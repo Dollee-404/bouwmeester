@@ -1,0 +1,58 @@
+{
+  "common": {
+    "loading": "Laden...",
+    "error": "Er ging iets mis",
+    "retry": "Opnieuw proberen",
+    "cancel": "Annuleren",
+    "save": "Opslaan",
+    "close": "Sluiten",
+    "download": "Downloaden",
+    "not_available": "Nog niet beschikbaar"
+  },
+  "projects": {
+    "title": "Projecten",
+    "new": "Nieuw project",
+    "search_placeholder": "Zoek project of klant...",
+    "view_board": "Board",
+    "view_table": "Tabel",
+    "show_archived": "Gearchiveerd",
+    "active_count": "{{count}} actief",
+    "archived_count": "{{count}} gearchiveerd",
+    "no_results": "Geen projecten gevonden",
+    "no_results_for": "Geen projecten gevonden voor '{{query}}'",
+    "empty_column": "Geen projecten",
+    "drag_drop_error": "Status bijwerken mislukt. Probeer opnieuw."
+  },
+  "setup": {
+    "title": "Welkom bij Bouwmeester",
+    "intro": "Om je projecten te tonen, voegt Bouwmeester 4 velden toe aan ERPNext. Dit is eenmalig.",
+    "install": "Installeer velden",
+    "installing": "Velden installeren...",
+    "install_success": "Installatie geslaagd! Bouwmeester start nu.",
+    "install_error": "Installatie mislukt",
+    "no_permission_title": "Vraag je beheerder om hulp",
+    "no_permission_body": "Bouwmeester kan de velden niet zelf installeren omdat je geen System Manager rechten hebt.",
+    "download_json": "Download installatiebestand",
+    "contact_admin": "Stuur naar beheerder",
+    "recheck": "Ik heb dit gedaan, controleer opnieuw",
+    "field_custom_bouwmeester_status": "Bouwmeester Status",
+    "field_custom_werksoort": "Werksoort",
+    "field_custom_budget_hours": "Budget uren",
+    "field_custom_weersafhankelijk": "Weersafhankelijk"
+  },
+  "status": {
+    "Lead": "Aanvraag",
+    "Calculatie": "Calculatie",
+    "Gegund": "Gegund",
+    "In uitvoering": "In uitvoering",
+    "Oplevering": "Oplevering",
+    "Afgerond": "Afgerond"
+  },
+  "werksoort": {
+    "Renovatie": "Renovatie",
+    "Nieuwbouw": "Nieuwbouw",
+    "Sloop": "Sloop",
+    "Verbouw": "Verbouw",
+    "Onderhoud": "Onderhoud"
+  }
+}

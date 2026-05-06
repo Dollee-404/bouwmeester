@@ -1,0 +1,58 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close",
+    "download": "Download",
+    "not_available": "Not available yet"
+  },
+  "projects": {
+    "title": "Projects",
+    "new": "New project",
+    "search_placeholder": "Search project or client...",
+    "view_board": "Board",
+    "view_table": "Table",
+    "show_archived": "Archived",
+    "active_count": "{{count}} active",
+    "archived_count": "{{count}} archived",
+    "no_results": "No projects found",
+    "no_results_for": "No projects found for '{{query}}'",
+    "empty_column": "No projects",
+    "drag_drop_error": "Failed to update status. Please try again."
+  },
+  "setup": {
+    "title": "Welcome to Bouwmeester",
+    "intro": "To show your projects, Bouwmeester needs to add 4 fields to ERPNext. This is a one-time setup.",
+    "install": "Install fields",
+    "installing": "Installing fields...",
+    "install_success": "Installation successful! Starting Bouwmeester.",
+    "install_error": "Installation failed",
+    "no_permission_title": "Ask your administrator",
+    "no_permission_body": "Bouwmeester cannot install these fields because you do not have System Manager rights.",
+    "download_json": "Download installation file",
+    "contact_admin": "Contact administrator",
+    "recheck": "Done, check again",
+    "field_custom_bouwmeester_status": "Bouwmeester Status",
+    "field_custom_werksoort": "Work type",
+    "field_custom_budget_hours": "Budget hours",
+    "field_custom_weersafhankelijk": "Weather dependent"
+  },
+  "status": {
+    "Lead": "Request",
+    "Calculatie": "Quotation",
+    "Gegund": "Awarded",
+    "In uitvoering": "In progress",
+    "Oplevering": "Completion",
+    "Afgerond": "Finished"
+  },
+  "werksoort": {
+    "Renovatie": "Renovation",
+    "Nieuwbouw": "New build",
+    "Sloop": "Demolition",
+    "Verbouw": "Conversion",
+    "Onderhoud": "Maintenance"
+  }
+}
