@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+@theme {
+  --color-y-teal: #006876;
+  --color-y-teal-light: #99c2c8;
+  --color-y-teal-dark: #043b42;
+  --color-y-purple: #043b42;
+  --color-y-purple-light: #065a64;
+  --color-y-purple-dark: #022a2f;
+
+  --font-sans: system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-sans);
+  margin: 0;
+  padding: 0;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+#root {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
