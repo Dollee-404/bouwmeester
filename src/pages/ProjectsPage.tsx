@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Search, LayoutGrid, List, Plus, AlertCircle, Loader2, HardHat, SearchX } from "lucide-react";
 import { EmptyState } from "../components/ui/empty-state";
 import { useProjects } from "../hooks/use-projects";
+import { useBreakpoint } from "../hooks/use-breakpoint";
 import { projectsService } from "../data";
 import type { BouwmeesterStatus, Project } from "../data/types";
 import { KanbanBoard } from "../components/kanban/KanbanBoard";
@@ -29,6 +30,10 @@ export function ProjectsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showArchived, setShowArchived] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("board");
+  const { isTablet } = useBreakpoint();
+
+  // Under 768px the kanban board is not usable — force table view
+  const effectiveViewMode: ViewMode = isTablet ? "table" : viewMode;
 
   const shownErrorRef = useRef<Error | null>(null);
   useEffect(() => {
@@ -106,12 +111,14 @@ export function ProjectsPage() {
         >
           {t("projects.show_archived")}
         </Button>
-        <Toggle
-          options={["Board", "Tabel"]}
-          value={viewMode === "board" ? "Board" : "Tabel"}
-          onChange={(v) => setViewMode(v === "Board" ? "board" : "table")}
-          icons={[<LayoutGrid size={13} key="b" />, <List size={13} key="t" />]}
-        />
+        {!isTablet && (
+          <Toggle
+            options={["Board", "Tabel"]}
+            value={viewMode === "board" ? "Board" : "Tabel"}
+            onChange={(v) => setViewMode(v === "Board" ? "board" : "table")}
+            icons={[<LayoutGrid size={13} key="b" />, <List size={13} key="t" />]}
+          />
+        )}
         <Button variant="primary" size="sm" onClick={notAvailable}>
           <Plus size={14} aria-hidden="true" />
           {t("projects.new")}
@@ -160,7 +167,7 @@ export function ProjectsPage() {
           />
         </div>
       )}
-      {(loading || filtered.length > 0 || (error && projects.length > 0)) && viewMode === "board" && (
+      {(loading || filtered.length > 0 || (error && projects.length > 0)) && effectiveViewMode === "board" && (
         <div className="px-6 pt-4 pb-6">
           <KanbanBoard
             projects={filtered}
@@ -171,7 +178,7 @@ export function ProjectsPage() {
           />
         </div>
       )}
-      {(loading || filtered.length > 0 || (error && projects.length > 0)) && viewMode === "table" && (
+      {(loading || filtered.length > 0 || (error && projects.length > 0)) && effectiveViewMode === "table" && (
         <div className="px-6 pt-4 pb-6">
           <ProjectsTable
             projects={filtered}

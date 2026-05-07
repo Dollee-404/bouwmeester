@@ -7,6 +7,7 @@ import { Avatar } from "../ui/avatar";
 import type { Project, BouwmeesterStatus, Werksoort } from "../../data/types";
 import { STATUS_COLORS } from "../../lib/status-colors";
 import { STATUS_ORDER, ARCHIVED_STATUS_ORDER } from "../kanban/status-config";
+import { useBreakpoint } from "../../hooks/use-breakpoint";
 
 const FULL_STATUS_ORDER: BouwmeesterStatus[] = [...STATUS_ORDER, ...ARCHIVED_STATUS_ORDER];
 
@@ -66,6 +67,7 @@ function sortProjects(projects: Project[], key: SortKey, dir: SortDir): Project[
 
 export function ProjectsTable({ projects, isLoading = false, onRowClick }: ProjectsTableProps) {
   const { t } = useTranslation();
+  const { isMobile } = useBreakpoint();
   const [sortKey, setSortKey] = useState<SortKey>("id");
   const [sortDir, setSortDir] = useState<SortDir>("none");
   const [werksoortFilter, setWerksoortFilter] = useState<Werksoort | "all" | "none">("all");
@@ -115,6 +117,85 @@ export function ProjectsTable({ projects, isLoading = false, onRowClick }: Proje
   function ariaSortFor(key: SortKey): React.AriaAttributes["aria-sort"] {
     if (sortKey !== key || sortDir === "none") return "none";
     return sortDir === "asc" ? "ascending" : "descending";
+  }
+
+  if (isMobile) {
+    return (
+      <div className="flex flex-col divide-y divide-slate-100 -mx-1">
+        {isLoading ? (
+          Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="py-3 px-3">
+              <div className="h-4 w-48 bg-slate-200 rounded animate-pulse mb-2" />
+              <div className="h-3 w-32 bg-slate-200 rounded animate-pulse mb-2" />
+              <div className="h-2 w-full bg-slate-100 rounded-full animate-pulse" />
+            </div>
+          ))
+        ) : sorted.length === 0 ? (
+          <div className="py-6 text-center text-sm text-slate-400">
+            {t("projects.no_results")}
+          </div>
+        ) : (
+          sorted.map((p) => {
+            const color = STATUS_COLORS[p.status];
+            const budgetPct = p.budgetSales > 0 ? p.billedAmount / p.budgetSales : 0;
+            const budgetOver = p.billedAmount > p.budgetSales;
+            return (
+              <div
+                key={p.id}
+                role="button"
+                tabIndex={0}
+                className="py-3 pr-3 cursor-pointer hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-y-teal"
+                style={{ borderLeft: `3px solid ${color}`, paddingLeft: "0.75rem" }}
+                onClick={() => onRowClick(p)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onRowClick(p);
+                  }
+                }}
+              >
+                <div className="flex items-start justify-between gap-2 mb-0.5">
+                  <span className="font-medium text-slate-900 text-sm leading-snug">{p.projectName}</span>
+                  {p.werksoort && <WerksoortBadge werksoort={p.werksoort} />}
+                </div>
+                <div className="text-xs text-slate-500 mb-1">{p.customerName}</div>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <span
+                    className="w-1.5 h-1.5 rounded-full shrink-0"
+                    style={{ backgroundColor: color }}
+                    aria-hidden="true"
+                  />
+                  <span className="text-xs text-slate-600">
+                    {t(`status.${p.status.toLowerCase().replace(/ /g, "_")}`)}
+                  </span>
+                  {p.endDate && (
+                    <>
+                      <span className="text-slate-300" aria-hidden="true">·</span>
+                      <span className="text-xs text-slate-500">{formatDate(p.endDate)}</span>
+                    </>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full"
+                      style={{
+                        width: `${Math.min(budgetPct * 100, 100)}%`,
+                        backgroundColor: budgetOver ? "#dc2626" : "#1D9E75",
+                      }}
+                    />
+                  </div>
+                  <span className={`text-[10px] shrink-0 ${budgetOver ? "text-red-600 font-medium" : "text-slate-500"}`}>
+                    {formatEuro(p.billedAmount)}
+                    <span className="text-slate-400"> / {formatEuro(p.budgetSales)}</span>
+                  </span>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+    );
   }
 
   return (
