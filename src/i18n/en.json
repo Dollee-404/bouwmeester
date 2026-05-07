@@ -42,7 +42,8 @@
     "empty_no_projects_body": "Create your first project to get started.",
     "empty_no_search_results_title": "No projects found",
     "empty_no_search_results_body": "No results for '{{query}}'. Try a different search term.",
-    "clear_search": "Clear search"
+    "clear_search": "Clear search",
+    "create_not_available": "Creating projects is not yet available — create projects via ERPNext for now"
   },
   "setup": {
     "title": "Welcome to Bouwmeester",

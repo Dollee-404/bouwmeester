@@ -68,7 +68,7 @@ export function ProjectsPage() {
   });
 
   function notAvailable() {
-    addToast(t("common.not_available"), "info");
+    addToast(t("projects.create_not_available"), "info");
   }
 
   function handleRowClick(_project: Project) {

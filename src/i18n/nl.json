@@ -42,7 +42,8 @@
     "empty_no_projects_body": "Maak je eerste project aan om te beginnen.",
     "empty_no_search_results_title": "Geen projecten gevonden",
     "empty_no_search_results_body": "Geen resultaten voor '{{query}}'. Probeer een andere zoekterm.",
-    "clear_search": "Zoekfilter wissen"
+    "clear_search": "Zoekfilter wissen",
+    "create_not_available": "Project aanmaken is nog niet beschikbaar — maak projecten voor nu aan via ERPNext"
   },
   "setup": {
     "title": "Welkom bij Bouwmeester",
