@@ -66,7 +66,7 @@ export function ProjectCard({ project, onClick, tabIndex = 0 }: ProjectCardProps
     >
       {/* Row 1: project number + werksoort badge */}
       <div className="flex items-center justify-between mb-1.5">
-        <span className="font-mono text-[11px] text-slate-400">{project.id}</span>
+        <span className="font-mono text-[11px] text-slate-500">{project.id}</span>
         <WerksoortBadge werksoort={project.werksoort} />
       </div>
 
@@ -79,14 +79,14 @@ export function ProjectCard({ project, onClick, tabIndex = 0 }: ProjectCardProps
       </div>
 
       {/* Row 3: date row — altijd tonen */}
-      <div className={`flex items-center gap-1.5 text-[12px] mb-2 ${project.endDate ? TONE_CLASSES[deadline.tone] : "text-slate-400"}`}>
+      <div className={`flex items-center gap-1.5 text-[12px] mb-2 ${project.endDate ? TONE_CLASSES[deadline.tone] : "text-slate-500"}`}>
         <Calendar size={12} className="shrink-0" aria-hidden="true" />
         {project.endDate ? (
           <>
             <span>{formatEndDate(project.endDate)}</span>
             {deadline.label !== "deadline.date_only" && deadline.tone !== "neutral" && (
               <>
-                <span className="text-slate-300">·</span>
+                <span className="text-slate-400" aria-hidden="true">·</span>
                 <span>
                   {deadline.tone === "overdue"
                     ? t("deadline.overdue", { days: deadline.days })
@@ -113,7 +113,7 @@ export function ProjectCard({ project, onClick, tabIndex = 0 }: ProjectCardProps
         <div className="mb-2.5">
           <div className="flex items-center justify-between text-[11px] text-slate-500 mb-1">
             <span>Besteed: € {project.billedAmount.toLocaleString("nl-NL")}</span>
-            <span className="text-slate-400">€ {project.budgetSales.toLocaleString("nl-NL")}</span>
+            <span className="text-slate-500">€ {project.budgetSales.toLocaleString("nl-NL")}</span>
           </div>
           <div className="h-1 rounded-full bg-slate-100 overflow-hidden">
             <div
@@ -135,7 +135,7 @@ export function ProjectCard({ project, onClick, tabIndex = 0 }: ProjectCardProps
         ) : (
           <div className="flex items-center gap-1.5">
             <div className="w-5 h-5 rounded-full bg-slate-200 shrink-0" />
-            <span className="text-[11px] text-slate-400">{t("card.no_project_manager")}</span>
+            <span className="text-[11px] text-slate-500">{t("card.no_project_manager")}</span>
           </div>
         )}
       </div>

@@ -81,7 +81,7 @@ export function ProjectsPage() {
   }
 
   return (
-    <div className="flex flex-col">
+    <main className="flex flex-col">
       {/* Header */}
       <div className="border-b border-slate-100">
         <div className="flex items-center gap-3 px-6 py-4 flex-wrap">
@@ -214,6 +214,6 @@ export function ProjectsPage() {
           />
         </div>
       )}
-    </div>
+    </main>
   );
 }
