@@ -1,3 +1,4 @@
+import type React from "react";
 import { useTranslation } from "react-i18next";
 import { Calendar, AlertTriangle } from "lucide-react";
 import type { Project } from "../../data/types";
@@ -10,6 +11,7 @@ import { getDeadlineStatus, formatEndDate } from "../../lib/deadline";
 interface ProjectCardProps {
   project: Project;
   onClick?: (project: Project) => void;
+  tabIndex?: number;
 }
 
 const TONE_CLASSES = {
@@ -19,7 +21,7 @@ const TONE_CLASSES = {
   "neutral":  "text-slate-400",
 };
 
-export function ProjectCard({ project, onClick }: ProjectCardProps) {
+export function ProjectCard({ project, onClick, tabIndex = 0 }: ProjectCardProps) {
   const { t } = useTranslation();
   const { addToast } = useToast();
 
@@ -38,9 +40,19 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
     }
   }
 
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleClick();
+    }
+  }
+
   return (
     <div
-      className="bg-white cursor-pointer hover:shadow-md transition-shadow select-none"
+      role="button"
+      tabIndex={tabIndex}
+      aria-label={t("a11y.project_card", { name: project.projectName })}
+      className="bg-white cursor-pointer hover:shadow-md transition-shadow select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-y-teal focus-visible:ring-offset-1"
       style={{
         borderTop: "0.5px solid #e2e8f0",
         borderRight: "0.5px solid #e2e8f0",
@@ -50,6 +62,7 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
         padding: "12px",
       }}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
     >
       {/* Row 1: project number + werksoort badge */}
       <div className="flex items-center justify-between mb-1.5">

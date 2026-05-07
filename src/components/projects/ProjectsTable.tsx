@@ -188,8 +188,15 @@ export function ProjectsTable({ projects, isLoading = false, onRowClick }: Proje
               return (
                 <tr
                   key={p.id}
-                  className="border-b border-slate-200 hover:bg-slate-50 cursor-pointer"
+                  className="border-b border-slate-200 hover:bg-slate-50 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-y-teal"
+                  tabIndex={0}
                   onClick={() => onRowClick(p)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      onRowClick(p);
+                    }
+                  }}
                 >
                   <td className="px-3 py-2.5 font-mono text-[11px] text-slate-500 whitespace-nowrap">
                     {p.id}
