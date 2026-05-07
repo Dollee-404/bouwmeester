@@ -8,12 +8,13 @@ import { projectsService } from "../data";
 import type { BouwmeesterStatus, Project } from "../data/types";
 import { KanbanBoard } from "../components/kanban/KanbanBoard";
 import { ProjectsTable } from "../components/projects/ProjectsTable";
+import { ProjectsCardList } from "../components/projects/ProjectsCardList";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Toggle } from "../components/ui/toggle";
 import { useToast } from "../components/ui/toast";
 
-type ViewMode = "board" | "table";
+type ViewMode = "board" | "table" | "card-list";
 
 function classifyError(e: Error): "bridge" | "server" | "unknown" {
   const msg = e.message;
@@ -30,10 +31,10 @@ export function ProjectsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showArchived, setShowArchived] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("board");
-  const { isTablet } = useBreakpoint();
+  const { isTablet, isMobile } = useBreakpoint();
 
-  // Under 768px the kanban board is not usable — force table view
-  const effectiveViewMode: ViewMode = isTablet ? "table" : viewMode;
+  // Under 768px the board is not usable — show grouped card list instead
+  const effectiveViewMode: ViewMode = isTablet ? "card-list" : viewMode;
 
   const shownErrorRef = useRef<Error | null>(null);
   useEffect(() => {
@@ -82,47 +83,64 @@ export function ProjectsPage() {
   return (
     <div className="flex flex-col">
       {/* Header */}
-      <div className="flex items-center gap-3 px-6 py-5 flex-wrap border-b border-slate-100">
-        <div className="flex flex-col mr-auto min-w-0">
-          <h1 className="text-xl font-bold text-slate-800">{t("projects.title")}</h1>
-          <p className="text-sm text-slate-500 flex items-center gap-1.5">
-            {loading && !isRefetching ? "—" : (
-              <>
-                {t("projects.active_count", { count: activeCount })}
-                {" · "}
-                {t("projects.archived_count", { count: archivedCount })}
-                {isRefetching && <Loader2 size={12} className="animate-spin text-slate-400" />}
-              </>
-            )}
-          </p>
+      <div className="border-b border-slate-100">
+        <div className="flex items-center gap-3 px-6 py-4 flex-wrap">
+          <div className="flex flex-col mr-auto min-w-0">
+            <h1 className="text-xl font-bold text-slate-800">{t("projects.title")}</h1>
+            <p className="text-sm text-slate-500 flex items-center gap-1.5">
+              {loading && !isRefetching ? "—" : (
+                <>
+                  {t("projects.active_count", { count: activeCount })}
+                  {" · "}
+                  {t("projects.archived_count", { count: archivedCount })}
+                  {isRefetching && <Loader2 size={12} className="animate-spin text-slate-400" />}
+                </>
+              )}
+            </p>
+          </div>
+
+          {!isMobile && (
+            <Input
+              icon={<Search size={14} />}
+              placeholder={t("projects.search_placeholder")}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-56"
+            />
+          )}
+          <Button
+            variant={showArchived ? "primary" : "secondary"}
+            size="sm"
+            onClick={() => setShowArchived((v) => !v)}
+          >
+            {t("projects.show_archived")}
+          </Button>
+          {!isTablet && (
+            <Toggle
+              options={["Board", "Tabel"]}
+              value={viewMode === "board" ? "Board" : "Tabel"}
+              onChange={(v) => setViewMode(v === "Board" ? "board" : "table")}
+              icons={[<LayoutGrid size={13} key="b" />, <List size={13} key="t" />]}
+            />
+          )}
+          <Button variant="primary" size="sm" onClick={notAvailable}>
+            <Plus size={14} aria-hidden="true" />
+            {t("projects.new")}
+          </Button>
         </div>
 
-        <Input
-          icon={<Search size={14} />}
-          placeholder={t("projects.search_placeholder")}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-56"
-        />
-        <Button
-          variant={showArchived ? "primary" : "secondary"}
-          size="sm"
-          onClick={() => setShowArchived((v) => !v)}
-        >
-          {t("projects.show_archived")}
-        </Button>
-        {!isTablet && (
-          <Toggle
-            options={["Board", "Tabel"]}
-            value={viewMode === "board" ? "Board" : "Tabel"}
-            onChange={(v) => setViewMode(v === "Board" ? "board" : "table")}
-            icons={[<LayoutGrid size={13} key="b" />, <List size={13} key="t" />]}
-          />
+        {/* Mobile: full-width search below title row */}
+        {isMobile && (
+          <div className="px-6 pb-4">
+            <Input
+              icon={<Search size={14} />}
+              placeholder={t("projects.search_placeholder")}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full"
+            />
+          </div>
         )}
-        <Button variant="primary" size="sm" onClick={notAvailable}>
-          <Plus size={14} aria-hidden="true" />
-          {t("projects.new")}
-        </Button>
       </div>
 
       {/* Content */}
@@ -184,6 +202,15 @@ export function ProjectsPage() {
             projects={filtered}
             isLoading={loading && !isRefetching}
             onRowClick={handleRowClick}
+          />
+        </div>
+      )}
+      {(loading || filtered.length > 0 || (error && projects.length > 0)) && effectiveViewMode === "card-list" && (
+        <div className="pt-2 pb-6">
+          <ProjectsCardList
+            projects={filtered}
+            showArchived={showArchived}
+            isLoading={loading && !isRefetching}
           />
         </div>
       )}
