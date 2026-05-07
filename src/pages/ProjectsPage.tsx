@@ -3,9 +3,9 @@ import { useTranslation } from "react-i18next";
 import { Search, LayoutGrid, List, Plus } from "lucide-react";
 import { useProjects } from "../hooks/use-projects";
 import { projectsService } from "../data";
-import type { BouwmeesterStatus } from "../data/types";
+import type { BouwmeesterStatus, Project } from "../data/types";
 import { KanbanBoard } from "../components/kanban/KanbanBoard";
-import { ProjectsTablePlaceholder } from "../components/projects/ProjectsTablePlaceholder";
+import { ProjectsTable } from "../components/projects/ProjectsTable";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Toggle } from "../components/ui/toggle";
@@ -42,6 +42,10 @@ export function ProjectsPage() {
 
   function notAvailable() {
     addToast(t("common.not_available"), "info");
+  }
+
+  function handleRowClick(_project: Project) {
+    addToast(t("projects.detail_coming_soon"), "info");
   }
 
   async function handleStatusChange(projectId: string, newStatus: BouwmeesterStatus) {
@@ -112,7 +116,9 @@ export function ProjectsPage() {
         </div>
       )}
       {!loading && !error && viewMode === "table" && (
-        <ProjectsTablePlaceholder onBack={() => setViewMode("board")} />
+        <div className="px-6 pt-4 pb-6">
+          <ProjectsTable projects={filtered} onRowClick={handleRowClick} />
+        </div>
       )}
     </div>
   );

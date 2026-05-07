@@ -24,7 +24,20 @@
     "drag_drop_error": "Failed to update status. Please try again.",
     "table_coming_soon_title": "Table view coming soon",
     "table_coming_soon_body": "For now, you can manage projects using the kanban board. A full table view with sorting and filtering will be available in a later version.",
-    "back_to_board": "Back to board"
+    "back_to_board": "Back to board",
+    "detail_coming_soon": "Detail view coming in a later version",
+    "table_col_id": "No.",
+    "table_col_name": "Name",
+    "table_col_customer": "Client",
+    "table_col_status": "Status",
+    "table_col_werksoort": "Work type",
+    "table_col_start": "Start",
+    "table_col_end": "End",
+    "table_col_progress": "Progress",
+    "table_col_budget": "Budget",
+    "table_col_manager": "Project manager",
+    "werksoort_filter_all": "All work types",
+    "werksoort_filter_none": "No work type"
   },
   "setup": {
     "title": "Welcome to Bouwmeester",

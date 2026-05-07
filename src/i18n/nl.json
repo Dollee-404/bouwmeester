@@ -24,7 +24,20 @@
     "drag_drop_error": "Status bijwerken mislukt. Probeer opnieuw.",
     "table_coming_soon_title": "Tabelweergave volgt later",
     "table_coming_soon_body": "Voor nu kun je projecten beheren via het kanban-bord. Een uitgebreide tabel met sorteer- en filterfuncties komt in een latere versie.",
-    "back_to_board": "Terug naar bord"
+    "back_to_board": "Terug naar bord",
+    "detail_coming_soon": "Detailweergave komt in een latere versie",
+    "table_col_id": "Nr.",
+    "table_col_name": "Naam",
+    "table_col_customer": "Klant",
+    "table_col_status": "Status",
+    "table_col_werksoort": "Werksoort",
+    "table_col_start": "Start",
+    "table_col_end": "Eind",
+    "table_col_progress": "Voortgang",
+    "table_col_budget": "Budget",
+    "table_col_manager": "Projectleider",
+    "werksoort_filter_all": "Alle werksoorten",
+    "werksoort_filter_none": "Geen werksoort"
   },
   "setup": {
     "title": "Welkom bij Bouwmeester",
