@@ -6,10 +6,20 @@ export interface SetupCheckResult {
   missing: CustomFieldSpec[];
 }
 
+const urlParams = new URLSearchParams(window.location.search);
+
+/** ?mock=wizard — forceert wizard lokaal met alle 4 velden als ontbrekend */
+export const MOCK_WIZARD = urlParams.get("mock") === "wizard";
+
+/** ?mock=noperm — forceert no-permission scherm (niet-System Manager) */
+export const MOCK_NO_PERM = urlParams.get("mock") === "noperm";
+
 export async function checkRequiredFields(): Promise<SetupCheckResult> {
+  if (MOCK_WIZARD) return { complete: false, missing: [...REQUIRED_CUSTOM_FIELDS] };
   // Dev mode: geen Y-App parent, sla setup over
   if (!INSTANCE_ID) return { complete: true, missing: [] };
 
+  console.time("[bouwmeester] checkRequiredFields");
   const existing = await fetchList<{ fieldname: string }>("Custom Field", {
     fields: ["fieldname"],
     filters: [
@@ -19,12 +29,14 @@ export async function checkRequiredFields(): Promise<SetupCheckResult> {
     limit_page_length: 10,
   });
 
+  console.timeEnd("[bouwmeester] checkRequiredFields");
   const existingNames = new Set(existing.map((f) => f.fieldname));
   const missing = REQUIRED_CUSTOM_FIELDS.filter((f) => !existingNames.has(f.fieldname));
   return { complete: missing.length === 0, missing };
 }
 
 export async function isSystemManager(): Promise<boolean> {
+  if (MOCK_NO_PERM) return false;
   try {
     const userResult = await callMethod<{ message: string }>(
       "frappe.client.get_value",
@@ -52,9 +64,13 @@ export async function installCustomFields(
   onProgress?: (fieldname: string) => void,
 ): Promise<void> {
   for (const spec of specs) {
-    await callMethod("frappe.client.insert", {
-      doc: { doctype: "Custom Field", ...spec },
-    });
+    if (MOCK_WIZARD) {
+      await new Promise((r) => setTimeout(r, 600));
+    } else {
+      await callMethod("frappe.client.insert", {
+        doc: { doctype: "Custom Field", ...spec },
+      });
+    }
     onProgress?.(spec.fieldname);
   }
 }
