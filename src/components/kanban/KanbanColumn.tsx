@@ -15,12 +15,13 @@ interface KanbanColumnProps {
   onAddNew?: (status: BouwmeesterStatus) => void;
 }
 
-// Geen React.memo: useDroppable() subscribeert op @dnd-kit's
-// DndContext wat alle consumers laat herrender bij elke drag-tick.
-// Memo is daardoor effectloos. Bij performance-issues op productie:
-// overweeg structuurwijziging waarbij useDroppable in een aparte
-// wrapper zit. Tot die tijd: dev-build profile toont 66.9ms per
-// commit, productie-build naar verwachting fors lager.
+// Geen React.memo: @dnd-kit's useDroppable() subscribeert
+// op DndContext, dat bij elke drag-tick update. Memo is
+// daardoor effectloos. Performance op dev-build: ~67ms per
+// commit met 15 projecten. Productie-build (geminified)
+// naar verwachting fors lager. Bij toekomstige performance-
+// issues: overweeg useDroppable in een aparte wrapper-
+// component te plaatsen zodat memo wel effect heeft.
 export function KanbanColumn({ status, projects, savingIds, isLoading = false, onCardClick, onAddNew }: KanbanColumnProps) {
   const { t } = useTranslation();
   const color = STATUS_COLORS[status];
