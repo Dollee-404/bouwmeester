@@ -1,5 +1,7 @@
 import "./index.css";
 import "./i18n/index";
+import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { SetupGate } from "./pages/SetupWizard";
 import { ProjectsPage } from "./pages/ProjectsPage";
 import { TestPage } from "./dev/TestPage";
@@ -9,10 +11,19 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 
 const DEV_MODE = new URLSearchParams(window.location.search).get("dev") === "1";
 
+function LangSync() {
+  const { i18n } = useTranslation();
+  useEffect(() => {
+    document.documentElement.lang = i18n.language;
+  }, [i18n.language]);
+  return null;
+}
+
 export default function App() {
   return (
     <ErrorBoundary>
       <ToastProvider>
+        <LangSync />
         <SetupGate>
           {DEV_MODE ? (
             <MockErrorProvider>
