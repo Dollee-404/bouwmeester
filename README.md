@@ -39,7 +39,22 @@ Extensie URL na deploy: `https://<jouw-github-user>.github.io/bouwmeester/`
 | `custom_budget_hours` | Float | Budget in uren |
 | `custom_weersafhankelijk` | Check | Weersafhankelijk ja/nee |
 
+## Lokaal wizard testen (zonder Y-App)
+
+| URL | Effect |
+|-----|--------|
+| `http://localhost:5200/?mock=wizard` | Forceert wizard met alle 4 velden als ontbrekend |
+| `http://localhost:5200/?mock=noperm` | Forceert no-permission scherm (geen System Manager) |
+
 ## Documentatie
 
 - Technisch onderzoek: `docs/research/y-app-extension-contract.md`
 - Design mockups: `docs/design-references/`
+- End-to-end testchecklist wizard: `docs/test-fase-2.md`
+
+## Bewuste technische keuzes
+
+**Vite 8.0.10** — Andere Y-App extensies (KG Planning, 3BM) gebruiken Vite 6 of 7.
+Y-App zelf gebruikt Vite 7. Bouwmeester draait op Vite 8 omdat het een nieuw project is
+en Vite 8 stabiel is uitgebracht. Als er deploy-problemen optreden (GitHub Pages,
+iframe-laadtijd) is downgrade naar Vite 7 de eerste stap om te proberen.
