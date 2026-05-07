@@ -5,6 +5,7 @@ import { Search, LayoutGrid, List, Hammer } from "lucide-react";
 import { HOST_ORIGIN, INSTANCE_ID, ERPNEXT_URL, LANG } from "../bridge";
 import { useProjects } from "../hooks/use-projects";
 import { setMockForceFail } from "../data/projects-service-mock";
+import { useMockErrors, type MockErrorFlags } from "./mock-error-context";
 import { ProjectCard } from "../components/kanban/ProjectCard";
 import { ProjectCardSkeleton } from "../components/kanban/ProjectCardSkeleton";
 import { KanbanBoard } from "../components/kanban/KanbanBoard";
@@ -185,6 +186,62 @@ function DatalaagCheck() {
   );
 }
 
+const ERROR_TOGGLES: {
+  key: keyof MockErrorFlags;
+  label: string;
+  description: string;
+}[] = [
+  {
+    key: "bridgeTimeout",
+    label: "Simuleer bridge-timeout",
+    description:
+      'Promise rejecteert na 12 seconden met Error("Bridge timeout"). Geldt voor alle bridge-calls.',
+  },
+  {
+    key: "erpNext500",
+    label: "Simuleer ERPNext 500-fout",
+    description:
+      'Gooit onmiddellijk Error("ERPNext error: 500 Internal Server Error"). Geldt voor alle service-methodes.',
+  },
+  {
+    key: "fetchError",
+    label: "Simuleer fetch-fout bij projects",
+    description:
+      'list() throws Error("Kan projecten niet ophalen"). Andere methodes (updateStatus etc.) werken normaal.',
+  },
+];
+
+function ErrorSimSection() {
+  const { flags, setFlag } = useMockErrors();
+
+  return (
+    <section className="flex flex-col gap-3">
+      <h2 className="text-sm font-semibold text-slate-700">
+        Error-state simulatie
+      </h2>
+      <Card variant="info" className="p-4 flex flex-col gap-3">
+        {ERROR_TOGGLES.map(({ key, label, description }) => (
+          <label
+            key={key}
+            className="flex items-start gap-2.5 cursor-pointer select-none"
+          >
+            <input
+              type="checkbox"
+              className="mt-0.5 shrink-0"
+              checked={flags[key]}
+              onChange={(e) => setFlag(key, e.target.checked)}
+            />
+            <span className="flex flex-col gap-0.5">
+              <span className="text-sm font-medium text-slate-700">{label}</span>
+              <span className="text-xs text-slate-500">{description}</span>
+            </span>
+          </label>
+        ))}
+      </Card>
+    </section>
+  );
+}
+
 export function TestPage() {
   const { t, i18n } = useTranslation();
   const { addToast } = useToast();
@@ -359,6 +416,11 @@ export function TestPage() {
     {/* KanbanBoard showcase */}
     <div className="px-8 pb-8">
       <KanbanBoardShowcase />
+    </div>
+
+    {/* Error-state simulatie */}
+    <div className="px-8 py-4 max-w-3xl">
+      <ErrorSimSection />
     </div>
 
     {/* ProjectsPage — met debug-toggle */}

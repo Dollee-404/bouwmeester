@@ -399,20 +399,45 @@ function applyFilters(list: Project[], options: ListOptions): Project[] {
 }
 
 let _forceFail = false;
+let _bridgeTimeout = false;
+let _erpNext500 = false;
+let _fetchError = false;
+
 export function setMockForceFail(enabled: boolean) { _forceFail = enabled; }
+export function setMockBridgeTimeout(enabled: boolean) { _bridgeTimeout = enabled; }
+export function setMockErpNext500(enabled: boolean) { _erpNext500 = enabled; }
+export function setMockFetchError(enabled: boolean) { _fetchError = enabled; }
+
+async function checkBridgeTimeout(): Promise<void> {
+  if (!_bridgeTimeout) return;
+  await new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error("Bridge timeout")), 12_000)
+  );
+}
+
+function checkErpNext500(): void {
+  if (_erpNext500) throw new Error("ERPNext error: 500 Internal Server Error");
+}
 
 export const mockService: ProjectsService = {
   async list(options = {}) {
+    await checkBridgeTimeout();
+    checkErpNext500();
+    if (_fetchError) throw new Error("Kan projecten niet ophalen");
     return applyFilters(projects, options);
   },
 
   async getOne(id) {
+    await checkBridgeTimeout();
+    checkErpNext500();
     const p = projects.find((p) => p.id === id);
     if (!p) throw new Error(`Project niet gevonden: ${id}`);
     return p;
   },
 
   async updateStatus(id, newStatus: BouwmeesterStatus) {
+    await checkBridgeTimeout();
+    checkErpNext500();
     await new Promise((r) => setTimeout(r, 200));
     if (_forceFail) throw new Error("Gesimuleerde server-fout voor rollback-test");
     const p = projects.find((p) => p.id === id);
