@@ -71,7 +71,7 @@ export function ProjectsTable({ projects, onRowClick }: ProjectsTableProps) {
   function handleSort(key: SortKey) {
     if (sortKey !== key) {
       setSortKey(key);
-      setSortDir("asc");
+      setSortDir(key === "budgetSales" ? "desc" : "asc");
     } else if (sortDir === "asc") {
       setSortDir("desc");
     } else if (sortDir === "desc") {
@@ -99,10 +99,12 @@ export function ProjectsTable({ projects, onRowClick }: ProjectsTableProps) {
     { value: "none",      label: t("projects.werksoort_filter_none") },
   ];
 
-  function thClass(sortable: boolean) {
+  function thClass(sortable: boolean, key?: SortKey) {
+    const isActive = key !== undefined && sortKey === key && sortDir !== "none";
     return [
-      "px-3 py-2 text-left text-sm font-semibold text-slate-600 whitespace-nowrap select-none",
-      sortable ? "cursor-pointer hover:text-slate-900" : "",
+      "px-3 py-2 text-left text-sm font-semibold whitespace-nowrap select-none",
+      isActive ? "text-slate-900 bg-slate-50" : "text-slate-600",
+      sortable ? "cursor-pointer hover:text-slate-900 hover:bg-slate-50" : "",
     ].join(" ");
   }
 
@@ -111,16 +113,16 @@ export function ProjectsTable({ projects, onRowClick }: ProjectsTableProps) {
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr className="border-b border-slate-200 bg-white sticky top-0 z-10">
-            <th className={thClass(true)} onClick={() => handleSort("id")}>
+            <th className={thClass(true, "id")} onClick={() => handleSort("id")}>
               {t("projects.table_col_id")}
               <SortIcon col="id" sortKey={sortKey} sortDir={sortDir} />
             </th>
-            <th className={thClass(true)} onClick={() => handleSort("projectName")}>
+            <th className={thClass(true, "projectName")} onClick={() => handleSort("projectName")}>
               {t("projects.table_col_name")}
               <SortIcon col="projectName" sortKey={sortKey} sortDir={sortDir} />
             </th>
             <th className={thClass(false)}>{t("projects.table_col_customer")}</th>
-            <th className={thClass(true)} onClick={() => handleSort("status")}>
+            <th className={thClass(true, "status")} onClick={() => handleSort("status")}>
               {t("projects.table_col_status")}
               <SortIcon col="status" sortKey={sortKey} sortDir={sortDir} />
             </th>
@@ -142,7 +144,7 @@ export function ProjectsTable({ projects, onRowClick }: ProjectsTableProps) {
             <th className={thClass(false)}>{t("projects.table_col_start")}</th>
             <th className={thClass(false)}>{t("projects.table_col_end")}</th>
             <th className={thClass(false)}>{t("projects.table_col_progress")}</th>
-            <th className={thClass(true)} onClick={() => handleSort("budgetSales")}>
+            <th className={thClass(true, "budgetSales")} onClick={() => handleSort("budgetSales")}>
               {t("projects.table_col_budget")}
               <SortIcon col="budgetSales" sortKey={sortKey} sortDir={sortDir} />
             </th>
