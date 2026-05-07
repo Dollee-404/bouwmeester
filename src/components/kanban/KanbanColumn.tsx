@@ -8,11 +8,12 @@ import { DraggableProjectCard } from "./DraggableProjectCard";
 interface KanbanColumnProps {
   status: BouwmeesterStatus;
   projects: Project[];
+  savingIds?: Set<string>;
   onCardClick?: (project: Project) => void;
   onAddNew?: () => void;
 }
 
-export function KanbanColumn({ status, projects, onCardClick, onAddNew }: KanbanColumnProps) {
+export function KanbanColumn({ status, projects, savingIds, onCardClick, onAddNew }: KanbanColumnProps) {
   const { t } = useTranslation();
   const color = STATUS_COLORS[status];
   const labelKey = STATUS_LABEL_KEYS[status];
@@ -66,6 +67,7 @@ export function KanbanColumn({ status, projects, onCardClick, onAddNew }: Kanban
               <DraggableProjectCard
                 key={project.id}
                 project={project}
+                isSaving={savingIds?.has(project.id) ?? false}
                 onClick={onCardClick}
               />
             ))}

@@ -37,6 +37,7 @@ export function KanbanBoard({
   const { addToast } = useToast();
   const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [statusOverrides, setStatusOverrides] = useState<Record<string, BouwmeesterStatus>>({});
+  const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -109,6 +110,7 @@ export function KanbanBoard({
     setStatusOverrides((prev) => ({ ...prev, [projectId]: newStatus }));
 
     if (onStatusChange) {
+      setSavingIds((prev) => new Set([...prev, projectId]));
       try {
         await onStatusChange(projectId, newStatus);
         // Keep override — useEffect above cleans it up once projects prop updates
@@ -119,6 +121,12 @@ export function KanbanBoard({
           return next;
         });
         addToast(t("projects.drag_drop_error"), "error");
+      } finally {
+        setSavingIds((prev) => {
+          const next = new Set(prev);
+          next.delete(projectId);
+          return next;
+        });
       }
     }
   }
@@ -148,6 +156,7 @@ export function KanbanBoard({
               key={status}
               status={status}
               projects={grouped[status]}
+              savingIds={savingIds}
               onCardClick={onCardClick}
               onAddNew={onAddNew ? () => onAddNew(status) : undefined}
             />

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Search, LayoutGrid, List, Plus, AlertCircle } from "lucide-react";
+import { Search, LayoutGrid, List, Plus, AlertCircle, Loader2 } from "lucide-react";
 import { useProjects } from "../hooks/use-projects";
 import { projectsService } from "../data";
 import type { BouwmeesterStatus, Project } from "../data/types";
@@ -24,7 +24,7 @@ function classifyError(e: Error): "bridge" | "server" | "unknown" {
 export function ProjectsPage() {
   const { t } = useTranslation();
   const { addToast } = useToast();
-  const { projects, loading, error, refetch } = useProjects({ includeArchived: true });
+  const { projects, loading, isRefetching, error, refetch } = useProjects({ includeArchived: true });
 
   const [searchQuery, setSearchQuery] = useState("");
   const [showArchived, setShowArchived] = useState(false);
@@ -81,10 +81,11 @@ export function ProjectsPage() {
         <div className="flex flex-col mr-auto min-w-0">
           <h1 className="text-xl font-bold text-slate-800">{t("projects.title")}</h1>
           {!loading && (
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 flex items-center gap-1.5">
               {t("projects.active_count", { count: activeCount })}
               {" · "}
               {t("projects.archived_count", { count: archivedCount })}
+              {isRefetching && <Loader2 size={12} className="animate-spin text-slate-400" />}
             </p>
           )}
         </div>
@@ -116,7 +117,7 @@ export function ProjectsPage() {
       </div>
 
       {/* Content */}
-      {loading && (
+      {loading && !isRefetching && (
         <div className="p-8">
           <LoadingState message={t("common.loading")} />
         </div>
@@ -133,7 +134,7 @@ export function ProjectsPage() {
           </Button>
         </div>
       )}
-      {!loading && (!error || projects.length > 0) && viewMode === "board" && (
+      {(!loading || isRefetching) && (!error || projects.length > 0) && viewMode === "board" && (
         <div className="px-6 pt-4 pb-6">
           <KanbanBoard
             projects={filtered}
@@ -143,7 +144,7 @@ export function ProjectsPage() {
           />
         </div>
       )}
-      {!loading && (!error || projects.length > 0) && viewMode === "table" && (
+      {(!loading || isRefetching) && (!error || projects.length > 0) && viewMode === "table" && (
         <div className="px-6 pt-4 pb-6">
           <ProjectsTable projects={filtered} onRowClick={handleRowClick} />
         </div>
