@@ -1,5 +1,6 @@
 import "./index.css";
 import "./i18n/index";
+import { SetupGate } from "./pages/SetupWizard";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Search, LayoutGrid, List, Hammer } from "lucide-react";
@@ -188,7 +189,9 @@ function TestContent() {
 export default function App() {
   return (
     <ToastProvider>
-      <TestContent />
+      <SetupGate>
+        <TestContent />
+      </SetupGate>
     </ToastProvider>
   );
 }
