@@ -52,6 +52,20 @@ Extensie URL na deploy: `https://<jouw-github-user>.github.io/bouwmeester/`
 - Design mockups: `docs/design-references/`
 - End-to-end testchecklist wizard: `docs/test-fase-2.md`
 
+## Console errors van Y-App
+
+Bouwmeester deelt zijn console met Y-App. Errors van Y-App's eigen
+background-fetches (DataContext) verschijnen daarom ook in Bouwmeester's
+DevTools, ook al hebben ze niets met Bouwmeester te maken. Filter op
+`bouwmeester` in de stack trace om Bouwmeester-specifieke errors te zien.
+
+Bekende Y-App background-fetches die kunnen falen op specifieke ERPNext-instances:
+- `GET /api/resource/Project` → 417 (permissie- of veldconflict op de instance)
+- `GET /api/resource/Leave Application` → 404 (HR-module niet actief)
+- `GET /api/resource/Task` → 417
+
+Dit zijn bugs in Y-App's DataContext, niet in Bouwmeester.
+
 ## Bewuste technische keuzes
 
 **Vite 8.0.10** — Andere Y-App extensies (KG Planning, 3BM) gebruiken Vite 6 of 7.
