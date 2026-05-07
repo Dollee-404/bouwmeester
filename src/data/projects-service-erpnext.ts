@@ -80,6 +80,7 @@ function toProject(raw: RawProject): Project {
     address: raw.custom_address ?? null,
     isWeatherDependent: Boolean(raw.custom_weersafhankelijk),
     isArchived: raw.status === "Completed" || raw.status === "Cancelled"
+      || raw.custom_bouwmeester_status === "Afgerond"
       || raw.custom_bouwmeester_status === "Verloren"
       || raw.custom_bouwmeester_status === "Geannuleerd",
   };
