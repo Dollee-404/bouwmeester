@@ -6,6 +6,11 @@ import { useTranslation } from "react-i18next";
 import { Search, LayoutGrid, List, Hammer } from "lucide-react";
 
 import { HOST_ORIGIN, INSTANCE_ID, ERPNEXT_URL, LANG } from "./bridge";
+import { useProjects } from "./hooks/use-projects";
+import { ProjectCard } from "./components/kanban/ProjectCard";
+import { ProjectCardSkeleton } from "./components/kanban/ProjectCardSkeleton";
+import { KanbanBoard } from "./components/kanban/KanbanBoard";
+import type { Project } from "./data/types";
 import { Button } from "./components/ui/button";
 import { Card } from "./components/ui/card";
 import { Badge } from "./components/ui/badge";
@@ -16,6 +21,170 @@ import { Toggle } from "./components/ui/toggle";
 import { EmptyState } from "./components/ui/empty-state";
 import { LoadingState } from "./components/ui/loading-state";
 import { ToastProvider, useToast } from "./components/ui/toast";
+
+const SHOWCASE_PROJECTS: Project[] = [
+  {
+    id: "PROJ-0001", projectName: "Renovatie Sporthal De Hoge Dijk", customerName: "Gemeente Dordrecht",
+    status: "Lead", werksoort: "Renovatie", startDate: null, endDate: null,
+    percentComplete: 0, budgetSales: 485_000, budgetHours: null, billedAmount: 0,
+    estimatedCosting: 420_000, projectManager: null, address: "Dordrecht",
+    isWeatherDependent: false, isArchived: false,
+  },
+  {
+    id: "PROJ-0009", projectName: "Renovatie Gemeentehuis Sliedrecht", customerName: "Gemeente Sliedrecht",
+    status: "In uitvoering", werksoort: "Renovatie",
+    startDate: new Date("2026-02-01"), endDate: new Date("2026-08-31"),
+    percentComplete: 38, budgetSales: 1_150_000, budgetHours: 2300, billedAmount: 437_000,
+    estimatedCosting: 1_020_000, projectManager: "M. Janssen", address: "Sliedrecht",
+    isWeatherDependent: false, isArchived: false,
+  },
+  {
+    id: "PROJ-0011", projectName: "Onderhoud Rioolstelsel Alblasserdam", customerName: "Gemeente Alblasserdam",
+    status: "In uitvoering", werksoort: "Onderhoud",
+    startDate: new Date("2026-03-15"), endDate: new Date("2026-06-30"),
+    percentComplete: 71, budgetSales: 340_000, budgetHours: 680, billedAmount: 385_000,
+    estimatedCosting: 305_000, projectManager: null, address: "Alblasserdam",
+    isWeatherDependent: false, isArchived: false,
+  },
+  {
+    id: "PROJ-0013", projectName: "Sloop en Herbouw Pakhuizen Dordrecht", customerName: "Historisch Dordrecht BV",
+    status: "Oplevering", werksoort: "Sloop",
+    startDate: new Date("2025-06-01"), endDate: new Date("2026-05-31"),
+    percentComplete: 96, budgetSales: 2_100_000, budgetHours: 4_200, billedAmount: 2_016_000,
+    estimatedCosting: 1_890_000, projectManager: "P. Bakker", address: "Dordrecht",
+    isWeatherDependent: true, isArchived: false,
+  },
+  {
+    id: "PROJ-0016", projectName: "Inspectie Daken Hendrik-Ido-Ambacht", customerName: "VVE Rivierstraat",
+    status: "Lead", werksoort: null, startDate: null, endDate: null,
+    percentComplete: 0, budgetSales: 18_500, budgetHours: null, billedAmount: 0,
+    estimatedCosting: 15_000, projectManager: null, address: "Hendrik-Ido-Ambacht",
+    isWeatherDependent: false, isArchived: false,
+  },
+];
+
+function KanbanBoardShowcase() {
+  const { projects, loading } = useProjects({ includeArchived: true });
+  const [narrow, setNarrow] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
+
+  return (
+    <section className="flex flex-col gap-3">
+      <div className="flex items-center gap-2 flex-wrap">
+        <h2 className="text-sm font-semibold text-slate-700 mr-auto">KanbanBoard showcase (tijdelijk)</h2>
+        <Button
+          size="sm"
+          variant={showArchived ? "primary" : "secondary"}
+          onClick={() => setShowArchived((v) => !v)}
+        >
+          {showArchived ? "Verberg gearchiveerd" : "Toon gearchiveerd"}
+        </Button>
+        <Button
+          size="sm"
+          variant={narrow ? "primary" : "secondary"}
+          onClick={() => setNarrow((n) => !n)}
+        >
+          {narrow ? "Volledig breed" : "Test smal scherm (1024px)"}
+        </Button>
+      </div>
+
+      <div
+        style={narrow ? { maxWidth: 1024, overflow: "hidden", border: "1.5px dashed #94a3b8", borderRadius: 8, padding: 8 } : undefined}
+      >
+        {narrow && (
+          <p className="text-xs text-slate-400 mb-2 font-mono">Test viewport: 1024px</p>
+        )}
+        {loading ? (
+          <p className="text-xs text-slate-400">Laden…</p>
+        ) : (
+          <KanbanBoard projects={projects} showArchived={showArchived} />
+        )}
+      </div>
+    </section>
+  );
+}
+
+function CardShowcase() {
+  return (
+    <>
+      <section className="flex flex-col gap-2">
+        <h2 className="text-sm font-semibold text-slate-700">ProjectCard showcase (tijdelijk)</h2>
+        <div className="flex gap-3 items-start flex-wrap">
+          {SHOWCASE_PROJECTS.map((p) => (
+            <div key={p.id} className="w-56">
+              <ProjectCard project={p} />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <h2 className="text-sm font-semibold text-slate-700">Skeleton — voorbeeld tijdens initial load</h2>
+        <div className="flex gap-3 items-start">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="w-56">
+              <ProjectCardSkeleton />
+            </div>
+          ))}
+        </div>
+      </section>
+    </>
+  );
+}
+
+function DatalaagResults() {
+  const { projects, loading, error, refetch } = useProjects();
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center gap-3">
+        <Button size="sm" variant="secondary" onClick={refetch} loading={loading}>
+          Ververs
+        </Button>
+        {!loading && !error && (
+          <span className="text-sm text-slate-600">
+            {projects.length === 0
+              ? "0 projecten — leeg in ERPNext"
+              : `${projects.length} projecten geladen`}
+          </span>
+        )}
+        {loading && <span className="text-sm text-slate-400">Laden…</span>}
+        {error && (
+          <span className="text-sm text-red-600 font-mono">{error.message}</span>
+        )}
+      </div>
+      {projects.length > 0 && (
+        <ul className="flex flex-col gap-1 text-xs font-mono text-slate-700">
+          {projects.slice(0, 3).map((p) => (
+            <li key={p.id}>
+              <span className="text-slate-400">{p.id}</span>{" "}
+              {p.projectName}{" "}
+              <span className="text-y-teal-dark">[{p.status}]</span>{" "}
+              €{p.budgetSales.toLocaleString("nl-NL")}
+            </li>
+          ))}
+          {projects.length > 3 && (
+            <li className="text-slate-400">…en {projects.length - 3} meer</li>
+          )}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function DatalaagCheck() {
+  const [enabled, setEnabled] = useState(false);
+  return (
+    <section className="flex flex-col gap-2">
+      <h2 className="text-sm font-semibold text-slate-700">Datalaag check (tijdelijk)</h2>
+      <Card variant="info" className="p-4">
+        {!enabled
+          ? <Button size="sm" variant="secondary" onClick={() => setEnabled(true)}>Laad projecten</Button>
+          : <DatalaagResults />
+        }
+      </Card>
+    </section>
+  );
+}
 
 function TestContent() {
   const { t, i18n } = useTranslation();
@@ -29,6 +198,7 @@ function TestContent() {
   }
 
   return (
+  <>
     <div className="p-8 max-w-3xl mx-auto flex flex-col gap-8">
       <h1 className="text-2xl font-bold text-y-teal-dark">
         Bouwmeester — Fase 1 testpagina
@@ -57,7 +227,7 @@ function TestContent() {
         <p className="text-sm text-slate-600">
           projects.title: <strong>{t("projects.title")}</strong> &middot;
           common.loading: <strong>{t("common.loading")}</strong> &middot;
-          status.Lead: <strong>{t("status.Lead")}</strong>
+          status.lead: <strong>{t("status.lead")}</strong>
         </p>
       </section>
 
@@ -167,6 +337,12 @@ function TestContent() {
         )}
       </section>
 
+      {/* Datalaag check — tijdelijk, vervangen in fase 4 */}
+      <DatalaagCheck />
+
+      {/* ProjectCard showcase — tijdelijk */}
+      <CardShowcase />
+
       {/* Toast */}
       <section className="flex flex-col gap-2">
         <h2 className="text-sm font-semibold text-slate-700">Toast</h2>
@@ -183,6 +359,12 @@ function TestContent() {
         </div>
       </section>
     </div>
+
+    {/* KanbanBoard showcase — buiten max-w-3xl zodat het volledige breedte heeft */}
+    <div className="px-8 pb-8">
+      <KanbanBoardShowcase />
+    </div>
+  </>
   );
 }
 

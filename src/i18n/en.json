@@ -41,18 +41,32 @@
     "field_custom_weersafhankelijk": "Weather dependent"
   },
   "status": {
-    "Lead": "Request",
-    "Calculatie": "Quotation",
-    "Gegund": "Awarded",
-    "In uitvoering": "In progress",
-    "Oplevering": "Completion",
-    "Afgerond": "Finished"
+    "lead": "Request",
+    "calculatie": "Quotation",
+    "gegund": "Awarded",
+    "in_uitvoering": "In progress",
+    "oplevering": "Completion",
+    "afgerond": "Finished",
+    "verloren": "Lost",
+    "geannuleerd": "Cancelled"
+  },
+  "card": {
+    "no_end_date": "No end date",
+    "no_project_manager": "No project manager"
+  },
+  "deadline": {
+    "on_track": "on schedule",
+    "soon": "almost due",
+    "overdue": "{{days}}d overdue",
+    "no_date": "no end date",
+    "completed": "completed",
+    "date_only": ""
   },
   "werksoort": {
-    "Renovatie": "Renovation",
-    "Nieuwbouw": "New build",
-    "Sloop": "Demolition",
-    "Verbouw": "Conversion",
-    "Onderhoud": "Maintenance"
+    "renovatie": "Renovation",
+    "nieuwbouw": "New build",
+    "sloop": "Demolition",
+    "verbouw": "Conversion",
+    "onderhoud": "Maintenance"
   }
 }

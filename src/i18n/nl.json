@@ -41,18 +41,32 @@
     "field_custom_weersafhankelijk": "Weersafhankelijk"
   },
   "status": {
-    "Lead": "Aanvraag",
-    "Calculatie": "Calculatie",
-    "Gegund": "Gegund",
-    "In uitvoering": "In uitvoering",
-    "Oplevering": "Oplevering",
-    "Afgerond": "Afgerond"
+    "lead": "Aanvraag",
+    "calculatie": "Calculatie",
+    "gegund": "Gegund",
+    "in_uitvoering": "In uitvoering",
+    "oplevering": "Oplevering",
+    "afgerond": "Afgerond",
+    "verloren": "Verloren",
+    "geannuleerd": "Geannuleerd"
+  },
+  "card": {
+    "no_end_date": "Geen einddatum",
+    "no_project_manager": "Geen projectleider"
+  },
+  "deadline": {
+    "on_track": "op schema",
+    "soon": "bijna",
+    "overdue": "{{days}}d vertraging",
+    "no_date": "geen einddatum",
+    "completed": "afgerond",
+    "date_only": ""
   },
   "werksoort": {
-    "Renovatie": "Renovatie",
-    "Nieuwbouw": "Nieuwbouw",
-    "Sloop": "Sloop",
-    "Verbouw": "Verbouw",
-    "Onderhoud": "Onderhoud"
+    "renovatie": "Renovatie",
+    "nieuwbouw": "Nieuwbouw",
+    "sloop": "Sloop",
+    "verbouw": "Verbouw",
+    "onderhoud": "Onderhoud"
   }
 }
