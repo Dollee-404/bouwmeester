@@ -113,7 +113,7 @@ export function ProjectsPage() {
           icons={[<LayoutGrid size={13} key="b" />, <List size={13} key="t" />]}
         />
         <Button variant="primary" size="sm" onClick={notAvailable}>
-          <Plus size={14} />
+          <Plus size={14} aria-hidden="true" />
           {t("projects.new")}
         </Button>
       </div>
@@ -139,7 +139,7 @@ export function ProjectsPage() {
             description={t("projects.empty_no_projects_body")}
             action={
               <Button variant="primary" size="sm" onClick={notAvailable}>
-                <Plus size={14} />
+                <Plus size={14} aria-hidden="true" />
                 {t("projects.new")}
               </Button>
             }

@@ -29,6 +29,7 @@ export function KanbanColumn({ status, projects, savingIds, isLoading = false, o
           <span
             className="shrink-0 rounded-full"
             style={{ width: 8, height: 8, backgroundColor: color }}
+            aria-hidden="true"
           />
           <span className="text-sm font-medium text-slate-700 truncate">
             {t(labelKey)}
@@ -42,7 +43,7 @@ export function KanbanColumn({ status, projects, savingIds, isLoading = false, o
           onClick={onAddNew}
           aria-label={`Nieuw project in ${t(labelKey)}`}
         >
-          <Plus size={14} />
+          <Plus size={14} aria-hidden="true" />
         </button>
       </div>
 

@@ -34,8 +34,8 @@ function formatEuro(amount: number): string {
 function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: SortDir }) {
   if (col !== sortKey || sortDir === "none") return null;
   return sortDir === "asc"
-    ? <ChevronUp size={12} className="inline ml-1 shrink-0" />
-    : <ChevronDown size={12} className="inline ml-1 shrink-0" />;
+    ? <ChevronUp size={12} className="inline ml-1 shrink-0" aria-hidden="true" />
+    : <ChevronDown size={12} className="inline ml-1 shrink-0" aria-hidden="true" />;
 }
 
 function sortProjects(projects: Project[], key: SortKey, dir: SortDir): Project[] {
@@ -199,6 +199,7 @@ export function ProjectsTable({ projects, isLoading = false, onRowClick }: Proje
                       <span
                         className="w-2 h-2 rounded-full shrink-0"
                         style={{ backgroundColor: color }}
+                        aria-hidden="true"
                       />
                       <span className="text-slate-700">
                         {t(`status.${p.status.toLowerCase().replace(/ /g, "_")}`)}
@@ -245,7 +246,7 @@ export function ProjectsTable({ projects, isLoading = false, onRowClick }: Proje
                   <td className="px-3 py-2.5 whitespace-nowrap">
                     {p.projectManager ? (
                       <span className="inline-flex items-center gap-1.5">
-                        <Avatar name={p.projectManager} size="xs" />
+                        <Avatar name={p.projectManager} size="xs" aria-hidden="true" />
                         <span className="text-slate-700 text-xs">{p.projectManager}</span>
                       </span>
                     ) : (

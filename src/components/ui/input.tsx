@@ -8,7 +8,7 @@ export function Input({ icon, className = "", ...props }: InputProps) {
   return (
     <div className="relative flex items-center">
       {icon && (
-        <span className="absolute left-3 text-slate-400 pointer-events-none flex items-center">
+        <span className="absolute left-3 text-slate-400 pointer-events-none flex items-center" aria-hidden="true">
           {icon}
         </span>
       )}

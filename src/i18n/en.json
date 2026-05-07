@@ -90,6 +90,13 @@
     "verbouw": "Conversion",
     "onderhoud": "Maintenance"
   },
+  "a11y": {
+    "search_icon": "Search",
+    "add_project_to_column": "New project in {{status}}",
+    "project_card": "Open project {{name}}",
+    "project_manager": "Project manager {{name}}",
+    "sort_column": "Sort by {{column}}"
+  },
   "errors": {
     "bridge_lost": "Connection to Y-App lost. Please refresh the page.",
     "server_generic": "Something went wrong on the server. Please try again later.",

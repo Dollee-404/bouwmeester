@@ -3,6 +3,8 @@ type AvatarSize = "xs" | "sm" | "md";
 interface AvatarProps {
   name: string;
   size?: AvatarSize;
+  "aria-label"?: string;
+  "aria-hidden"?: boolean | "true" | "false";
 }
 
 const COLORS = [
@@ -28,7 +30,7 @@ const sizeClasses: Record<AvatarSize, string> = {
   md: "w-8 h-8 text-xs",
 };
 
-export function Avatar({ name, size = "sm" }: AvatarProps) {
+export function Avatar({ name, size = "sm", "aria-label": ariaLabel, "aria-hidden": ariaHidden }: AvatarProps) {
   return (
     <span
       className={[
@@ -37,6 +39,8 @@ export function Avatar({ name, size = "sm" }: AvatarProps) {
         sizeClasses[size],
       ].join(" ")}
       title={name}
+      aria-label={ariaLabel}
+      aria-hidden={ariaHidden}
     >
       {initials(name)}
     </span>

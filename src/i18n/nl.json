@@ -90,6 +90,13 @@
     "verbouw": "Verbouw",
     "onderhoud": "Onderhoud"
   },
+  "a11y": {
+    "search_icon": "Zoeken",
+    "add_project_to_column": "Nieuw project in {{status}}",
+    "project_card": "Project {{name}} openen",
+    "project_manager": "Projectleider {{name}}",
+    "sort_column": "Sorteren op {{column}}"
+  },
   "errors": {
     "bridge_lost": "Verbinding met Y-App verloren. Vernieuw de pagina.",
     "server_generic": "Er ging iets mis met de server. Probeer het later opnieuw.",

@@ -67,7 +67,7 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
 
       {/* Row 3: date row — altijd tonen */}
       <div className={`flex items-center gap-1.5 text-[12px] mb-2 ${project.endDate ? TONE_CLASSES[deadline.tone] : "text-slate-400"}`}>
-        <Calendar size={12} className="shrink-0" />
+        <Calendar size={12} className="shrink-0" aria-hidden="true" />
         {project.endDate ? (
           <>
             <span>{formatEndDate(project.endDate)}</span>
@@ -90,7 +90,7 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
       {/* Row 4: budget overschrijding banner */}
       {isOverBudget && (
         <div className="flex items-center gap-1.5 bg-red-50 border border-red-100 rounded-md px-2.5 py-1.5 mb-2">
-          <AlertTriangle size={12} className="text-red-500 shrink-0" />
+          <AlertTriangle size={12} className="text-red-500 shrink-0" aria-hidden="true" />
           <span className="text-[11px] text-red-600 font-medium">Budget overschreden</span>
         </div>
       )}
@@ -114,7 +114,11 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
       {/* Row 6: footer — altijd tonen */}
       <div className="flex items-center mt-1">
         {project.projectManager ? (
-          <Avatar name={project.projectManager} size="xs" />
+          <Avatar
+            name={project.projectManager}
+            size="xs"
+            aria-label={t("a11y.project_manager", { name: project.projectManager })}
+          />
         ) : (
           <div className="flex items-center gap-1.5">
             <div className="w-5 h-5 rounded-full bg-slate-200 shrink-0" />
