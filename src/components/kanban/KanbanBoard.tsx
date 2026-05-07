@@ -5,11 +5,13 @@ import {
   PointerSensor,
   TouchSensor,
   KeyboardSensor,
+  KeyboardCode,
+  closestCenter,
   useSensor,
   useSensors,
-  pointerWithin,
   type DragStartEvent,
   type DragEndEvent,
+  type KeyboardCoordinateGetter,
 } from "@dnd-kit/core";
 import { useTranslation } from "react-i18next";
 import type { BouwmeesterStatus, Project } from "../../data/types";
@@ -17,6 +19,36 @@ import { STATUS_ORDER, ARCHIVED_STATUS_ORDER } from "./status-config";
 import { KanbanColumn } from "./KanbanColumn";
 import { ProjectCard } from "./ProjectCard";
 import { useToast } from "../ui/toast";
+
+const columnKeyboardCoordinates: KeyboardCoordinateGetter = (
+  event,
+  { currentCoordinates, context: { droppableRects } }
+) => {
+  if (event.code !== KeyboardCode.Right && event.code !== KeyboardCode.Left) return;
+
+  const cols: Array<{ left: number; right: number; cx: number }> = [];
+  droppableRects.forEach((rect) => {
+    cols.push({ left: rect.left, right: rect.right, cx: rect.left + rect.width / 2 });
+  });
+  cols.sort((a, b) => a.left - b.left);
+  if (cols.length === 0) return;
+
+  let idx = cols.findIndex(
+    (col) => currentCoordinates.x >= col.left && currentCoordinates.x <= col.right
+  );
+  if (idx === -1) {
+    let minDist = Infinity;
+    cols.forEach((col, i) => {
+      const dist = Math.abs(col.cx - currentCoordinates.x);
+      if (dist < minDist) { minDist = dist; idx = i; }
+    });
+  }
+
+  const targetIdx = idx + (event.code === KeyboardCode.Right ? 1 : -1);
+  if (targetIdx < 0 || targetIdx >= cols.length) return;
+
+  return { x: cols[targetIdx].left, y: currentCoordinates.y };
+};
 
 interface KanbanBoardProps {
   projects: Project[];
@@ -44,7 +76,7 @@ export function KanbanBoard({
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
-    useSensor(KeyboardSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: columnKeyboardCoordinates }),
   );
 
   // Clean up overrides once the real data catches up (after refetch)
@@ -140,7 +172,7 @@ export function KanbanBoard({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={pointerWithin}
+      collisionDetection={closestCenter}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
