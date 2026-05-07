@@ -18,7 +18,7 @@ function useMediaQuery(maxWidth: number): boolean {
 
 export function useBreakpoint() {
   const isMobile = useMediaQuery(480);
-  const isTablet = useMediaQuery(768);
+  const isTablet = useMediaQuery(1024);
   const isNarrow = useMediaQuery(1024);
   return { isMobile, isTablet, isNarrow };
 }
