@@ -31,14 +31,19 @@ export function DraggableProjectCard({ project, isSaving = false, onClick }: Dra
   const opacity = isDragging ? 0.4 : isSaving ? 0.7 : 1;
 
   return (
+    // Keyboard flow: Tab → focus here → Space picks up card for drag → arrow keys move
+    // between drop zones → Space/Enter drops, Escape cancels.
+    // Enter (when not dragging) triggers the card click action via handleKeyDown above.
+    // aria-label overrides dnd-kit's default (which only has aria-roledescription/describedby).
     <div
       ref={setNodeRef}
       style={{ opacity, cursor: "grab", transition: "opacity 0.15s" }}
       {...restListeners}
       {...attributes}
+      aria-label={project.projectName}
       onKeyDown={handleKeyDown}
     >
-      {/* tabIndex={-1}: the outer dnd-kit div is the keyboard tab stop; inner card is click-only */}
+      {/* tabIndex={-1}: outer div is the keyboard tab stop; inner card renders visuals only */}
       <ProjectCard project={project} onClick={onClick} tabIndex={-1} />
     </div>
   );
