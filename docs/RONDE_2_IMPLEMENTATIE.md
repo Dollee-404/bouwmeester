@@ -963,7 +963,35 @@ Bouwmeester ronde 2 is klaar als:
 | 4 | Kanban-board UI + drag-and-drop | ✅ |
 | 5 | Tabelweergave | ✅ |
 | 6 | Polish (error states, loading, a11y, responsive, performance) | ✅ |
-| 7 | Deploy en eindtest | 🔜 volgende sessie |
+| 7 | Deploy en eindtest | ✅ |
+
+## Voortgangsstatus — 2026-05-07 (einde sessie)
+
+**RONDE 2 volledig afgerond.**
+
+| Fase | Omschrijving | Status |
+|------|-------------|--------|
+| 0 | Repo setup | ✅ |
+| 1 | Bridge-laag + design tokens | ✅ |
+| 2 | First-launch wizard custom fields | ✅ |
+| 3 | Datalaag + mock service | ✅ |
+| 4 | Kanban-board UI + drag-and-drop | ✅ |
+| 5 | Tabelweergave | ✅ |
+| 6 | Polish (error states, loading, a11y, responsive, performance) | ✅ |
+| 7 | Deploy en eindtest | ✅ |
+
+Live op: `https://Dollee-404.github.io/bouwmeester/`
+
+---
+
+## Openstaande items voor RONDE_3_PLANNING
+
+- **Project aanmaken via Bouwmeester** — create-modal bij "+ Nieuw project" knop; huidig gedrag is een info-toast
+- **Project-detailpaneel** — klik op kaart opent een paneel met projectdetails, tabs voor planning/financiën/documenten
+- **Data-architectuur audit** — review welke `custom_*` velden redundant zijn met ERPNext-native velden (bijv. `custom_project_manager` vs ERPNext `project_manager`)
+- **Bredere instance-switch testing** — multi-tenant Y-App setup met meerdere ERPNext-instances; huidig gedrag is niet uitgebreid getest
+
+---
 
 ### Bekende issues (niet geblokkeerd voor fase 7)
 
