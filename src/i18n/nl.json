@@ -59,7 +59,9 @@
     "field_custom_bouwmeester_status": "Bouwmeester Status",
     "field_custom_werksoort": "Werksoort",
     "field_custom_budget_hours": "Budget uren",
-    "field_custom_weersafhankelijk": "Weersafhankelijk"
+    "field_custom_weersafhankelijk": "Weersafhankelijk",
+    "field_custom_project_manager": "Projectleider",
+    "field_custom_address": "Adres"
   },
   "status": {
     "lead": "Aanvraag",

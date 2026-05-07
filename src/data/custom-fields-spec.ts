@@ -40,6 +40,21 @@ export const REQUIRED_CUSTOM_FIELDS: CustomFieldSpec[] = [
     fieldtype: "Check",
     insert_after: "custom_werksoort",
   },
+  {
+    dt: "Project",
+    fieldname: "custom_project_manager",
+    label: "Projectleider",
+    fieldtype: "Link",
+    options: "User",
+    insert_after: "custom_weersafhankelijk",
+  },
+  {
+    dt: "Project",
+    fieldname: "custom_address",
+    label: "Adres",
+    fieldtype: "Small Text",
+    insert_after: "custom_project_manager",
+  },
 ];
 
 export const FIELD_NAMES = REQUIRED_CUSTOM_FIELDS.map((f) => f.fieldname);

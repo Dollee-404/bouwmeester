@@ -17,6 +17,8 @@ const FIELDS = [
   "estimated_costing",
   "custom_budget_hours",
   "custom_weersafhankelijk",
+  "custom_project_manager",
+  "custom_address",
 ];
 
 interface RawProject {
@@ -34,6 +36,8 @@ interface RawProject {
   estimated_costing: number | null;
   custom_budget_hours: number | null;
   custom_weersafhankelijk: 0 | 1 | null;
+  custom_project_manager: string | null;
+  custom_address: string | null;
 }
 
 const VALID_STATUSES = new Set<BouwmeesterStatus>([
@@ -72,8 +76,8 @@ function toProject(raw: RawProject): Project {
     budgetHours: raw.custom_budget_hours ?? null,
     billedAmount: raw.total_billed_amount ?? 0,
     estimatedCosting: raw.estimated_costing ?? 0,
-    projectManager: null,
-    address: null,
+    projectManager: raw.custom_project_manager ?? null,
+    address: raw.custom_address ?? null,
     isWeatherDependent: Boolean(raw.custom_weersafhankelijk),
     isArchived: raw.status === "Completed" || raw.status === "Cancelled"
       || raw.custom_bouwmeester_status === "Verloren"
