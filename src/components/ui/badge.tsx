@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
+import type { Werksoort } from "../../data/types";
 
 type BadgeVariant = "default" | "success" | "warning" | "danger" | "info" | "purple" | "neutral";
 type BadgeSize = "sm" | "xs";
@@ -24,6 +26,24 @@ const sizeClasses: Record<BadgeSize, string> = {
   sm: "px-2 py-0.5 text-xs",
   xs: "px-1.5 py-0 text-[10px]",
 };
+
+const WERKSOORT_VARIANT: Record<Werksoort, BadgeVariant> = {
+  "Renovatie": "info",
+  "Nieuwbouw": "success",
+  "Sloop": "warning",
+  "Verbouw": "purple",
+  "Onderhoud": "neutral",
+};
+
+export function WerksoortBadge({ werksoort }: { werksoort: Werksoort | null }) {
+  const { t } = useTranslation();
+  if (!werksoort) return null;
+  return (
+    <Badge variant={WERKSOORT_VARIANT[werksoort]} size="xs">
+      {t(`werksoort.${werksoort.toLowerCase()}`)}
+    </Badge>
+  );
+}
 
 export function Badge({
   variant = "default",
