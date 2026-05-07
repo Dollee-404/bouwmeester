@@ -14,7 +14,7 @@ export const REQUIRED_CUSTOM_FIELDS: CustomFieldSpec[] = [
     fieldname: "custom_bouwmeester_status",
     label: "Bouwmeester Status",
     fieldtype: "Select",
-    options: "Lead\nCalculatie\nGegund\nIn uitvoering\nOplevering\nAfgerond",
+    options: "Lead\nCalculatie\nGegund\nIn uitvoering\nOplevering\nAfgerond\nVerloren\nGeannuleerd",
     insert_after: "status",
     default: "Lead",
   },

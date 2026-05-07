@@ -1,6 +1,55 @@
 import { fetchList, callMethod, INSTANCE_ID } from "../bridge";
 import { REQUIRED_CUSTOM_FIELDS, FIELD_NAMES, type CustomFieldSpec } from "./custom-fields-spec";
 
+export async function validateAndUpdateFieldOptions(): Promise<void> {
+  if (!INSTANCE_ID) return;
+
+  const selectFields = REQUIRED_CUSTOM_FIELDS.filter(
+    (f) => f.fieldtype === "Select" && f.options,
+  );
+
+  for (const spec of selectFields) {
+    try {
+      const result = await callMethod<{ name: string; options: string } | null>(
+        "frappe.client.get_value",
+        {
+          doctype: "Custom Field",
+          filters: { dt: spec.dt, fieldname: spec.fieldname },
+          fieldname: ["name", "options"],
+        },
+      );
+
+      const currentOptions = result?.options?.trim() ?? "";
+      const specOptions = spec.options?.trim() ?? "";
+
+      if (currentOptions === specOptions) {
+        console.log(
+          `[bouwmeester] Field ${spec.fieldname} options up to date (${specOptions.split("\n").length} opties)`,
+        );
+        continue;
+      }
+
+      if (!result?.name) {
+        console.warn(`[bouwmeester] No document name found for ${spec.fieldname}, skipping update`);
+        continue;
+      }
+
+      await callMethod("frappe.client.set_value", {
+        doctype: "Custom Field",
+        name: result.name,
+        fieldname: "options",
+        value: specOptions,
+      });
+
+      console.log(
+        `[bouwmeester] Field ${spec.fieldname} options updated: ${currentOptions.split("\n").length}→${specOptions.split("\n").length} opties`,
+      );
+    } catch (e) {
+      console.warn(`[bouwmeester] Could not validate options for ${spec.fieldname}:`, e);
+    }
+  }
+}
+
 export interface SetupCheckResult {
   complete: boolean;
   missing: CustomFieldSpec[];
@@ -38,11 +87,7 @@ export async function checkRequiredFields(): Promise<SetupCheckResult> {
 export async function isSystemManager(): Promise<boolean> {
   if (MOCK_NO_PERM) return false;
   try {
-    const userResult = await callMethod<{ message: string }>(
-      "frappe.client.get_value",
-      { doctype: "User", filters: { name: ["like", "%"] }, fieldname: "name" },
-    );
-    const user = userResult?.message;
+    const user = await callMethod<string>("frappe.auth.get_logged_user", {});
     if (!user) return false;
 
     const roles = await fetchList<{ name: string }>("Has Role", {

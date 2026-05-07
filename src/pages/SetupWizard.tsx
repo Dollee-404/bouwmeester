@@ -7,6 +7,7 @@ import {
   isSystemManager,
   installCustomFields,
   downloadFieldsJson,
+  validateAndUpdateFieldOptions,
 } from "../data/setup-check";
 import { REQUIRED_CUSTOM_FIELDS, type CustomFieldSpec } from "../data/custom-fields-spec";
 import { Button } from "../components/ui/button";
@@ -33,6 +34,7 @@ export function SetupGate({ children }: SetupGateProps) {
     try {
       const result = await checkRequiredFields();
       if (result.complete) {
+        validateAndUpdateFieldOptions(); // stilzwijgende migratie, geen await — blokkeert app niet
         setReady(true);
       } else {
         setMissingFields(result.missing);
