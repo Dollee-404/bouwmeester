@@ -21,6 +21,7 @@ import { useToast } from "../ui/toast";
 interface KanbanBoardProps {
   projects: Project[];
   showArchived?: boolean;
+  isLoading?: boolean;
   onCardClick?: (project: Project) => void;
   onAddNew?: (status: BouwmeesterStatus) => void;
   onStatusChange?: (projectId: string, newStatus: BouwmeesterStatus) => Promise<void>;
@@ -29,6 +30,7 @@ interface KanbanBoardProps {
 export function KanbanBoard({
   projects,
   showArchived = false,
+  isLoading = false,
   onCardClick,
   onAddNew,
   onStatusChange,
@@ -157,6 +159,7 @@ export function KanbanBoard({
               status={status}
               projects={grouped[status]}
               savingIds={savingIds}
+              isLoading={isLoading}
               onCardClick={onCardClick}
               onAddNew={onAddNew ? () => onAddNew(status) : undefined}
             />

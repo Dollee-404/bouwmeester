@@ -14,6 +14,7 @@ type SortDir = "asc" | "desc" | "none";
 
 interface ProjectsTableProps {
   projects: Project[];
+  isLoading?: boolean;
   onRowClick: (project: Project) => void;
 }
 
@@ -62,7 +63,7 @@ function sortProjects(projects: Project[], key: SortKey, dir: SortDir): Project[
   });
 }
 
-export function ProjectsTable({ projects, onRowClick }: ProjectsTableProps) {
+export function ProjectsTable({ projects, isLoading = false, onRowClick }: ProjectsTableProps) {
   const { t } = useTranslation();
   const [sortKey, setSortKey] = useState<SortKey>("id");
   const [sortDir, setSortDir] = useState<SortDir>("none");
@@ -152,7 +153,22 @@ export function ProjectsTable({ projects, onRowClick }: ProjectsTableProps) {
           </tr>
         </thead>
         <tbody>
-          {sorted.length === 0 ? (
+          {isLoading ? (
+            Array.from({ length: 8 }).map((_, i) => (
+              <tr key={i} className="border-b border-slate-200">
+                <td className="px-3 py-2.5"><div className="h-3 w-16 bg-slate-200 rounded animate-pulse" /></td>
+                <td className="px-3 py-2.5"><div className="h-3 w-40 bg-slate-200 rounded animate-pulse" /></td>
+                <td className="px-3 py-2.5"><div className="h-3 w-28 bg-slate-200 rounded animate-pulse" /></td>
+                <td className="px-3 py-2.5"><div className="h-3 w-24 bg-slate-200 rounded animate-pulse" /></td>
+                <td className="px-3 py-2.5"><div className="h-4 w-16 bg-slate-200 rounded-full animate-pulse" /></td>
+                <td className="px-3 py-2.5"><div className="h-3 w-20 bg-slate-200 rounded animate-pulse" /></td>
+                <td className="px-3 py-2.5"><div className="h-3 w-20 bg-slate-200 rounded animate-pulse" /></td>
+                <td className="px-3 py-2.5"><div className="h-2 w-20 bg-slate-200 rounded-full animate-pulse" /></td>
+                <td className="px-3 py-2.5"><div className="h-3 w-24 bg-slate-200 rounded animate-pulse" /></td>
+                <td className="px-3 py-2.5"><div className="h-5 w-5 bg-slate-200 rounded-full animate-pulse" /></td>
+              </tr>
+            ))
+          ) : sorted.length === 0 ? (
             <tr>
               <td colSpan={10} className="px-3 py-6 text-center text-sm text-slate-400">
                 {t("projects.no_results")}

@@ -9,7 +9,6 @@ import { ProjectsTable } from "../components/projects/ProjectsTable";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Toggle } from "../components/ui/toggle";
-import { LoadingState } from "../components/ui/loading-state";
 import { useToast } from "../components/ui/toast";
 
 type ViewMode = "board" | "table";
@@ -80,14 +79,16 @@ export function ProjectsPage() {
       <div className="flex items-center gap-3 px-6 py-5 flex-wrap border-b border-slate-100">
         <div className="flex flex-col mr-auto min-w-0">
           <h1 className="text-xl font-bold text-slate-800">{t("projects.title")}</h1>
-          {!loading && (
-            <p className="text-sm text-slate-500 flex items-center gap-1.5">
-              {t("projects.active_count", { count: activeCount })}
-              {" · "}
-              {t("projects.archived_count", { count: archivedCount })}
-              {isRefetching && <Loader2 size={12} className="animate-spin text-slate-400" />}
-            </p>
-          )}
+          <p className="text-sm text-slate-500 flex items-center gap-1.5">
+            {loading && !isRefetching ? "—" : (
+              <>
+                {t("projects.active_count", { count: activeCount })}
+                {" · "}
+                {t("projects.archived_count", { count: archivedCount })}
+                {isRefetching && <Loader2 size={12} className="animate-spin text-slate-400" />}
+              </>
+            )}
+          </p>
         </div>
 
         <Input
@@ -117,11 +118,6 @@ export function ProjectsPage() {
       </div>
 
       {/* Content */}
-      {loading && !isRefetching && (
-        <div className="p-8">
-          <LoadingState message={t("common.loading")} />
-        </div>
-      )}
       {!loading && error && projects.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
           <AlertCircle size={48} className="text-slate-400 mb-4" />
@@ -134,19 +130,24 @@ export function ProjectsPage() {
           </Button>
         </div>
       )}
-      {(!loading || isRefetching) && (!error || projects.length > 0) && viewMode === "board" && (
+      {(loading || !error || projects.length > 0) && viewMode === "board" && (
         <div className="px-6 pt-4 pb-6">
           <KanbanBoard
             projects={filtered}
             showArchived={showArchived}
+            isLoading={loading && !isRefetching}
             onAddNew={notAvailable}
             onStatusChange={handleStatusChange}
           />
         </div>
       )}
-      {(!loading || isRefetching) && (!error || projects.length > 0) && viewMode === "table" && (
+      {(loading || !error || projects.length > 0) && viewMode === "table" && (
         <div className="px-6 pt-4 pb-6">
-          <ProjectsTable projects={filtered} onRowClick={handleRowClick} />
+          <ProjectsTable
+            projects={filtered}
+            isLoading={loading && !isRefetching}
+            onRowClick={handleRowClick}
+          />
         </div>
       )}
     </div>

@@ -4,16 +4,18 @@ import { Plus } from "lucide-react";
 import type { BouwmeesterStatus, Project } from "../../data/types";
 import { STATUS_COLORS, STATUS_LABEL_KEYS } from "./status-config";
 import { DraggableProjectCard } from "./DraggableProjectCard";
+import { ProjectCardSkeleton } from "./ProjectCardSkeleton";
 
 interface KanbanColumnProps {
   status: BouwmeesterStatus;
   projects: Project[];
   savingIds?: Set<string>;
+  isLoading?: boolean;
   onCardClick?: (project: Project) => void;
   onAddNew?: () => void;
 }
 
-export function KanbanColumn({ status, projects, savingIds, onCardClick, onAddNew }: KanbanColumnProps) {
+export function KanbanColumn({ status, projects, savingIds, isLoading = false, onCardClick, onAddNew }: KanbanColumnProps) {
   const { t } = useTranslation();
   const color = STATUS_COLORS[status];
   const labelKey = STATUS_LABEL_KEYS[status];
@@ -54,7 +56,13 @@ export function KanbanColumn({ status, projects, savingIds, onCardClick, onAddNe
             : undefined
         }
       >
-        {projects.length === 0 ? (
+        {isLoading ? (
+          <div className="flex flex-col" style={{ gap: 10 }}>
+            <ProjectCardSkeleton />
+            <ProjectCardSkeleton />
+            <ProjectCardSkeleton />
+          </div>
+        ) : projects.length === 0 ? (
           <div
             className="flex items-center justify-center text-xs text-slate-400 bg-slate-50 rounded-lg"
             style={{ minHeight: 72, padding: 16 }}
