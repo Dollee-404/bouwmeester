@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -95,25 +95,31 @@ export function KanbanBoard({
     });
   }, [projects]);
 
-  const columns = showArchived
-    ? [...STATUS_ORDER, ...ARCHIVED_STATUS_ORDER]
-    : STATUS_ORDER;
-
-  const visible = showArchived
-    ? projects
-    : projects.filter((p) => !p.isArchived);
-
-  // Apply optimistic overrides on top of real data
-  const displayProjects = visible.map((p) =>
-    statusOverrides[p.id] ? { ...p, status: statusOverrides[p.id] } : p
+  const columns = useMemo(
+    () => showArchived ? [...STATUS_ORDER, ...ARCHIVED_STATUS_ORDER] : STATUS_ORDER,
+    [showArchived]
   );
 
-  const grouped = columns.reduce<Record<string, Project[]>>(
-    (acc, status) => {
-      acc[status] = displayProjects.filter((p) => p.status === status);
-      return acc;
-    },
-    {},
+  const visible = useMemo(
+    () => showArchived ? projects : projects.filter((p) => !p.isArchived),
+    [projects, showArchived]
+  );
+
+  // Apply optimistic overrides on top of real data
+  const displayProjects = useMemo(
+    () => visible.map((p) => statusOverrides[p.id] ? { ...p, status: statusOverrides[p.id] } : p),
+    [visible, statusOverrides]
+  );
+
+  const grouped = useMemo(
+    () => columns.reduce<Record<string, Project[]>>(
+      (acc, status) => {
+        acc[status] = displayProjects.filter((p) => p.status === status);
+        return acc;
+      },
+      {}
+    ),
+    [columns, displayProjects]
   );
 
   const colCount = columns.length;
@@ -193,7 +199,7 @@ export function KanbanBoard({
               savingIds={savingIds}
               isLoading={isLoading}
               onCardClick={onCardClick}
-              onAddNew={onAddNew ? () => onAddNew(status) : undefined}
+              onAddNew={onAddNew}
             />
           ))}
         </div>

@@ -12,9 +12,15 @@ interface KanbanColumnProps {
   savingIds?: Set<string>;
   isLoading?: boolean;
   onCardClick?: (project: Project) => void;
-  onAddNew?: () => void;
+  onAddNew?: (status: BouwmeesterStatus) => void;
 }
 
+// Geen React.memo: useDroppable() subscribeert op @dnd-kit's
+// DndContext wat alle consumers laat herrender bij elke drag-tick.
+// Memo is daardoor effectloos. Bij performance-issues op productie:
+// overweeg structuurwijziging waarbij useDroppable in een aparte
+// wrapper zit. Tot die tijd: dev-build profile toont 66.9ms per
+// commit, productie-build naar verwachting fors lager.
 export function KanbanColumn({ status, projects, savingIds, isLoading = false, onCardClick, onAddNew }: KanbanColumnProps) {
   const { t } = useTranslation();
   const color = STATUS_COLORS[status];
@@ -40,7 +46,7 @@ export function KanbanColumn({ status, projects, savingIds, isLoading = false, o
         </div>
         <button
           className="text-slate-400 hover:text-slate-600 transition-colors p-0.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-y-teal"
-          onClick={onAddNew}
+          onClick={() => onAddNew?.(status)}
           aria-label={`Nieuw project in ${t(labelKey)}`}
         >
           <Plus size={14} aria-hidden="true" />
@@ -86,3 +92,4 @@ export function KanbanColumn({ status, projects, savingIds, isLoading = false, o
     </div>
   );
 }
+
