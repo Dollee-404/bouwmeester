@@ -8,6 +8,7 @@ import { TestPage } from "./dev/TestPage";
 import { MockErrorProvider } from "./dev/mock-error-context";
 import { ToastProvider } from "./components/ui/toast";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { DemoBanner } from "./components/DemoBanner";
 
 const DEV_MODE = new URLSearchParams(window.location.search).get("dev") === "1";
 
@@ -24,6 +25,7 @@ export default function App() {
     <ErrorBoundary>
       <ToastProvider>
         <LangSync />
+        <DemoBanner />
         <SetupGate>
           {DEV_MODE ? (
             <MockErrorProvider>

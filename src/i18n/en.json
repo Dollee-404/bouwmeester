@@ -97,6 +97,12 @@
     "project_manager": "Project manager {{name}}",
     "sort_column": "Sort by {{column}}"
   },
+  "demo": {
+    "banner": {
+      "message": "Bouwmeester is a Y-App extension. You're viewing a demo with fictional data.",
+      "cta": "Learn more"
+    }
+  },
   "errors": {
     "bridge_lost": "Connection to Y-App lost. Please refresh the page.",
     "server_generic": "Something went wrong on the server. Please try again later.",
