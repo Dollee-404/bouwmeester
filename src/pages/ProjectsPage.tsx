@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Search, LayoutGrid, List, Plus, AlertCircle, Loader2, HardHat } from "lucide-react";
+import { Search, LayoutGrid, List, Plus, AlertCircle, Loader2, HardHat, SearchX } from "lucide-react";
 import { EmptyState } from "../components/ui/empty-state";
 import { useProjects } from "../hooks/use-projects";
 import { projectsService } from "../data";
@@ -141,6 +141,20 @@ export function ProjectsPage() {
               <Button variant="primary" size="sm" onClick={notAvailable}>
                 <Plus size={14} />
                 {t("projects.new")}
+              </Button>
+            }
+          />
+        </div>
+      )}
+      {!loading && !error && projects.length > 0 && searchQuery.trim() !== "" && filtered.length === 0 && (
+        <div className="px-6 pt-4 pb-6">
+          <EmptyState
+            icon={<SearchX size={48} className="text-slate-400" />}
+            title={t("projects.empty_no_search_results_title")}
+            description={t("projects.empty_no_search_results_body", { query: searchQuery })}
+            action={
+              <Button variant="secondary" size="sm" onClick={() => setSearchQuery("")}>
+                {t("projects.clear_search")}
               </Button>
             }
           />
