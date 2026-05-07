@@ -245,8 +245,12 @@ function ErrorSimSection() {
 export function TestPage() {
   const { t, i18n } = useTranslation();
   const { addToast } = useToast();
+  const { flags } = useMockErrors();
   const [view, setView] = useState<"Board" | "Tabel">("Board");
   const [loading, setLoading] = useState(false);
+
+  // Zorgt dat ProjectsPage opnieuw laadt als een error-flag wijzigt
+  const errorKey = `${flags.bridgeTimeout}-${flags.erpNext500}-${flags.fetchError}`;
 
   function triggerLoading() {
     setLoading(true);
@@ -437,7 +441,7 @@ export function TestPage() {
           Forceer fout bij updateStatus (test rollback)
         </label>
       </div>
-      <ProjectsPage />
+      <ProjectsPage key={errorKey} />
     </div>
   </>
   );
