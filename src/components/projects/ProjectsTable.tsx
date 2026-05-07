@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type React from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { WerksoortBadge } from "../ui/badge";
@@ -109,21 +110,26 @@ export function ProjectsTable({ projects, isLoading = false, onRowClick }: Proje
     ].join(" ");
   }
 
+  function ariaSortFor(key: SortKey): React.AriaAttributes["aria-sort"] {
+    if (sortKey !== key || sortDir === "none") return "none";
+    return sortDir === "asc" ? "ascending" : "descending";
+  }
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr className="border-b border-slate-200 bg-white sticky top-0 z-10">
-            <th className={thClass(true, "id")} onClick={() => handleSort("id")}>
+            <th className={thClass(true, "id")} onClick={() => handleSort("id")} aria-sort={ariaSortFor("id")}>
               {t("projects.table_col_id")}
               <SortIcon col="id" sortKey={sortKey} sortDir={sortDir} />
             </th>
-            <th className={thClass(true, "projectName")} onClick={() => handleSort("projectName")}>
+            <th className={thClass(true, "projectName")} onClick={() => handleSort("projectName")} aria-sort={ariaSortFor("projectName")}>
               {t("projects.table_col_name")}
               <SortIcon col="projectName" sortKey={sortKey} sortDir={sortDir} />
             </th>
             <th className={thClass(false)}>{t("projects.table_col_customer")}</th>
-            <th className={thClass(true, "status")} onClick={() => handleSort("status")}>
+            <th className={thClass(true, "status")} onClick={() => handleSort("status")} aria-sort={ariaSortFor("status")}>
               {t("projects.table_col_status")}
               <SortIcon col="status" sortKey={sortKey} sortDir={sortDir} />
             </th>
@@ -145,7 +151,7 @@ export function ProjectsTable({ projects, isLoading = false, onRowClick }: Proje
             <th className={thClass(false)}>{t("projects.table_col_start")}</th>
             <th className={thClass(false)}>{t("projects.table_col_end")}</th>
             <th className={thClass(false)}>{t("projects.table_col_progress")}</th>
-            <th className={thClass(true, "budgetSales")} onClick={() => handleSort("budgetSales")}>
+            <th className={thClass(true, "budgetSales")} onClick={() => handleSort("budgetSales")} aria-sort={ariaSortFor("budgetSales")}>
               {t("projects.table_col_budget")}
               <SortIcon col="budgetSales" sortKey={sortKey} sortDir={sortDir} />
             </th>
