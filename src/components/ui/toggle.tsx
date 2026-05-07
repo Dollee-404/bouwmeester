@@ -17,6 +17,7 @@ export function Toggle({ options, value, onChange, icons }: ToggleProps) {
           onClick={() => onChange(opt)}
           className={[
             "px-3 py-1.5 text-sm font-medium flex items-center gap-1.5 transition-colors cursor-pointer",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-y-teal",
             value === opt
               ? "bg-y-teal-dark text-white"
               : "text-slate-600 hover:bg-slate-50",

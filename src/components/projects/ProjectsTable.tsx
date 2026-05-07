@@ -106,7 +106,9 @@ export function ProjectsTable({ projects, isLoading = false, onRowClick }: Proje
     return [
       "px-3 py-2 text-left text-sm font-semibold whitespace-nowrap select-none",
       isActive ? "text-slate-900 bg-slate-50" : "text-slate-600",
-      sortable ? "cursor-pointer hover:text-slate-900 hover:bg-slate-50" : "",
+      sortable
+        ? "cursor-pointer hover:text-slate-900 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-y-teal"
+        : "",
     ].join(" ");
   }
 
@@ -120,16 +122,16 @@ export function ProjectsTable({ projects, isLoading = false, onRowClick }: Proje
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr className="border-b border-slate-200 bg-white sticky top-0 z-10">
-            <th className={thClass(true, "id")} onClick={() => handleSort("id")} aria-sort={ariaSortFor("id")}>
+            <th className={thClass(true, "id")} onClick={() => handleSort("id")} aria-sort={ariaSortFor("id")} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") handleSort("id"); }}>
               {t("projects.table_col_id")}
               <SortIcon col="id" sortKey={sortKey} sortDir={sortDir} />
             </th>
-            <th className={thClass(true, "projectName")} onClick={() => handleSort("projectName")} aria-sort={ariaSortFor("projectName")}>
+            <th className={thClass(true, "projectName")} onClick={() => handleSort("projectName")} aria-sort={ariaSortFor("projectName")} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") handleSort("projectName"); }}>
               {t("projects.table_col_name")}
               <SortIcon col="projectName" sortKey={sortKey} sortDir={sortDir} />
             </th>
             <th className={thClass(false)}>{t("projects.table_col_customer")}</th>
-            <th className={thClass(true, "status")} onClick={() => handleSort("status")} aria-sort={ariaSortFor("status")}>
+            <th className={thClass(true, "status")} onClick={() => handleSort("status")} aria-sort={ariaSortFor("status")} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") handleSort("status"); }}>
               {t("projects.table_col_status")}
               <SortIcon col="status" sortKey={sortKey} sortDir={sortDir} />
             </th>
@@ -151,7 +153,7 @@ export function ProjectsTable({ projects, isLoading = false, onRowClick }: Proje
             <th className={thClass(false)}>{t("projects.table_col_start")}</th>
             <th className={thClass(false)}>{t("projects.table_col_end")}</th>
             <th className={thClass(false)}>{t("projects.table_col_progress")}</th>
-            <th className={thClass(true, "budgetSales")} onClick={() => handleSort("budgetSales")} aria-sort={ariaSortFor("budgetSales")}>
+            <th className={thClass(true, "budgetSales")} onClick={() => handleSort("budgetSales")} aria-sort={ariaSortFor("budgetSales")} tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") handleSort("budgetSales"); }}>
               {t("projects.table_col_budget")}
               <SortIcon col="budgetSales" sortKey={sortKey} sortDir={sortDir} />
             </th>

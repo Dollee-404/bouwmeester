@@ -39,7 +39,7 @@ export function KanbanColumn({ status, projects, savingIds, isLoading = false, o
           </span>
         </div>
         <button
-          className="text-slate-400 hover:text-slate-600 transition-colors p-0.5 rounded"
+          className="text-slate-400 hover:text-slate-600 transition-colors p-0.5 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-y-teal"
           onClick={onAddNew}
           aria-label={`Nieuw project in ${t(labelKey)}`}
         >
