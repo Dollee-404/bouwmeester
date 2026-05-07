@@ -1,15 +1,65 @@
+import { useState, useEffect } from "react";
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  TouchSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  pointerWithin,
+  type DragStartEvent,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { useTranslation } from "react-i18next";
 import type { BouwmeesterStatus, Project } from "../../data/types";
 import { STATUS_ORDER, ARCHIVED_STATUS_ORDER } from "./status-config";
 import { KanbanColumn } from "./KanbanColumn";
+import { ProjectCard } from "./ProjectCard";
+import { useToast } from "../ui/toast";
 
 interface KanbanBoardProps {
   projects: Project[];
   showArchived?: boolean;
   onCardClick?: (project: Project) => void;
   onAddNew?: (status: BouwmeesterStatus) => void;
+  onStatusChange?: (projectId: string, newStatus: BouwmeesterStatus) => Promise<void>;
 }
 
-export function KanbanBoard({ projects, showArchived = false, onCardClick, onAddNew }: KanbanBoardProps) {
+export function KanbanBoard({
+  projects,
+  showArchived = false,
+  onCardClick,
+  onAddNew,
+  onStatusChange,
+}: KanbanBoardProps) {
+  const { t } = useTranslation();
+  const { addToast } = useToast();
+  const [activeProject, setActiveProject] = useState<Project | null>(null);
+  const [statusOverrides, setStatusOverrides] = useState<Record<string, BouwmeesterStatus>>({});
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
+    useSensor(KeyboardSensor),
+  );
+
+  // Clean up overrides once the real data catches up (after refetch)
+  useEffect(() => {
+    setStatusOverrides((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      for (const id in next) {
+        const real = projects.find((p) => p.id === id);
+        if (real && real.status === next[id]) {
+          delete next[id];
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [projects]);
+
   const columns = showArchived
     ? [...STATUS_ORDER, ...ARCHIVED_STATUS_ORDER]
     : STATUS_ORDER;
@@ -18,38 +68,100 @@ export function KanbanBoard({ projects, showArchived = false, onCardClick, onAdd
     ? projects
     : projects.filter((p) => !p.isArchived);
 
+  // Apply optimistic overrides on top of real data
+  const displayProjects = visible.map((p) =>
+    statusOverrides[p.id] ? { ...p, status: statusOverrides[p.id] } : p
+  );
+
   const grouped = columns.reduce<Record<string, Project[]>>(
     (acc, status) => {
-      acc[status] = visible.filter((p) => p.status === status);
+      acc[status] = displayProjects.filter((p) => p.status === status);
       return acc;
     },
     {},
   );
 
-  // minmax(Xpx, 1fr): on wide screens 1fr fills space, on narrow screens
-  // min-width triggers overflow-x scroll — no JS resize listeners needed.
   const colCount = columns.length;
   const minColWidth = colCount === 8 ? 220 : 240;
 
+  function handleDragStart(event: DragStartEvent) {
+    const project = event.active.data.current?.project as Project | undefined;
+    setActiveProject(project ?? null);
+  }
+
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    setActiveProject(null);
+
+    if (!over) return;
+
+    const projectId = active.id as string;
+    const newStatus = over.id as BouwmeesterStatus;
+
+    // Find original status (before any overrides) from real projects
+    const project = projects.find((p) => p.id === projectId);
+    if (!project) return;
+
+    const currentStatus = statusOverrides[projectId] ?? project.status;
+    if (currentStatus === newStatus) return;
+    if (!columns.includes(newStatus)) return;
+
+    setStatusOverrides((prev) => ({ ...prev, [projectId]: newStatus }));
+
+    if (onStatusChange) {
+      try {
+        await onStatusChange(projectId, newStatus);
+        // Keep override — useEffect above cleans it up once projects prop updates
+      } catch {
+        setStatusOverrides((prev) => {
+          const next = { ...prev };
+          delete next[projectId];
+          return next;
+        });
+        addToast(t("projects.drag_drop_error"), "error");
+      }
+    }
+  }
+
+  function handleDragCancel() {
+    setActiveProject(null);
+  }
+
   return (
-    <div className="overflow-x-auto pb-2">
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: `repeat(${colCount}, minmax(${minColWidth}px, 1fr))`,
-          gap: 12,
-        }}
-      >
-        {columns.map((status) => (
-          <KanbanColumn
-            key={status}
-            status={status}
-            projects={grouped[status]}
-            onCardClick={onCardClick}
-            onAddNew={onAddNew ? () => onAddNew(status) : undefined}
-          />
-        ))}
+    <DndContext
+      sensors={sensors}
+      collisionDetection={pointerWithin}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
+    >
+      <div className="overflow-x-auto pb-2">
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: `repeat(${colCount}, minmax(${minColWidth}px, 1fr))`,
+            gap: 12,
+          }}
+        >
+          {columns.map((status) => (
+            <KanbanColumn
+              key={status}
+              status={status}
+              projects={grouped[status]}
+              onCardClick={onCardClick}
+              onAddNew={onAddNew ? () => onAddNew(status) : undefined}
+            />
+          ))}
+        </div>
       </div>
-    </div>
+
+      <DragOverlay>
+        {activeProject && (
+          <div style={{ cursor: "grabbing", width: 224 }}>
+            <ProjectCard project={activeProject} />
+          </div>
+        )}
+      </DragOverlay>
+    </DndContext>
   );
 }

@@ -398,6 +398,9 @@ function applyFilters(list: Project[], options: ListOptions): Project[] {
   });
 }
 
+let _forceFail = false;
+export function setMockForceFail(enabled: boolean) { _forceFail = enabled; }
+
 export const mockService: ProjectsService = {
   async list(options = {}) {
     return applyFilters(projects, options);
@@ -411,6 +414,7 @@ export const mockService: ProjectsService = {
 
   async updateStatus(id, newStatus: BouwmeesterStatus) {
     await new Promise((r) => setTimeout(r, 200));
+    if (_forceFail) throw new Error("Gesimuleerde server-fout voor rollback-test");
     const p = projects.find((p) => p.id === id);
     if (p) p.status = newStatus;
   },

@@ -1,8 +1,9 @@
+import { useDroppable } from "@dnd-kit/core";
 import { useTranslation } from "react-i18next";
 import { Plus } from "lucide-react";
 import type { BouwmeesterStatus, Project } from "../../data/types";
 import { STATUS_COLORS, STATUS_LABEL_KEYS } from "./status-config";
-import { ProjectCard } from "./ProjectCard";
+import { DraggableProjectCard } from "./DraggableProjectCard";
 
 interface KanbanColumnProps {
   status: BouwmeesterStatus;
@@ -15,6 +16,7 @@ export function KanbanColumn({ status, projects, onCardClick, onAddNew }: Kanban
   const { t } = useTranslation();
   const color = STATUS_COLORS[status];
   const labelKey = STATUS_LABEL_KEYS[status];
+  const { isOver, setNodeRef } = useDroppable({ id: status });
 
   return (
     <div className="flex flex-col min-w-0">
@@ -41,25 +43,35 @@ export function KanbanColumn({ status, projects, onCardClick, onAddNew }: Kanban
         </button>
       </div>
 
-      {/* Card list or empty state */}
-      {projects.length === 0 ? (
-        <div
-          className="flex items-center justify-center text-xs text-slate-400 bg-slate-50 rounded-lg"
-          style={{ minHeight: 72, padding: 16 }}
-        >
-          {t("projects.empty_column")}
-        </div>
-      ) : (
-        <div className="flex flex-col" style={{ gap: 10 }}>
-          {projects.map((project) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              onClick={onCardClick}
-            />
-          ))}
-        </div>
-      )}
+      {/* Drop zone */}
+      <div
+        ref={setNodeRef}
+        className="flex-1 flex flex-col rounded-lg transition-colors duration-150"
+        style={
+          isOver
+            ? { backgroundColor: "rgba(0,104,118,0.06)", outline: "2px solid rgba(0,104,118,0.22)", outlineOffset: 2 }
+            : undefined
+        }
+      >
+        {projects.length === 0 ? (
+          <div
+            className="flex items-center justify-center text-xs text-slate-400 bg-slate-50 rounded-lg"
+            style={{ minHeight: 72, padding: 16 }}
+          >
+            {t("projects.empty_column")}
+          </div>
+        ) : (
+          <div className="flex flex-col" style={{ gap: 10 }}>
+            {projects.map((project) => (
+              <DraggableProjectCard
+                key={project.id}
+                project={project}
+                onClick={onCardClick}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
