@@ -21,7 +21,10 @@
     "no_results": "No projects found",
     "no_results_for": "No projects found for '{{query}}'",
     "empty_column": "No projects",
-    "drag_drop_error": "Failed to update status. Please try again."
+    "drag_drop_error": "Failed to update status. Please try again.",
+    "table_coming_soon_title": "Table view coming soon",
+    "table_coming_soon_body": "For now, you can manage projects using the kanban board. A full table view with sorting and filtering will be available in a later version.",
+    "back_to_board": "Back to board"
   },
   "setup": {
     "title": "Welcome to Bouwmeester",

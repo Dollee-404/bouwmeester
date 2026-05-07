@@ -21,7 +21,10 @@
     "no_results": "Geen projecten gevonden",
     "no_results_for": "Geen projecten gevonden voor '{{query}}'",
     "empty_column": "Geen projecten",
-    "drag_drop_error": "Status bijwerken mislukt. Probeer opnieuw."
+    "drag_drop_error": "Status bijwerken mislukt. Probeer opnieuw.",
+    "table_coming_soon_title": "Tabelweergave volgt later",
+    "table_coming_soon_body": "Voor nu kun je projecten beheren via het kanban-bord. Een uitgebreide tabel met sorteer- en filterfuncties komt in een latere versie.",
+    "back_to_board": "Terug naar bord"
   },
   "setup": {
     "title": "Welkom bij Bouwmeester",

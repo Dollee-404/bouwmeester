@@ -5,32 +5,14 @@ import { useProjects } from "../hooks/use-projects";
 import { projectsService } from "../data";
 import type { BouwmeesterStatus } from "../data/types";
 import { KanbanBoard } from "../components/kanban/KanbanBoard";
+import { ProjectsTablePlaceholder } from "../components/projects/ProjectsTablePlaceholder";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Toggle } from "../components/ui/toggle";
-import { EmptyState } from "../components/ui/empty-state";
 import { LoadingState } from "../components/ui/loading-state";
 import { useToast } from "../components/ui/toast";
 
 type ViewMode = "board" | "table";
-
-function ProjectsTablePlaceholder({ onBack }: { onBack: () => void }) {
-  const { t } = useTranslation();
-  return (
-    <div className="p-8">
-      <EmptyState
-        icon={<List size={32} />}
-        title="Tabelweergave"
-        description="Tabelweergave volgt in een latere versie"
-        action={
-          <Button variant="secondary" size="sm" onClick={onBack}>
-            {t("projects.view_board")}
-          </Button>
-        }
-      />
-    </div>
-  );
-}
 
 export function ProjectsPage() {
   const { t } = useTranslation();
