@@ -84,5 +84,16 @@
     "sloop": "Demolition",
     "verbouw": "Conversion",
     "onderhoud": "Maintenance"
+  },
+  "errors": {
+    "bridge_lost": "Connection to Y-App lost. Please refresh the page.",
+    "server_generic": "Something went wrong on the server. Please try again later.",
+    "unexpected": "Unexpected error. Please try again.",
+    "projects_load_failed_title": "Projects cannot be loaded",
+    "try_again": "Try again",
+    "error_boundary_title": "Bouwmeester is temporarily unavailable",
+    "error_boundary_body": "An unexpected error occurred. Refresh the page to start again.",
+    "refresh_page": "Refresh page",
+    "show_technical_details": "Show technical details"
   }
 }

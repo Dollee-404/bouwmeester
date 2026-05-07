@@ -84,5 +84,16 @@
     "sloop": "Sloop",
     "verbouw": "Verbouw",
     "onderhoud": "Onderhoud"
+  },
+  "errors": {
+    "bridge_lost": "Verbinding met Y-App verloren. Vernieuw de pagina.",
+    "server_generic": "Er ging iets mis met de server. Probeer het later opnieuw.",
+    "unexpected": "Onverwachte fout. Probeer het opnieuw.",
+    "projects_load_failed_title": "Projecten kunnen niet worden geladen",
+    "try_again": "Opnieuw proberen",
+    "error_boundary_title": "Bouwmeester is tijdelijk niet beschikbaar",
+    "error_boundary_body": "Er is een onverwachte fout opgetreden. Vernieuw de pagina om opnieuw te beginnen.",
+    "refresh_page": "Vernieuw pagina",
+    "show_technical_details": "Toon technische details"
   }
 }

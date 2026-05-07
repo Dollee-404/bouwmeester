@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Search, LayoutGrid, List, Plus } from "lucide-react";
+import { Search, LayoutGrid, List, Plus, AlertCircle } from "lucide-react";
 import { useProjects } from "../hooks/use-projects";
 import { projectsService } from "../data";
 import type { BouwmeesterStatus, Project } from "../data/types";
@@ -14,6 +14,13 @@ import { useToast } from "../components/ui/toast";
 
 type ViewMode = "board" | "table";
 
+function classifyError(e: Error): "bridge" | "server" | "unknown" {
+  const msg = e.message;
+  if (msg.includes("timeout") || msg.includes("Bridge")) return "bridge";
+  if (/\b[45]\d\d\b/.test(msg) || msg.toLowerCase().includes("erpnext error")) return "server";
+  return "unknown";
+}
+
 export function ProjectsPage() {
   const { t } = useTranslation();
   const { addToast } = useToast();
@@ -22,6 +29,20 @@ export function ProjectsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showArchived, setShowArchived] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("board");
+
+  const shownErrorRef = useRef<Error | null>(null);
+  useEffect(() => {
+    if (!error || error === shownErrorRef.current) return;
+    shownErrorRef.current = error;
+    const kind = classifyError(error);
+    if (kind === "bridge") {
+      addToast(t("errors.bridge_lost"), "error");
+    } else if (kind === "server") {
+      addToast(error.message || t("errors.server_generic"), "error");
+    } else {
+      addToast(t("errors.unexpected"), "error");
+    }
+  }, [error, addToast, t]);
 
   // Counts gebaseerd op totaal (niet op gefilterd resultaat)
   const activeCount = projects.filter((p) => !p.isArchived).length;
@@ -100,12 +121,19 @@ export function ProjectsPage() {
           <LoadingState message={t("common.loading")} />
         </div>
       )}
-      {error && (
-        <div className="px-6 py-4">
-          <span className="text-sm text-red-600 font-mono">{error.message}</span>
+      {!loading && error && projects.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
+          <AlertCircle size={48} className="text-slate-400 mb-4" />
+          <h2 className="text-base font-semibold text-slate-700">
+            {t("errors.projects_load_failed_title")}
+          </h2>
+          <p className="text-sm text-slate-600 mt-1 max-w-sm">{error.message}</p>
+          <Button variant="primary" size="sm" className="mt-6" onClick={refetch}>
+            {t("errors.try_again")}
+          </Button>
         </div>
       )}
-      {!loading && !error && viewMode === "board" && (
+      {!loading && (!error || projects.length > 0) && viewMode === "board" && (
         <div className="px-6 pt-4 pb-6">
           <KanbanBoard
             projects={filtered}
@@ -115,7 +143,7 @@ export function ProjectsPage() {
           />
         </div>
       )}
-      {!loading && !error && viewMode === "table" && (
+      {!loading && (!error || projects.length > 0) && viewMode === "table" && (
         <div className="px-6 pt-4 pb-6">
           <ProjectsTable projects={filtered} onRowClick={handleRowClick} />
         </div>
