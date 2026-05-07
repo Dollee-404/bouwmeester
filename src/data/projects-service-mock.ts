@@ -402,11 +402,13 @@ let _forceFail = false;
 let _bridgeTimeout = false;
 let _erpNext500 = false;
 let _fetchError = false;
+let _emptyDatabase = false;
 
 export function setMockForceFail(enabled: boolean) { _forceFail = enabled; }
 export function setMockBridgeTimeout(enabled: boolean) { _bridgeTimeout = enabled; }
 export function setMockErpNext500(enabled: boolean) { _erpNext500 = enabled; }
 export function setMockFetchError(enabled: boolean) { _fetchError = enabled; }
+export function setMockEmptyDatabase(enabled: boolean) { _emptyDatabase = enabled; }
 
 async function checkBridgeTimeout(): Promise<void> {
   if (!_bridgeTimeout) return;
@@ -424,6 +426,7 @@ export const mockService: ProjectsService = {
     await checkBridgeTimeout();
     checkErpNext500();
     if (_fetchError) throw new Error("Kan projecten niet ophalen");
+    if (_emptyDatabase) return [];
     return applyFilters(projects, options);
   },
 

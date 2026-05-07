@@ -37,7 +37,12 @@
     "table_col_budget": "Budget",
     "table_col_manager": "Project manager",
     "werksoort_filter_all": "All work types",
-    "werksoort_filter_none": "No work type"
+    "werksoort_filter_none": "No work type",
+    "empty_no_projects_title": "No projects yet",
+    "empty_no_projects_body": "Create your first project to get started.",
+    "empty_no_search_results_title": "No projects found",
+    "empty_no_search_results_body": "No results for '{{query}}'. Try a different search term.",
+    "clear_search": "Clear search"
   },
   "setup": {
     "title": "Welcome to Bouwmeester",

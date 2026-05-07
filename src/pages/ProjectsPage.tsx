@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Search, LayoutGrid, List, Plus, AlertCircle, Loader2 } from "lucide-react";
+import { Search, LayoutGrid, List, Plus, AlertCircle, Loader2, HardHat } from "lucide-react";
+import { EmptyState } from "../components/ui/empty-state";
 import { useProjects } from "../hooks/use-projects";
 import { projectsService } from "../data";
 import type { BouwmeesterStatus, Project } from "../data/types";
@@ -130,7 +131,22 @@ export function ProjectsPage() {
           </Button>
         </div>
       )}
-      {(loading || !error || projects.length > 0) && viewMode === "board" && (
+      {!loading && !error && projects.length === 0 && (
+        <div className="px-6 pt-4 pb-6">
+          <EmptyState
+            icon={<HardHat size={64} className="text-slate-400" />}
+            title={t("projects.empty_no_projects_title")}
+            description={t("projects.empty_no_projects_body")}
+            action={
+              <Button variant="primary" size="sm" onClick={notAvailable}>
+                <Plus size={14} />
+                {t("projects.new")}
+              </Button>
+            }
+          />
+        </div>
+      )}
+      {(loading || filtered.length > 0 || (error && projects.length > 0)) && viewMode === "board" && (
         <div className="px-6 pt-4 pb-6">
           <KanbanBoard
             projects={filtered}
@@ -141,7 +157,7 @@ export function ProjectsPage() {
           />
         </div>
       )}
-      {(loading || !error || projects.length > 0) && viewMode === "table" && (
+      {(loading || filtered.length > 0 || (error && projects.length > 0)) && viewMode === "table" && (
         <div className="px-6 pt-4 pb-6">
           <ProjectsTable
             projects={filtered}

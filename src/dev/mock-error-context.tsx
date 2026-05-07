@@ -3,12 +3,14 @@ import {
   setMockBridgeTimeout,
   setMockErpNext500,
   setMockFetchError,
+  setMockEmptyDatabase,
 } from "../data/projects-service-mock";
 
 export interface MockErrorFlags {
   bridgeTimeout: boolean;
   erpNext500: boolean;
   fetchError: boolean;
+  emptyDatabase: boolean;
 }
 
 interface MockErrorContextValue {
@@ -20,6 +22,7 @@ const defaultFlags: MockErrorFlags = {
   bridgeTimeout: false,
   erpNext500: false,
   fetchError: false,
+  emptyDatabase: false,
 };
 
 const MockErrorContext = createContext<MockErrorContextValue>({
@@ -35,6 +38,7 @@ export function MockErrorProvider({ children }: { children: ReactNode }) {
     if (key === "bridgeTimeout") setMockBridgeTimeout(value);
     else if (key === "erpNext500") setMockErpNext500(value);
     else if (key === "fetchError") setMockFetchError(value);
+    else if (key === "emptyDatabase") setMockEmptyDatabase(value);
   }
 
   return (

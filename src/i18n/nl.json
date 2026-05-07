@@ -37,7 +37,12 @@
     "table_col_budget": "Budget",
     "table_col_manager": "Projectleider",
     "werksoort_filter_all": "Alle werksoorten",
-    "werksoort_filter_none": "Geen werksoort"
+    "werksoort_filter_none": "Geen werksoort",
+    "empty_no_projects_title": "Nog geen projecten",
+    "empty_no_projects_body": "Maak je eerste project aan om te beginnen.",
+    "empty_no_search_results_title": "Geen projecten gevonden",
+    "empty_no_search_results_body": "Geen resultaten voor '{{query}}'. Probeer een andere zoekterm.",
+    "clear_search": "Zoekfilter wissen"
   },
   "setup": {
     "title": "Welkom bij Bouwmeester",

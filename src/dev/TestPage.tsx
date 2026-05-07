@@ -209,6 +209,12 @@ const ERROR_TOGGLES: {
     description:
       'list() throws Error("Kan projecten niet ophalen"). Andere methodes (updateStatus etc.) werken normaal.',
   },
+  {
+    key: "emptyDatabase",
+    label: "Simuleer lege database",
+    description:
+      "list() retourneert []. Test de 'Nog geen projecten' empty state in ProjectsPage.",
+  },
 ];
 
 function ErrorSimSection() {
@@ -250,7 +256,7 @@ export function TestPage() {
   const [loading, setLoading] = useState(false);
 
   // Zorgt dat ProjectsPage opnieuw laadt als een error-flag wijzigt
-  const errorKey = `${flags.bridgeTimeout}-${flags.erpNext500}-${flags.fetchError}`;
+  const errorKey = `${flags.bridgeTimeout}-${flags.erpNext500}-${flags.fetchError}-${flags.emptyDatabase}`;
 
   function triggerLoading() {
     setLoading(true);
