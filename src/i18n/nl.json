@@ -109,6 +109,11 @@
     "project_manager": "Projectleider {{name}}",
     "sort_column": "Sorteren op {{column}}"
   },
+  "panel": {
+    "back": "Terug naar projecten",
+    "close_label": "Paneel sluiten",
+    "load_error": "Fout bij laden"
+  },
   "demo": {
     "banner": {
       "message": "Bouwmeester is een Y-App extensie. Je bekijkt nu een demo met fictieve gegevens.",

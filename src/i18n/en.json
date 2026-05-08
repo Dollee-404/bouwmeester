@@ -109,6 +109,11 @@
     "project_manager": "Project manager {{name}}",
     "sort_column": "Sort by {{column}}"
   },
+  "panel": {
+    "back": "Back to projects",
+    "close_label": "Close panel",
+    "load_error": "Error loading project"
+  },
   "demo": {
     "banner": {
       "message": "Bouwmeester is a Y-App extension. You're viewing a demo with fictional data.",

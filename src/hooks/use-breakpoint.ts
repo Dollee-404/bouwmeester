@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-function useMediaQuery(maxWidth: number): boolean {
+export function useMediaQuery(maxWidth: number): boolean {
   const [matches, setMatches] = useState(
     () => window.matchMedia(`(max-width: ${maxWidth - 1}px)`).matches
   );
