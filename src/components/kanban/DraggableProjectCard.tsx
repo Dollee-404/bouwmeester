@@ -36,6 +36,7 @@ export function DraggableProjectCard({ project, isSaving = false, onClick }: Dra
       {...attributes}
       aria-label={project.projectName}
       onKeyDown={handleKeyDown}
+      onClick={() => { if (!isDragging && onClick) onClick(project); }}
     >
       <ProjectCard project={project} onClick={onClick} tabIndex={-1} />
     </div>
