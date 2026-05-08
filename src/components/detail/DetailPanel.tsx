@@ -35,15 +35,16 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
   }, [onClose]);
 
   return (
-    <>
-      {/* Gedimde achtergrond — klik doet niets per spec */}
-      <div className="fixed inset-0 bg-black/20 z-40" aria-hidden="true" />
-
+    <div
+      className="fixed inset-0 bg-black/20 z-40"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
       {/* Paneel */}
       <div
         role="dialog"
         aria-label="Projectdetails"
-        className="fixed top-0 right-0 h-full bg-white shadow-xl z-50 flex flex-col"
+        aria-modal="true"
+        className="absolute top-0 right-0 h-full bg-white shadow-xl flex flex-col"
         style={{ width: "75%" }}
       >
         {/* Header */}
@@ -65,6 +66,6 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
           Inhoud volgt in fase 3D
         </div>
       </div>
-    </>
+    </div>
   );
 }
