@@ -125,6 +125,12 @@
       "cta": "Learn more"
     }
   },
+  "kpi": {
+    "voortgang": "Progress",
+    "budget": "Budget",
+    "uren": "Hours",
+    "planning": "Planning"
+  },
   "errors": {
     "bridge_lost": "Connection to Y-App lost. Please refresh the page.",
     "server_generic": "Something went wrong on the server. Please try again later.",

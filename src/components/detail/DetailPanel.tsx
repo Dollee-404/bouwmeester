@@ -6,6 +6,8 @@ import type { ProjectDetail, ProjectFinancials, ProjectTask, TimesheetMap } from
 import { useMediaQuery } from "../../hooks/use-breakpoint";
 import { Button } from "../ui/button";
 import { PanelHeader } from "./PanelHeader";
+import { KPIBlock } from "./KPIBlock";
+import { calcVoortgangKPI, calcBudgetKPI, calcUrenKPI, calcPlanningKPI } from "./kpi-helpers";
 
 const ANIMATION_MS = 250;
 
@@ -65,7 +67,7 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
   const { t } = useTranslation();
   const [detail, setDetail] = useState<ProjectDetail | null>(null);
   const [_financials, setFinancials] = useState<ProjectFinancials | null>(null);
-  const [_timesheets, setTimesheets] = useState<TimesheetMap | null>(null);
+  const [timesheets, setTimesheets] = useState<TimesheetMap | null>(null);
   const [_tasks, setTasks] = useState<ProjectTask[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -192,7 +194,14 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
       ) : error ? (
         <PanelError onRetry={handleRetry} />
       ) : (
-        <p className="p-6 text-sm text-slate-500">Inhoud volgt in fase 3D</p>
+        <div className="p-6 flex flex-col gap-6">
+          <div className={`grid gap-3 ${mode === "drawer" ? "grid-cols-4" : "grid-cols-2"}`}>
+            <KPIBlock {...calcVoortgangKPI(detail!, t("kpi.voortgang"))} />
+            <KPIBlock {...calcBudgetKPI(detail!, t("kpi.budget"))} />
+            <KPIBlock {...calcUrenKPI(detail!, timesheets ?? {}, t("kpi.uren"))} />
+            <KPIBlock {...calcPlanningKPI(detail!, t("kpi.planning"))} />
+          </div>
+        </div>
       )}
     </div>
   );

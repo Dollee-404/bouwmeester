@@ -14,10 +14,14 @@ import { getPhaseTemplate } from "./default-phase-templates";
 // ?mockSlow             — vertraagt getProjectDetail naar 2500ms (skeleton testen)
 // ?mockError            — laat getProjectDetail falen (error-state testen)
 // ?mockStatus=Verloren  — overschrijft status (banner testen)
+// ?mockOverbudget       — simuleert kostenoverschrijding (budget danger-state)
+// ?mockDelayed          — verplaatst einddatum naar 30 dagen geleden (planning danger-state)
 const _p = new URLSearchParams(window.location.search);
 const MOCK_DELAY_MS = _p.has("mockSlow") ? 2500 : 200;
 const MOCK_FAIL = _p.has("mockError");
 const MOCK_STATUS_OVERRIDE = (_p.get("mockStatus") as BouwmeesterStatus | null) ?? null;
+const MOCK_OVERBUDGET = _p.has("mockOverbudget");
+const MOCK_DELAYED = _p.has("mockDelayed");
 
 const MOCK_DETAILS: Record<string, ProjectDetail> = {
   "PROJ-0009": {
@@ -70,7 +74,15 @@ export const mockDetailService: ProjectDetailService = {
     await new Promise((r) => setTimeout(r, MOCK_DELAY_MS));
     if (MOCK_FAIL) throw new Error("Gesimuleerde fout (mockError in URL)");
     const base = MOCK_DETAILS[projectId] ?? fallbackDetail(projectId);
-    return MOCK_STATUS_OVERRIDE ? { ...base, status: MOCK_STATUS_OVERRIDE } : base;
+    let result = MOCK_STATUS_OVERRIDE ? { ...base, status: MOCK_STATUS_OVERRIDE } : base;
+    if (MOCK_OVERBUDGET) {
+      const budget = result.budgetSales || 1_000_000;
+      result = { ...result, budgetSales: budget, estimatedCosting: Math.round(budget * 1.25) };
+    }
+    if (MOCK_DELAYED) {
+      result = { ...result, endDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) };
+    }
+    return result;
   },
 
   async getProjectTasks(_projectId: string): Promise<ProjectTask[]> {
