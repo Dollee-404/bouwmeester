@@ -9,6 +9,13 @@ import type {
 import type { ProjectDetailService } from "./project-detail-service";
 import { getPhaseTemplate } from "./default-phase-templates";
 
+// URL-param overrides for local development (mock only):
+// ?mockSlow  — vertraagt getProjectDetail naar 2500ms (skeleton testen)
+// ?mockError — laat getProjectDetail falen (error-state testen)
+const _p = new URLSearchParams(window.location.search);
+const MOCK_DELAY_MS = _p.has("mockSlow") ? 2500 : 200;
+const MOCK_FAIL = _p.has("mockError");
+
 const MOCK_DETAILS: Record<string, ProjectDetail> = {
   "PROJ-0009": {
     id: "PROJ-0009",
@@ -57,7 +64,8 @@ function fallbackDetail(projectId: string): ProjectDetail {
 
 export const mockDetailService: ProjectDetailService = {
   async getProjectDetail(projectId: string): Promise<ProjectDetail> {
-    await new Promise((r) => setTimeout(r, 150));
+    await new Promise((r) => setTimeout(r, MOCK_DELAY_MS));
+    if (MOCK_FAIL) throw new Error("Gesimuleerde fout (mockError in URL)");
     return MOCK_DETAILS[projectId] ?? fallbackDetail(projectId);
   },
 

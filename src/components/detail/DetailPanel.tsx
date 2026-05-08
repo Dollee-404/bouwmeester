@@ -1,11 +1,59 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { X, ArrowLeft } from "lucide-react";
+import { X, ArrowLeft, AlertCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { projectDetailService } from "../../data/project-detail-service";
 import type { ProjectDetail } from "../../data/detail-types";
 import { useMediaQuery } from "../../hooks/use-breakpoint";
+import { Button } from "../ui/button";
 
 const ANIMATION_MS = 250;
+
+// ── Skeleton helpers ─────────────────────────────────────────────────
+
+function Bone({ className = "" }: { className?: string }) {
+  return <div className={`bg-slate-100 rounded ${className}`} />;
+}
+
+function PanelSkeleton({ twoColumn }: { twoColumn: boolean }) {
+  return (
+    <div className="p-6 flex flex-col gap-6 animate-pulse overflow-hidden">
+      <div className={`grid gap-3 ${twoColumn ? "grid-cols-4" : "grid-cols-2"}`}>
+        {Array.from({ length: 4 }).map((_, i) => <Bone key={i} className="h-20" />)}
+      </div>
+      <div className={`flex gap-6 ${twoColumn ? "" : "flex-col"}`}>
+        <div className="flex flex-col gap-3 flex-1 min-w-0">
+          <Bone className="h-7 w-48" />
+          <Bone className="h-32" />
+          <Bone className="h-24" />
+          <Bone className="h-24" />
+        </div>
+        {twoColumn && (
+          <div className="flex flex-col gap-3 w-64 shrink-0">
+            <Bone className="h-44" />
+            <Bone className="h-28" />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Error state ──────────────────────────────────────────────────────
+
+function PanelError({ onRetry }: { onRetry: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <div className="flex flex-col items-center justify-center flex-1 gap-4 p-6 text-center">
+      <AlertCircle size={40} className="text-slate-400" />
+      <p className="text-sm text-slate-600">{t("errors.server_generic")}</p>
+      <Button variant="primary" size="sm" onClick={onRetry}>
+        {t("common.retry")}
+      </Button>
+    </div>
+  );
+}
+
+// ── Main component ───────────────────────────────────────────────────
 
 interface DetailPanelProps {
   projectId: string;
@@ -17,12 +65,12 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
   const [detail, setDetail] = useState<ProjectDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Panel breakpoints — independent of the existing useBreakpoint values
-  const isMobilePanel = useMediaQuery(768);   // <768px  → full-page
-  const isNarrowPanel = useMediaQuery(1280);  // <1280px → overlay; ≥1280px → drawer
+  const isMobilePanel = useMediaQuery(768);
+  const isNarrowPanel = useMediaQuery(1280);
   const mode = isMobilePanel ? "fullpage" : isNarrowPanel ? "overlay" : "drawer";
 
   // Trigger enter animation after first paint
@@ -31,19 +79,27 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
     return () => cancelAnimationFrame(raf);
   }, []);
 
+  // Save focus on open; restore on close (keyboard accessibility)
+  useEffect(() => {
+    const trigger = document.activeElement as HTMLElement | null;
+    return () => { trigger?.focus(); };
+  }, []);
+
   // Cleanup close timer on unmount
   useEffect(() => {
     return () => { if (closeTimerRef.current) clearTimeout(closeTimerRef.current); };
   }, []);
 
-  // Animate out first, then call the real onClose
+  // Animate out, then call onClose
   const handleClose = useCallback(() => {
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     setIsVisible(false);
     closeTimerRef.current = setTimeout(onClose, ANIMATION_MS);
   }, [onClose]);
 
-  // Data fetch — cancelled flag prevents state update after unmount
+  const handleRetry = useCallback(() => setRetryKey((k) => k + 1), []);
+
+  // Data fetch — cancelled prevents state update after unmount / close
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -55,7 +111,7 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
       .catch(() => { if (!cancelled) setError(true); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [projectId]);
+  }, [projectId, retryKey]);
 
   // Escape key
   useEffect(() => {
@@ -70,7 +126,6 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
     ? t("panel.load_error")
     : (detail?.projectName ?? "");
 
-  // Header differs by mode: mobile shows back-button, others show X
   const header = (
     <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-200 shrink-0">
       {mode === "fullpage" ? (
@@ -99,17 +154,21 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
     </div>
   );
 
-  // Body — stays as placeholder until fase 3D; transition property prepared for tab-switch fade
   const body = (
     <div
-      className="flex-1 overflow-y-auto p-6 text-sm text-slate-500"
+      className="flex-1 overflow-y-auto"
       style={{ transition: "opacity 100ms ease-in-out" }}
     >
-      Inhoud volgt in fase 3D
+      {loading ? (
+        <PanelSkeleton twoColumn={mode !== "fullpage"} />
+      ) : error ? (
+        <PanelError onRetry={handleRetry} />
+      ) : (
+        <p className="p-6 text-sm text-slate-500">Inhoud volgt in fase 3D</p>
+      )}
     </div>
   );
 
-  // ── Full-page mode (mobile <768px) ──────────────────────────────────
   if (mode === "fullpage") {
     return (
       <div
@@ -125,7 +184,6 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
     );
   }
 
-  // ── Drawer (≥1280px) or overlay (<1280px ≥768px) ────────────────────
   const panelWidth = mode === "drawer" ? "75%" : "95%";
   const panelAnimStyle = mode === "drawer"
     ? { transition: `transform ${ANIMATION_MS}ms ease-out`, transform: isVisible ? "translateX(0)" : "translateX(100%)" }
