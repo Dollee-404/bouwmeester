@@ -2,9 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { X, ArrowLeft, AlertCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { projectDetailService } from "../../data/project-detail-service";
-import type { ProjectDetail } from "../../data/detail-types";
+import type { ProjectDetail, ProjectFinancials, ProjectTask, TimesheetMap } from "../../data/detail-types";
 import { useMediaQuery } from "../../hooks/use-breakpoint";
 import { Button } from "../ui/button";
+import { PanelHeader } from "./PanelHeader";
 
 const ANIMATION_MS = 250;
 
@@ -63,6 +64,9 @@ interface DetailPanelProps {
 export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
   const { t } = useTranslation();
   const [detail, setDetail] = useState<ProjectDetail | null>(null);
+  const [financials, setFinancials] = useState<ProjectFinancials | null>(null);
+  const [timesheets, setTimesheets] = useState<TimesheetMap | null>(null);
+  const [tasks, setTasks] = useState<ProjectTask[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
@@ -79,7 +83,7 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  // Save focus on open; restore on close (keyboard accessibility)
+  // Save focus on open; restore on close
   useEffect(() => {
     const trigger = document.activeElement as HTMLElement | null;
     return () => { trigger?.focus(); };
@@ -90,7 +94,6 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
     return () => { if (closeTimerRef.current) clearTimeout(closeTimerRef.current); };
   }, []);
 
-  // Animate out, then call onClose
   const handleClose = useCallback(() => {
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     setIsVisible(false);
@@ -99,17 +102,41 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
 
   const handleRetry = useCallback(() => setRetryKey((k) => k + 1), []);
 
-  // Data fetch — cancelled prevents state update after unmount / close
+  // Promise.allSettled — één loading-state voor alle vier calls.
+  // Bij ≥1 rejected: error-state voor het hele paneel (future-proof voor partiële UI).
+  // cancelled-flag voorkomt state-update na unmount of sluit-animatie.
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setError(false);
     setDetail(null);
-    projectDetailService
-      .getProjectDetail(projectId)
-      .then((d) => { if (!cancelled) setDetail(d); })
-      .catch(() => { if (!cancelled) setError(true); })
-      .finally(() => { if (!cancelled) setLoading(false); });
+    setFinancials(null);
+    setTimesheets(null);
+    setTasks(null);
+
+    Promise.allSettled([
+      projectDetailService.getProjectDetail(projectId),
+      projectDetailService.getProjectFinancials(projectId),
+      projectDetailService.getProjectTimesheets(projectId),
+      projectDetailService.getProjectTasks(projectId),
+    ]).then(([detailRes, financialsRes, timesheetsRes, tasksRes]) => {
+      if (cancelled) return;
+      if (
+        detailRes.status === "rejected" ||
+        financialsRes.status === "rejected" ||
+        timesheetsRes.status === "rejected" ||
+        tasksRes.status === "rejected"
+      ) {
+        setError(true);
+      } else {
+        setDetail(detailRes.value);
+        setFinancials(financialsRes.value);
+        setTimesheets(timesheetsRes.value);
+        setTasks(tasksRes.value);
+      }
+      setLoading(false);
+    });
+
     return () => { cancelled = true; };
   }, [projectId, retryKey]);
 
@@ -120,13 +147,10 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [handleClose]);
 
-  const headerTitle = loading
-    ? t("common.loading")
-    : error
-    ? t("panel.load_error")
-    : (detail?.projectName ?? "");
+  // ── Header: simpel tijdens loading/error, volledig PanelHeader bij data ──
+  const headerTitle = loading ? t("common.loading") : t("panel.load_error");
 
-  const header = (
+  const simpleHeader = (
     <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-200 shrink-0">
       {mode === "fullpage" ? (
         <>
@@ -153,6 +177,10 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
       )}
     </div>
   );
+
+  const header = detail
+    ? <PanelHeader detail={detail} onClose={handleClose} isFullPage={mode === "fullpage"} />
+    : simpleHeader;
 
   const body = (
     <div

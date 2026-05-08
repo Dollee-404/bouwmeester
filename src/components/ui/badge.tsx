@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import type { Werksoort } from "../../data/types";
+import type { BouwmeesterStatus, Werksoort } from "../../data/types";
+import { STATUS_LABEL_KEYS } from "../kanban/status-config";
 
 type BadgeVariant = "default" | "success" | "warning" | "danger" | "info" | "purple" | "neutral";
 type BadgeSize = "sm" | "xs";
@@ -41,6 +42,26 @@ export function WerksoortBadge({ werksoort }: { werksoort: Werksoort | null }) {
   return (
     <Badge variant={WERKSOORT_VARIANT[werksoort]} size="xs">
       {t(`werksoort.${werksoort.toLowerCase()}`)}
+    </Badge>
+  );
+}
+
+const STATUS_BADGE_VARIANT: Record<BouwmeesterStatus, BadgeVariant> = {
+  "Lead":          "neutral",
+  "Calculatie":    "info",
+  "Gegund":        "default",
+  "In uitvoering": "warning",
+  "Oplevering":    "purple",
+  "Afgerond":      "success",
+  "Verloren":      "neutral",
+  "Geannuleerd":   "neutral",
+};
+
+export function StatusBadge({ status }: { status: BouwmeesterStatus }) {
+  const { t } = useTranslation();
+  return (
+    <Badge variant={STATUS_BADGE_VARIANT[status]} size="xs">
+      {t(STATUS_LABEL_KEYS[status])}
     </Badge>
   );
 }

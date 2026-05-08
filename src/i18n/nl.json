@@ -112,7 +112,12 @@
   "panel": {
     "back": "Terug naar projecten",
     "close_label": "Paneel sluiten",
-    "load_error": "Fout bij laden"
+    "load_error": "Fout bij laden",
+    "project_lost": "Project verloren",
+    "project_cancelled": "Project geannuleerd",
+    "action_uren": "Uren",
+    "action_factureren": "Factureren",
+    "action_actie": "Actie"
   },
   "demo": {
     "banner": {

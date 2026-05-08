@@ -6,15 +6,18 @@ import type {
   ProjectFinancials,
   CreatePhasesResult,
 } from "./detail-types";
+import type { BouwmeesterStatus } from "./types";
 import type { ProjectDetailService } from "./project-detail-service";
 import { getPhaseTemplate } from "./default-phase-templates";
 
 // URL-param overrides for local development (mock only):
-// ?mockSlow  — vertraagt getProjectDetail naar 2500ms (skeleton testen)
-// ?mockError — laat getProjectDetail falen (error-state testen)
+// ?mockSlow             — vertraagt getProjectDetail naar 2500ms (skeleton testen)
+// ?mockError            — laat getProjectDetail falen (error-state testen)
+// ?mockStatus=Verloren  — overschrijft status (banner testen)
 const _p = new URLSearchParams(window.location.search);
 const MOCK_DELAY_MS = _p.has("mockSlow") ? 2500 : 200;
 const MOCK_FAIL = _p.has("mockError");
+const MOCK_STATUS_OVERRIDE = (_p.get("mockStatus") as BouwmeesterStatus | null) ?? null;
 
 const MOCK_DETAILS: Record<string, ProjectDetail> = {
   "PROJ-0009": {
@@ -66,7 +69,8 @@ export const mockDetailService: ProjectDetailService = {
   async getProjectDetail(projectId: string): Promise<ProjectDetail> {
     await new Promise((r) => setTimeout(r, MOCK_DELAY_MS));
     if (MOCK_FAIL) throw new Error("Gesimuleerde fout (mockError in URL)");
-    return MOCK_DETAILS[projectId] ?? fallbackDetail(projectId);
+    const base = MOCK_DETAILS[projectId] ?? fallbackDetail(projectId);
+    return MOCK_STATUS_OVERRIDE ? { ...base, status: MOCK_STATUS_OVERRIDE } : base;
   },
 
   async getProjectTasks(_projectId: string): Promise<ProjectTask[]> {

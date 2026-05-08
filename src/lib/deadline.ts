@@ -38,6 +38,13 @@ export function getDeadlineStatus(project: Project): DeadlineStatus {
   return { tone: "on-track", label: "deadline.on_track" };
 }
 
+// Gedeelde helper voor Voortgang- en Planning-KPI: positief = toekomst, negatief = verleden
+export function calcDaysFromNow(date: Date | null): number | null {
+  if (!date) return null;
+  const now = new Date();
+  return Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+}
+
 export function formatEndDate(date: Date): string {
   const now = new Date();
   const sameYear = date.getFullYear() === now.getFullYear();
