@@ -64,9 +64,9 @@ interface DetailPanelProps {
 export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
   const { t } = useTranslation();
   const [detail, setDetail] = useState<ProjectDetail | null>(null);
-  const [financials, setFinancials] = useState<ProjectFinancials | null>(null);
-  const [timesheets, setTimesheets] = useState<TimesheetMap | null>(null);
-  const [tasks, setTasks] = useState<ProjectTask[] | null>(null);
+  const [_financials, setFinancials] = useState<ProjectFinancials | null>(null);
+  const [_timesheets, setTimesheets] = useState<TimesheetMap | null>(null);
+  const [_tasks, setTasks] = useState<ProjectTask[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
