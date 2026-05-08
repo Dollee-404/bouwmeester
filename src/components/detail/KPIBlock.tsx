@@ -31,11 +31,13 @@ export function KPIBlock({ label, value, sub, bar }: KPIBlockProps) {
         <span className="text-xs text-slate-400 truncate">{sub}</span>
       )}
       {bar && !isEmpty && (
-        <div className="mt-2 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-          <div
-            className={`h-full rounded-full ${BAR_COLOR[bar.variant]}`}
-            style={{ width: `${Math.min(bar.pct, 100)}%` }}
-          />
+        <div className="mt-auto pt-2">
+          <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full ${BAR_COLOR[bar.variant]}`}
+              style={{ width: `${Math.min(bar.pct, 100)}%` }}
+            />
+          </div>
         </div>
       )}
     </div>
