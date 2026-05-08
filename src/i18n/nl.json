@@ -62,7 +62,16 @@
     "field_custom_budget_hours": "Budget uren",
     "field_custom_weersafhankelijk": "Weersafhankelijk",
     "field_custom_project_manager": "Projectleider",
-    "field_custom_address": "Adres"
+    "field_custom_address": "Adres",
+    "field_custom_role": "Teamrol",
+    "field_custom_is_meerwerk": "Is meerwerk",
+    "migration_title": "Data bijwerken",
+    "migration_migrated_one": "1 projectleider overgezet naar projectteam.",
+    "migration_migrated_other": "{{count}} projectleiders overgezet naar projectteam.",
+    "migration_migrated_zero": "Alle projectleiders stonden al in het projectteam.",
+    "migration_address_warning_title": "Adres controleren aanbevolen",
+    "migration_address_warning_body": "De volgende projecten hebben een adres in het oude veld, maar de klant heeft nog geen Customer Address in ERPNext:",
+    "migration_continue": "Doorgaan"
   },
   "status": {
     "lead": "Aanvraag",

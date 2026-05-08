@@ -62,7 +62,16 @@
     "field_custom_budget_hours": "Budget hours",
     "field_custom_weersafhankelijk": "Weather dependent",
     "field_custom_project_manager": "Project manager",
-    "field_custom_address": "Address"
+    "field_custom_address": "Address",
+    "field_custom_role": "Team role",
+    "field_custom_is_meerwerk": "Is additional work",
+    "migration_title": "Updating data",
+    "migration_migrated_one": "1 project manager migrated to project team.",
+    "migration_migrated_other": "{{count}} project managers migrated to project team.",
+    "migration_migrated_zero": "All project managers were already in the project team.",
+    "migration_address_warning_title": "Address check recommended",
+    "migration_address_warning_body": "The following projects have an address in the old field, but the customer has no Customer Address in ERPNext yet:",
+    "migration_continue": "Continue"
   },
   "status": {
     "lead": "Request",

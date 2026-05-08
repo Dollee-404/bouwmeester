@@ -1,4 +1,4 @@
-import { fetchList, callMethod, INSTANCE_ID } from "../bridge";
+import { fetchList, fetchAll, callMethod, INSTANCE_ID } from "../bridge";
 import { REQUIRED_CUSTOM_FIELDS, FIELD_NAMES, type CustomFieldSpec } from "./custom-fields-spec";
 
 export async function validateAndUpdateFieldOptions(): Promise<void> {
@@ -57,11 +57,14 @@ export interface SetupCheckResult {
 
 const urlParams = new URLSearchParams(window.location.search);
 
-/** ?mock=wizard — forceert wizard lokaal met alle 4 velden als ontbrekend */
+/** ?mock=wizard — forceert wizard lokaal met alle velden als ontbrekend */
 export const MOCK_WIZARD = urlParams.get("mock") === "wizard";
 
 /** ?mock=noperm — forceert no-permission scherm (niet-System Manager) */
 export const MOCK_NO_PERM = urlParams.get("mock") === "noperm";
+
+/** ?mock=migration — toont migratiescherm met voorbeelddata (dev only) */
+export const MOCK_MIGRATION = urlParams.get("mock") === "migration";
 
 export async function checkRequiredFields(): Promise<SetupCheckResult> {
   if (MOCK_WIZARD) return { complete: false, missing: [...REQUIRED_CUSTOM_FIELDS] };
@@ -72,10 +75,10 @@ export async function checkRequiredFields(): Promise<SetupCheckResult> {
   const existing = await fetchList<{ fieldname: string }>("Custom Field", {
     fields: ["fieldname"],
     filters: [
-      ["dt", "=", "Project"],
+      ["dt", "in", ["Project", "Project User", "Sales Order"]],
       ["fieldname", "in", FIELD_NAMES],
     ],
-    limit_page_length: 10,
+    limit_page_length: 20,
   });
 
   console.timeEnd("[bouwmeester] checkRequiredFields");
@@ -118,6 +121,91 @@ export async function installCustomFields(
     }
     onProgress?.(spec.fieldname);
   }
+}
+
+export interface MigrationResult {
+  migrated: number;
+  addressWarnings: string[];
+}
+
+export async function runProjectManagerMigration(): Promise<{ migrated: number }> {
+  if (!INSTANCE_ID) return { migrated: 0 };
+
+  const projects = await fetchAll<{
+    name: string;
+    custom_project_manager: string;
+  }>("Project", ["name", "custom_project_manager"], [
+    ["custom_project_manager", "!=", ""],
+  ]);
+
+  let migrated = 0;
+  for (const project of projects) {
+    if (!project.custom_project_manager) continue;
+
+    const existing = await fetchList<{ name: string }>("Project User", {
+      fields: ["name"],
+      filters: [
+        ["parent", "=", project.name],
+        ["user", "=", project.custom_project_manager],
+      ],
+      limit_page_length: 1,
+    });
+
+    if (existing.length > 0) continue;
+
+    try {
+      await callMethod("frappe.client.insert", {
+        doc: {
+          doctype: "Project User",
+          parent: project.name,
+          parenttype: "Project",
+          parentfield: "users",
+          user: project.custom_project_manager,
+          custom_role: "projectleider",
+          // Voorkomt dat ERPNext probeert een welkomstmail te sturen
+          welcome_email_sent: 1,
+        },
+      });
+      migrated++;
+    } catch (e) {
+      console.warn(`[bouwmeester] Migratie mislukt voor ${project.name}:`, e);
+    }
+  }
+
+  return { migrated };
+}
+
+export async function checkAddressWarnings(): Promise<string[]> {
+  if (!INSTANCE_ID) return [];
+
+  const projects = await fetchAll<{
+    project_name: string;
+    custom_address: string;
+    customer: string;
+  }>("Project", ["project_name", "custom_address", "customer"], [
+    ["custom_address", "!=", ""],
+  ]);
+
+  const warnings: string[] = [];
+  for (const project of projects) {
+    if (!project.customer) continue;
+    try {
+      const result = await callMethod<{ customer_primary_address: string | null }>(
+        "frappe.client.get_value",
+        {
+          doctype: "Customer",
+          filters: { name: project.customer },
+          fieldname: ["customer_primary_address"],
+        },
+      );
+      if (!result?.customer_primary_address) {
+        warnings.push(project.project_name);
+      }
+    } catch {
+      // negeer — adreswaarschuwing is informatief, blokkeert niet
+    }
+  }
+  return warnings;
 }
 
 export function downloadFieldsJson(specs: CustomFieldSpec[]): void {

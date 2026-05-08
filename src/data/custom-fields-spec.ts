@@ -55,6 +55,22 @@ export const REQUIRED_CUSTOM_FIELDS: CustomFieldSpec[] = [
     fieldtype: "Small Text",
     insert_after: "custom_project_manager",
   },
+  {
+    dt: "Project User",
+    fieldname: "custom_role",
+    label: "Rol",
+    fieldtype: "Select",
+    options: "projectleider\nuitvoerder\nwerkvoorbereider\ncalculator\nanders",
+    insert_after: "user",
+  },
+  {
+    dt: "Sales Order",
+    fieldname: "custom_is_meerwerk",
+    label: "Is meerwerk",
+    fieldtype: "Check",
+    default: "0",
+    insert_after: "customer",
+  },
 ];
 
 export const FIELD_NAMES = REQUIRED_CUSTOM_FIELDS.map((f) => f.fieldname);

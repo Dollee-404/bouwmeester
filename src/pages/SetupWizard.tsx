@@ -1,19 +1,22 @@
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CheckCircle, Circle, Download, Mail, RefreshCw, Loader2 } from "lucide-react";
+import { CheckCircle, Circle, Download, Mail, RefreshCw, Loader2, AlertTriangle } from "lucide-react";
 import {
   checkRequiredFields,
   isSystemManager,
   installCustomFields,
   downloadFieldsJson,
   validateAndUpdateFieldOptions,
+  runProjectManagerMigration,
+  checkAddressWarnings,
+  MOCK_MIGRATION,
 } from "../data/setup-check";
 import { REQUIRED_CUSTOM_FIELDS, type CustomFieldSpec } from "../data/custom-fields-spec";
 import { Button } from "../components/ui/button";
 import { LoadingState } from "../components/ui/loading-state";
 
-type Screen = "checking" | "welcome" | "installing" | "no-permission" | "error";
+type Screen = "checking" | "welcome" | "installing" | "no-permission" | "migration" | "error";
 
 interface SetupGateProps {
   children: ReactNode;
@@ -26,7 +29,29 @@ export function SetupGate({ children }: SetupGateProps) {
   const [hasPermission, setHasPermission] = useState(false);
   const [installedFields, setInstalledFields] = useState<Set<string>>(new Set());
   const [errorMessage, setErrorMessage] = useState("");
+  const [migratedCount, setMigratedCount] = useState(0);
+  const [addressWarnings, setAddressWarnings] = useState<string[]>([]);
   const { t } = useTranslation();
+
+  async function runMigrationStep() {
+    if (MOCK_MIGRATION) {
+      setMigratedCount(2);
+      setAddressWarnings(["TEST Verbouw kantoor", "TEST Onderhoud bruggen", "TEST Renovatie woonblok"]);
+      setScreen("migration");
+      return;
+    }
+    const [migrationResult, warnings] = await Promise.all([
+      runProjectManagerMigration(),
+      checkAddressWarnings(),
+    ]);
+    if (migrationResult.migrated > 0) {
+      setMigratedCount(migrationResult.migrated);
+      setAddressWarnings(warnings);
+      setScreen("migration");
+    } else {
+      setReady(true);
+    }
+  }
 
   async function runCheck() {
     setScreen("checking");
@@ -34,8 +59,8 @@ export function SetupGate({ children }: SetupGateProps) {
     try {
       const result = await checkRequiredFields();
       if (result.complete) {
-        validateAndUpdateFieldOptions(); // stilzwijgende migratie, geen await — blokkeert app niet
-        setReady(true);
+        validateAndUpdateFieldOptions(); // stilzwijgende options-sync, geen await
+        await runMigrationStep();
       } else {
         setMissingFields(result.missing);
         const perm = await isSystemManager();
@@ -61,8 +86,8 @@ export function SetupGate({ children }: SetupGateProps) {
       await installCustomFields(missingFields, (fieldname) => {
         setInstalledFields((prev) => new Set([...prev, fieldname]));
       });
-      // Auto-doorklik na 1 seconde
-      setTimeout(() => setReady(true), 1000);
+      // Kort tonen dat installatie klaar is, daarna migratiestap
+      setTimeout(() => runMigrationStep(), 1000);
     } catch (e) {
       setErrorMessage(e instanceof Error ? e.message : String(e));
       setScreen("error");
@@ -181,6 +206,48 @@ export function SetupGate({ children }: SetupGateProps) {
                 {t("setup.recheck")}
               </Button>
             </div>
+          </div>
+        )}
+
+        {screen === "migration" && (
+          <div className="flex flex-col gap-5">
+            <div>
+              <h1 className="text-xl font-bold text-slate-900 mb-2">
+                {t("setup.migration_title")}
+              </h1>
+              <p className="text-sm text-slate-600">
+                {migratedCount === 0
+                  ? t("setup.migration_migrated_zero")
+                  : migratedCount === 1
+                    ? t("setup.migration_migrated_one")
+                    : t("setup.migration_migrated_other", { count: migratedCount })}
+              </p>
+            </div>
+
+            {addressWarnings.length > 0 && (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 flex flex-col gap-2">
+                <div className="flex items-center gap-2 text-amber-700">
+                  <AlertTriangle size={16} className="shrink-0" />
+                  <span className="text-sm font-medium">
+                    {t("setup.migration_address_warning_title")}
+                  </span>
+                </div>
+                <p className="text-xs text-amber-600">
+                  {t("setup.migration_address_warning_body")}
+                </p>
+                <ul className="flex flex-col gap-1 mt-1">
+                  {addressWarnings.map((name) => (
+                    <li key={name} className="text-xs text-amber-700 font-medium">
+                      • {name}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <Button variant="primary" onClick={() => setReady(true)}>
+              {t("setup.migration_continue")}
+            </Button>
           </div>
         )}
 
