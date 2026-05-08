@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Search, LayoutGrid, List, Plus, AlertCircle, Loader2, HardHat, SearchX } from "lucide-react";
 import { EmptyState } from "../components/ui/empty-state";
@@ -9,6 +9,7 @@ import type { BouwmeesterStatus, Project } from "../data/types";
 import { KanbanBoard } from "../components/kanban/KanbanBoard";
 import { ProjectsTable } from "../components/projects/ProjectsTable";
 import { ProjectsCardList } from "../components/projects/ProjectsCardList";
+import { DetailPanel } from "../components/detail/DetailPanel";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Toggle } from "../components/ui/toggle";
@@ -31,6 +32,7 @@ export function ProjectsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showArchived, setShowArchived] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("board");
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const { isTablet, isMobile } = useBreakpoint();
 
   // Under 768px the board is not usable — show grouped card list instead
@@ -67,12 +69,16 @@ export function ProjectsPage() {
     return true;
   });
 
+  const handleProjectClick = useCallback((project: Project) => {
+    setSelectedProjectId(project.id);
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setSelectedProjectId(null);
+  }, []);
+
   function notAvailable() {
     addToast(t("projects.create_not_available"), "info");
-  }
-
-  function handleRowClick(_project: Project) {
-    addToast(t("projects.detail_coming_soon"), "info");
   }
 
   async function handleStatusChange(projectId: string, newStatus: BouwmeesterStatus) {
@@ -191,6 +197,7 @@ export function ProjectsPage() {
             projects={filtered}
             showArchived={showArchived}
             isLoading={loading && !isRefetching}
+            onCardClick={handleProjectClick}
             onAddNew={notAvailable}
             onStatusChange={handleStatusChange}
           />
@@ -201,7 +208,7 @@ export function ProjectsPage() {
           <ProjectsTable
             projects={filtered}
             isLoading={loading && !isRefetching}
-            onRowClick={handleRowClick}
+            onRowClick={handleProjectClick}
           />
         </div>
       )}
@@ -211,8 +218,12 @@ export function ProjectsPage() {
             projects={filtered}
             showArchived={showArchived}
             isLoading={loading && !isRefetching}
+            onCardClick={handleProjectClick}
           />
         </div>
+      )}
+      {selectedProjectId && (
+        <DetailPanel projectId={selectedProjectId} onClose={handleClose} />
       )}
     </main>
   );

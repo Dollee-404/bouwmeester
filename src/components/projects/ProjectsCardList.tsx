@@ -22,9 +22,10 @@ interface SectionProps {
   projects: Project[];
   defaultOpen: boolean;
   compact: boolean;
+  onCardClick?: (project: Project) => void;
 }
 
-function Section({ status, projects, defaultOpen, compact }: SectionProps) {
+function Section({ status, projects, defaultOpen, compact, onCardClick }: SectionProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(defaultOpen);
   const color = STATUS_COLORS[status];
@@ -58,7 +59,7 @@ function Section({ status, projects, defaultOpen, compact }: SectionProps) {
       {open && projects.length > 0 && (
         <div className={`flex flex-col gap-2 ${compact ? "px-3 pb-3" : "px-4 pb-4"}`}>
           {projects.map((p) => (
-            <ProjectCard key={p.id} project={p} />
+            <ProjectCard key={p.id} project={p} onClick={onCardClick} />
           ))}
         </div>
       )}
@@ -70,12 +71,14 @@ interface ProjectsCardListProps {
   projects: Project[];
   showArchived: boolean;
   isLoading?: boolean;
+  onCardClick?: (project: Project) => void;
 }
 
 export function ProjectsCardList({
   projects,
   showArchived,
   isLoading = false,
+  onCardClick,
 }: ProjectsCardListProps) {
   const { isMobile } = useBreakpoint();
 
@@ -118,6 +121,7 @@ export function ProjectsCardList({
             projects={sectionProjects}
             defaultOpen={defaultOpen}
             compact={isMobile}
+            onCardClick={onCardClick}
           />
         );
       })}
