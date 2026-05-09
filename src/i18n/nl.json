@@ -157,6 +157,17 @@
     "show_all": "Alles tonen",
     "empty": "Geen activiteit gevonden"
   },
+  "sidebar": {
+    "team": "Projectteam",
+    "team_empty": "Nog geen team toegewezen",
+    "client": "Opdrachtgever",
+    "contract": "Contract",
+    "contract_aanneemsom": "Aanneemsom",
+    "contract_meerwerk": "Meerwerk",
+    "contract_gefactureerd": "Gefactureerd",
+    "contract_openstaand": "Openstaand",
+    "labels": "Labels"
+  },
   "errors": {
     "bridge_lost": "Verbinding met Y-App verloren. Vernieuw de pagina.",
     "server_generic": "Er ging iets mis met de server. Probeer het later opnieuw.",

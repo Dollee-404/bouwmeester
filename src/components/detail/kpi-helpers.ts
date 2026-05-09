@@ -4,7 +4,7 @@ import type { KPIBlockProps } from "./KPIBlock";
 
 type Variant = "ok" | "warning" | "danger";
 
-function fmtEuro(n: number): string {
+export function fmtEuro(n: number): string {
   if (n >= 1_000_000) return `€${(n / 1_000_000).toFixed(1).replace(".", ",")}M`;
   if (n >= 1_000) return `€${Math.round(n / 1_000)}K`;
   return `€${n}`;

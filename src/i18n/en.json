@@ -157,6 +157,17 @@
     "show_all": "Show all",
     "empty": "No activity found"
   },
+  "sidebar": {
+    "team": "Project team",
+    "team_empty": "No team assigned yet",
+    "client": "Client",
+    "contract": "Contract",
+    "contract_aanneemsom": "Contract value",
+    "contract_meerwerk": "Additional work",
+    "contract_gefactureerd": "Invoiced",
+    "contract_openstaand": "Outstanding",
+    "labels": "Labels"
+  },
   "errors": {
     "bridge_lost": "Connection to Y-App lost. Please refresh the page.",
     "server_generic": "Something went wrong on the server. Please try again later.",

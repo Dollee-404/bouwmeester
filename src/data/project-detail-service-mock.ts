@@ -23,7 +23,11 @@ const MOCK_FAIL = _p.has("mockError");
 const MOCK_STATUS_OVERRIDE = (_p.get("mockStatus") as BouwmeesterStatus | null) ?? null;
 const MOCK_OVERBUDGET = _p.has("mockOverbudget");
 const MOCK_DELAYED = _p.has("mockDelayed");
-const MOCK_EMPTY_PHASES = _p.has("mockEmptyPhases");
+const MOCK_EMPTY_PHASES      = _p.has("mockEmptyPhases");
+const MOCK_EMPTY_TEAM        = _p.has("mockEmptyTeam");
+const MOCK_NO_ADDRESS        = _p.has("mockNoAddress");
+const MOCK_NO_MEERWERK       = _p.has("mockNoMeerwerk");
+const MOCK_NEGATIVE_BALANCE  = _p.has("mockNegativeBalance");
 
 // In-memory: onthoudt welke projecten fases hebben gekregen via de knop
 const mockCreatedTasks: Record<string, ProjectTask[]> = {};
@@ -87,6 +91,8 @@ export const mockDetailService: ProjectDetailService = {
     if (MOCK_DELAYED) {
       result = { ...result, endDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) };
     }
+    if (MOCK_EMPTY_TEAM)  result = { ...result, team: [] };
+    if (MOCK_NO_ADDRESS)  result = { ...result, customerAddress: null };
     return result;
   },
 
@@ -153,7 +159,10 @@ export const mockDetailService: ProjectDetailService = {
 
   async getProjectFinancials(_projectId: string): Promise<ProjectFinancials> {
     await new Promise((r) => setTimeout(r, 100));
-    return { aanneemsom: 1_150_000, meerwerk: 45_000, gefactureerd: 437_000, openstaand: 758_000 };
+    let fin = { aanneemsom: 1_150_000, meerwerk: 45_000, gefactureerd: 437_000, openstaand: 758_000 };
+    if (MOCK_NO_MEERWERK)      fin = { ...fin, meerwerk: 0, openstaand: fin.aanneemsom - fin.gefactureerd };
+    if (MOCK_NEGATIVE_BALANCE) fin = { ...fin, gefactureerd: 1_250_000, openstaand: fin.aanneemsom + fin.meerwerk - 1_250_000 };
+    return fin;
   },
 
   async createDefaultPhaseTasks(projectId: string, werksoort: string): Promise<CreatePhasesResult> {

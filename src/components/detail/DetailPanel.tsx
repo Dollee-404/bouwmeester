@@ -11,6 +11,7 @@ import { calcVoortgangKPI, calcBudgetKPI, calcUrenKPI, calcPlanningKPI } from ".
 import { TabBar, type TabKey } from "./TabBar";
 import { PhasesSection } from "./PhasesSection";
 import { ActivityItem } from "./ActivityItem";
+import { Sidebar } from "./Sidebar";
 
 const ANIMATION_MS = 250;
 
@@ -34,9 +35,11 @@ function PanelSkeleton({ twoColumn }: { twoColumn: boolean }) {
           <Bone className="h-24" />
         </div>
         {twoColumn && (
-          <div className="flex flex-col gap-3 w-64 shrink-0">
-            <Bone className="h-44" />
+          <div className="flex flex-col gap-4 w-72 shrink-0">
             <Bone className="h-28" />
+            <Bone className="h-16" />
+            <Bone className="h-24" />
+            <Bone className="h-8" />
           </div>
         )}
       </div>
@@ -69,7 +72,7 @@ interface DetailPanelProps {
 export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
   const { t } = useTranslation();
   const [detail, setDetail] = useState<ProjectDetail | null>(null);
-  const [_financials, setFinancials] = useState<ProjectFinancials | null>(null);
+  const [financials, setFinancials] = useState<ProjectFinancials | null>(null);
   const [timesheets, setTimesheets] = useState<TimesheetMap | null>(null);
   const [tasks, setTasks] = useState<ProjectTask[] | null>(null);
   const [activity, setActivity] = useState<ActivityItemData[] | null>(null);
@@ -215,37 +218,48 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
           </div>
           {/* Tab-bar — rand-tot-rand */}
           <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
-          {/* Tab-content */}
-          <div className="px-6 pt-4 pb-6">
-            {activeTab === "overzicht" ? (
-              <div>
-                {/* Fases */}
-                <PhasesSection
-                  tasks={tasks ?? []}
-                  timesheets={timesheets ?? {}}
-                  projectId={projectId}
-                  werksoort={detail!.werksoort}
-                  onPhasesCreated={handleRetry}
-                  mode={mode}
-                />
-                {/* Activiteit */}
-                <div className="mt-8 flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-semibold text-slate-800">{t("activity.title")}</h3>
-                  <button className="text-xs text-y-teal hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-y-teal rounded">
-                    {t("activity.show_all")}
-                  </button>
+          {/* Twee-kolom op drawer/overlay, gestackt op fullpage */}
+          <div className={`flex flex-1 ${mode !== "fullpage" ? "flex-row" : "flex-col"}`}>
+            {/* Linker kolom / hoofdcontent */}
+            <div className="flex-1 min-w-0 px-6 pt-4 pb-6">
+              {activeTab === "overzicht" ? (
+                <div>
+                  {/* Fases */}
+                  <PhasesSection
+                    tasks={tasks ?? []}
+                    timesheets={timesheets ?? {}}
+                    projectId={projectId}
+                    werksoort={detail!.werksoort}
+                    onPhasesCreated={handleRetry}
+                    mode={mode}
+                  />
+                  {/* Activiteit */}
+                  <div className="mt-8 flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-semibold text-slate-800">{t("activity.title")}</h3>
+                    <button className="text-xs text-y-teal hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-y-teal rounded">
+                      {t("activity.show_all")}
+                    </button>
+                  </div>
+                  {activity && activity.length > 0 ? (
+                    activity.map((item) => <ActivityItem key={item.id} item={item} />)
+                  ) : (
+                    <p className="text-sm text-slate-400 py-4 text-center">{t("activity.empty")}</p>
+                  )}
                 </div>
-                {activity && activity.length > 0 ? (
-                  activity.map((item) => <ActivityItem key={item.id} item={item} />)
-                ) : (
-                  <p className="text-sm text-slate-400 py-4 text-center">{t("activity.empty")}</p>
-                )}
-              </div>
-            ) : (
-              <div className="py-12 text-center text-sm text-slate-400">
-                {t("tab.not_available")}
-              </div>
-            )}
+              ) : (
+                <div className="py-12 text-center text-sm text-slate-400">
+                  {t("tab.not_available")}
+                </div>
+              )}
+            </div>
+            {/* Rechter zijbalk */}
+            <div className={
+              mode !== "fullpage"
+                ? "w-72 shrink-0 border-l border-slate-100 pt-4 pb-6 pl-5 pr-6"
+                : "px-6 pt-2 pb-6"
+            }>
+              <Sidebar detail={detail!} financials={financials} />
+            </div>
           </div>
         </div>
       )}
