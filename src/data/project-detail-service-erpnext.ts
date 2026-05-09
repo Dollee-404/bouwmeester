@@ -52,6 +52,7 @@ interface RawTask {
   is_milestone: 0 | 1;
   exp_end_date: string | null;
   progress: number;
+  expected_time?: number;
 }
 
 interface RawTimesheetDetail {
@@ -167,7 +168,7 @@ export const erpnextDetailService: ProjectDetailService = {
   async getProjectTasks(projectId: string): Promise<ProjectTask[]> {
     const rows = await fetchList<RawTask>("Task", {
       filters: [["project", "=", projectId]],
-      fields: ["name", "subject", "parent_task", "status", "is_milestone", "exp_end_date", "progress"],
+      fields: ["name", "subject", "parent_task", "status", "is_milestone", "exp_end_date", "progress", "expected_time"],
       limit_page_length: 200,
     });
     return rows.map((t) => ({
@@ -178,6 +179,7 @@ export const erpnextDetailService: ProjectDetailService = {
       status: t.status,
       progress: t.progress ?? 0,
       expectedEndDate: parseDate(t.exp_end_date),
+      budgetHours: t.expected_time ?? null,
     }));
   },
 

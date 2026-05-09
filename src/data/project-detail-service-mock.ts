@@ -16,12 +16,17 @@ import { getPhaseTemplate } from "./default-phase-templates";
 // ?mockStatus=Verloren  — overschrijft status (banner testen)
 // ?mockOverbudget       — simuleert kostenoverschrijding (budget danger-state)
 // ?mockDelayed          — verplaatst einddatum naar 30 dagen geleden (planning danger-state)
+// ?mockEmptyPhases      — retourneert lege task-lijst (lege fases-staat testen)
 const _p = new URLSearchParams(window.location.search);
 const MOCK_DELAY_MS = _p.has("mockSlow") ? 2500 : 200;
 const MOCK_FAIL = _p.has("mockError");
 const MOCK_STATUS_OVERRIDE = (_p.get("mockStatus") as BouwmeesterStatus | null) ?? null;
 const MOCK_OVERBUDGET = _p.has("mockOverbudget");
 const MOCK_DELAYED = _p.has("mockDelayed");
+const MOCK_EMPTY_PHASES = _p.has("mockEmptyPhases");
+
+// In-memory: onthoudt welke projecten fases hebben gekregen via de knop
+const mockCreatedTasks: Record<string, ProjectTask[]> = {};
 
 const MOCK_DETAILS: Record<string, ProjectDetail> = {
   "PROJ-0009": {
@@ -85,14 +90,23 @@ export const mockDetailService: ProjectDetailService = {
     return result;
   },
 
-  async getProjectTasks(_projectId: string): Promise<ProjectTask[]> {
+  async getProjectTasks(projectId: string): Promise<ProjectTask[]> {
     await new Promise((r) => setTimeout(r, 100));
-    return [];
+    if (mockCreatedTasks[projectId]) return mockCreatedTasks[projectId];
+    if (MOCK_EMPTY_PHASES || projectId !== "PROJ-0009") return [];
+    return [
+      { id: "TASK-001", subject: "Sloop",       parentTask: null, isMilestone: false, status: "Completed", progress: 100, expectedEndDate: new Date("2026-03-01"), budgetHours: 200 },
+      { id: "TASK-002", subject: "Ruwbouw",     parentTask: null, isMilestone: false, status: "Open",      progress: 65,  expectedEndDate: new Date("2026-05-01"), budgetHours: 900 },
+      { id: "TASK-003", subject: "Afbouw",      parentTask: null, isMilestone: false, status: "Open",      progress: 10,  expectedEndDate: new Date("2026-07-01"), budgetHours: 450 },
+      { id: "TASK-004", subject: "Installatie", parentTask: null, isMilestone: false, status: "Open",      progress: 0,   expectedEndDate: null,                  budgetHours: null },
+      { id: "TASK-005", subject: "Oplevering",  parentTask: null, isMilestone: false, status: "Open",      progress: 0,   expectedEndDate: null,                  budgetHours: null },
+    ];
   },
 
-  async getProjectTimesheets(_projectId: string): Promise<TimesheetMap> {
+  async getProjectTimesheets(projectId: string): Promise<TimesheetMap> {
     await new Promise((r) => setTimeout(r, 100));
-    return {};
+    if (projectId !== "PROJ-0009") return {};
+    return { "TASK-001": 240, "TASK-002": 580, "TASK-003": 80 };
   },
 
   async getProjectActivity(projectId: string, limit = 20): Promise<ActivityItem[]> {
@@ -142,10 +156,20 @@ export const mockDetailService: ProjectDetailService = {
     return { aanneemsom: 1_150_000, meerwerk: 45_000, gefactureerd: 437_000, openstaand: 758_000 };
   },
 
-  async createDefaultPhaseTasks(_projectId: string, werksoort: string): Promise<CreatePhasesResult> {
+  async createDefaultPhaseTasks(projectId: string, werksoort: string): Promise<CreatePhasesResult> {
     await new Promise((r) => setTimeout(r, 300));
     const template = getPhaseTemplate(werksoort);
     if (!template) return { created: [], skipped: [], failed: [] };
+    mockCreatedTasks[projectId] = template.phases.map((phase, i) => ({
+      id: `MOCK-${projectId}-${i}`,
+      subject: phase,
+      parentTask: null,
+      isMilestone: false,
+      status: "Open",
+      progress: 0,
+      expectedEndDate: null,
+      budgetHours: null,
+    }));
     return { created: [...template.phases], skipped: [], failed: [] };
   },
 };

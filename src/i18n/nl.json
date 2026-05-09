@@ -7,7 +7,9 @@
     "save": "Opslaan",
     "close": "Sluiten",
     "download": "Downloaden",
-    "not_available": "Nog niet beschikbaar"
+    "not_available": "Nog niet beschikbaar",
+    "today": "vandaag",
+    "yesterday": "gisteren"
   },
   "projects": {
     "title": "Projecten",
@@ -125,11 +127,33 @@
       "cta": "Meer informatie"
     }
   },
+  "tab": {
+    "overzicht": "Overzicht",
+    "planning": "Planning",
+    "calculatie": "Calculatie",
+    "financieel": "Financieel",
+    "uren": "Uren",
+    "materialen": "Materialen",
+    "documenten": "Documenten",
+    "opleverpunten": "Opleverpunten",
+    "not_available": "Nog niet beschikbaar in deze versie"
+  },
   "kpi": {
     "voortgang": "Voortgang",
     "budget": "Budget",
     "uren": "Uren",
     "planning": "Planning"
+  },
+  "phases": {
+    "title": "Fases",
+    "empty_title": "Dit project heeft nog geen fases",
+    "empty_button": "Standaard fases voor {{werksoort}} toevoegen",
+    "create_error": "Aanmaken mislukt. Probeer opnieuw."
+  },
+  "activity": {
+    "title": "Activiteit",
+    "show_all": "Alles tonen",
+    "empty": "Geen activiteit gevonden"
   },
   "errors": {
     "bridge_lost": "Verbinding met Y-App verloren. Vernieuw de pagina.",

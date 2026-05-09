@@ -2,12 +2,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { X, ArrowLeft, AlertCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { projectDetailService } from "../../data/project-detail-service";
-import type { ProjectDetail, ProjectFinancials, ProjectTask, TimesheetMap } from "../../data/detail-types";
+import type { ProjectDetail, ProjectFinancials, ProjectTask, TimesheetMap, ActivityItem as ActivityItemData } from "../../data/detail-types";
 import { useMediaQuery } from "../../hooks/use-breakpoint";
 import { Button } from "../ui/button";
 import { PanelHeader } from "./PanelHeader";
 import { KPIBlock } from "./KPIBlock";
 import { calcVoortgangKPI, calcBudgetKPI, calcUrenKPI, calcPlanningKPI } from "./kpi-helpers";
+import { TabBar, type TabKey } from "./TabBar";
+import { PhasesSection } from "./PhasesSection";
+import { ActivityItem } from "./ActivityItem";
 
 const ANIMATION_MS = 250;
 
@@ -68,7 +71,9 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
   const [detail, setDetail] = useState<ProjectDetail | null>(null);
   const [_financials, setFinancials] = useState<ProjectFinancials | null>(null);
   const [timesheets, setTimesheets] = useState<TimesheetMap | null>(null);
-  const [_tasks, setTasks] = useState<ProjectTask[] | null>(null);
+  const [tasks, setTasks] = useState<ProjectTask[] | null>(null);
+  const [activity, setActivity] = useState<ActivityItemData[] | null>(null);
+  const [activeTab, setActiveTab] = useState<TabKey>("overzicht");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
@@ -115,19 +120,22 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
     setFinancials(null);
     setTimesheets(null);
     setTasks(null);
+    setActivity(null);
 
     Promise.allSettled([
       projectDetailService.getProjectDetail(projectId),
       projectDetailService.getProjectFinancials(projectId),
       projectDetailService.getProjectTimesheets(projectId),
       projectDetailService.getProjectTasks(projectId),
-    ]).then(([detailRes, financialsRes, timesheetsRes, tasksRes]) => {
+      projectDetailService.getProjectActivity(projectId, 10),
+    ]).then(([detailRes, financialsRes, timesheetsRes, tasksRes, activityRes]) => {
       if (cancelled) return;
       if (
         detailRes.status === "rejected" ||
         financialsRes.status === "rejected" ||
         timesheetsRes.status === "rejected" ||
-        tasksRes.status === "rejected"
+        tasksRes.status === "rejected" ||
+        activityRes.status === "rejected"
       ) {
         setError(true);
       } else {
@@ -135,6 +143,7 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
         setFinancials(financialsRes.value);
         setTimesheets(timesheetsRes.value);
         setTasks(tasksRes.value);
+        setActivity(activityRes.value);
       }
       setLoading(false);
     });
@@ -194,12 +203,48 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
       ) : error ? (
         <PanelError onRetry={handleRetry} />
       ) : (
-        <div className="p-6 flex flex-col gap-6">
-          <div className={`grid gap-3 ${mode === "drawer" ? "grid-cols-4" : "grid-cols-2"}`}>
-            <KPIBlock {...calcVoortgangKPI(detail!, t("kpi.voortgang"))} />
-            <KPIBlock {...calcBudgetKPI(detail!, t("kpi.budget"))} />
-            <KPIBlock {...calcUrenKPI(detail!, timesheets ?? {}, t("kpi.uren"))} />
-            <KPIBlock {...calcPlanningKPI(detail!, t("kpi.planning"))} />
+        <div className="flex flex-col">
+          {/* KPI-strook */}
+          <div className="px-6 pt-6 pb-4">
+            <div className={`grid gap-3 ${mode === "drawer" ? "grid-cols-4" : "grid-cols-2"}`}>
+              <KPIBlock {...calcVoortgangKPI(detail!, t("kpi.voortgang"))} />
+              <KPIBlock {...calcBudgetKPI(detail!, t("kpi.budget"))} />
+              <KPIBlock {...calcUrenKPI(detail!, timesheets ?? {}, t("kpi.uren"))} />
+              <KPIBlock {...calcPlanningKPI(detail!, t("kpi.planning"))} />
+            </div>
+          </div>
+          {/* Tab-bar — rand-tot-rand */}
+          <TabBar activeTab={activeTab} onTabChange={setActiveTab} />
+          {/* Tab-content */}
+          <div className="px-6 pt-4 pb-6">
+            {activeTab === "overzicht" ? (
+              <div>
+                {/* Fases */}
+                <PhasesSection
+                  tasks={tasks ?? []}
+                  timesheets={timesheets ?? {}}
+                  projectId={projectId}
+                  werksoort={detail!.werksoort}
+                  onPhasesCreated={handleRetry}
+                />
+                {/* Activiteit */}
+                <div className="mt-8 flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-slate-800">{t("activity.title")}</h3>
+                  <button className="text-xs text-y-teal hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-y-teal rounded">
+                    {t("activity.show_all")}
+                  </button>
+                </div>
+                {activity && activity.length > 0 ? (
+                  activity.map((item) => <ActivityItem key={item.id} item={item} />)
+                ) : (
+                  <p className="text-sm text-slate-400 py-4 text-center">{t("activity.empty")}</p>
+                )}
+              </div>
+            ) : (
+              <div className="py-12 text-center text-sm text-slate-400">
+                {t("tab.not_available")}
+              </div>
+            )}
           </div>
         </div>
       )}

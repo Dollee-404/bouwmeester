@@ -34,6 +34,7 @@ export interface ProjectTask {
   status: string;
   progress: number;
   expectedEndDate: Date | null;
+  budgetHours: number | null;
 }
 
 export type TimesheetMap = Record<string, number>;

@@ -7,7 +7,9 @@
     "save": "Save",
     "close": "Close",
     "download": "Download",
-    "not_available": "Not available yet"
+    "not_available": "Not available yet",
+    "today": "today",
+    "yesterday": "yesterday"
   },
   "projects": {
     "title": "Projects",
@@ -125,11 +127,33 @@
       "cta": "Learn more"
     }
   },
+  "tab": {
+    "overzicht": "Overview",
+    "planning": "Planning",
+    "calculatie": "Calculation",
+    "financieel": "Financial",
+    "uren": "Hours",
+    "materialen": "Materials",
+    "documenten": "Documents",
+    "opleverpunten": "Completion items",
+    "not_available": "Not available in this version"
+  },
   "kpi": {
     "voortgang": "Progress",
     "budget": "Budget",
     "uren": "Hours",
     "planning": "Planning"
+  },
+  "phases": {
+    "title": "Phases",
+    "empty_title": "This project has no phases yet",
+    "empty_button": "Add default phases for {{werksoort}}",
+    "create_error": "Creation failed. Please try again."
+  },
+  "activity": {
+    "title": "Activity",
+    "show_all": "Show all",
+    "empty": "No activity found"
   },
   "errors": {
     "bridge_lost": "Connection to Y-App lost. Please refresh the page.",
