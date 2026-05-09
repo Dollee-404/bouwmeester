@@ -148,7 +148,9 @@
     "title": "Phases",
     "empty_title": "This project has no phases yet",
     "empty_button": "Add default phases for {{werksoort}}",
-    "create_error": "Creation failed. Please try again."
+    "create_error": "Creation failed. Please try again.",
+    "not_started": "Not started",
+    "no_hours_budget": "No hours budget"
   },
   "activity": {
     "title": "Activity",

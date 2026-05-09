@@ -5,8 +5,18 @@ import { projectDetailService } from "../../data/project-detail-service";
 import type { ProjectTask, TimesheetMap } from "../../data/detail-types";
 import type { Werksoort } from "../../data/types";
 import { getPhaseTemplate } from "../../data/default-phase-templates";
-import { PhaseRow } from "./PhaseRow";
+import { PhaseCard } from "./PhaseCard";
 import { Button } from "../ui/button";
+
+// Dev-only: ?demoPhases injecteert demo-variatie voor visuele STOP-reviews
+const DEMO_PHASES = new URLSearchParams(window.location.search).has("demoPhases");
+const DEMO_CARDS = [
+  { id: "demo-1", name: "Sloop",       progress: 100, hoursSpent: 240, hoursBudget: 200 },
+  { id: "demo-2", name: "Ruwbouw",     progress: 65,  hoursSpent: 580, hoursBudget: 900 },
+  { id: "demo-3", name: "Afbouw",      progress: 10,  hoursSpent: 80,  hoursBudget: 450 },
+  { id: "demo-4", name: "Installatie", progress: 0,   hoursSpent: 0,   hoursBudget: 300 },
+  { id: "demo-5", name: "Oplevering",  progress: 0 },
+] as const;
 
 interface PhasesSectionProps {
   tasks: ProjectTask[];
@@ -14,9 +24,10 @@ interface PhasesSectionProps {
   projectId: string;
   werksoort: Werksoort | null;
   onPhasesCreated: () => void;
+  mode: "drawer" | "overlay" | "fullpage";
 }
 
-export function PhasesSection({ tasks, timesheets, projectId, werksoort, onPhasesCreated }: PhasesSectionProps) {
+export function PhasesSection({ tasks, timesheets, projectId, werksoort, onPhasesCreated, mode }: PhasesSectionProps) {
   const { t } = useTranslation();
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState(false);
@@ -65,8 +76,23 @@ export function PhasesSection({ tasks, timesheets, projectId, werksoort, onPhase
     );
   }
 
+  const gridCols =
+    mode === "drawer"    ? "grid-cols-4"
+    : mode === "overlay" ? "grid-cols-3"
+    : "grid-cols-2";
+
+  if (DEMO_PHASES) {
+    return (
+      <div className={`grid gap-3 ${gridCols}`}>
+        {DEMO_CARDS.map((c) => (
+          <PhaseCard key={c.id} name={c.name} progress={c.progress} hoursSpent={c.hoursSpent} hoursBudget={c.hoursBudget} />
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <div>
+    <div className={`grid gap-3 ${gridCols}`}>
       {phases.map((phase) => {
         const children = childrenByParent[phase.id] ?? [];
         const hoursSpent =
@@ -76,7 +102,7 @@ export function PhasesSection({ tasks, timesheets, projectId, werksoort, onPhase
           ? phase.budgetHours
           : undefined;
         return (
-          <PhaseRow
+          <PhaseCard
             key={phase.id}
             name={phase.subject}
             progress={phase.progress}

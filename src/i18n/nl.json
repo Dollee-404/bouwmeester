@@ -148,7 +148,9 @@
     "title": "Fases",
     "empty_title": "Dit project heeft nog geen fases",
     "empty_button": "Standaard fases voor {{werksoort}} toevoegen",
-    "create_error": "Aanmaken mislukt. Probeer opnieuw."
+    "create_error": "Aanmaken mislukt. Probeer opnieuw.",
+    "not_started": "Niet gestart",
+    "no_hours_budget": "Geen urenbudget"
   },
   "activity": {
     "title": "Activiteit",

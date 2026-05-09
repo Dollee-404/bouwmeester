@@ -226,6 +226,7 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
                   projectId={projectId}
                   werksoort={detail!.werksoort}
                   onPhasesCreated={handleRetry}
+                  mode={mode}
                 />
                 {/* Activiteit */}
                 <div className="mt-8 flex items-center justify-between mb-3">
