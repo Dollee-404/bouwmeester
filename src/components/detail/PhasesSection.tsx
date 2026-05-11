@@ -10,13 +10,13 @@ import { Button } from "../ui/button";
 
 // Dev-only: ?demoPhases injecteert demo-variatie voor visuele STOP-reviews
 const DEMO_PHASES = new URLSearchParams(window.location.search).has("demoPhases");
-const DEMO_CARDS = [
+const DEMO_CARDS: Array<{ id: string; name: string; progress: number; hoursSpent?: number; hoursBudget?: number }> = [
   { id: "demo-1", name: "Sloop",       progress: 100, hoursSpent: 240, hoursBudget: 200 },
   { id: "demo-2", name: "Ruwbouw",     progress: 65,  hoursSpent: 580, hoursBudget: 900 },
   { id: "demo-3", name: "Afbouw",      progress: 10,  hoursSpent: 80,  hoursBudget: 450 },
   { id: "demo-4", name: "Installatie", progress: 0,   hoursSpent: 0,   hoursBudget: 300 },
   { id: "demo-5", name: "Oplevering",  progress: 0 },
-] as const;
+];
 
 interface PhasesSectionProps {
   tasks: ProjectTask[];

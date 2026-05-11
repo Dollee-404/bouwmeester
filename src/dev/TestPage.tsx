@@ -27,6 +27,7 @@ const SHOWCASE_PROJECTS: Project[] = [
     id: "PROJ-0001", projectName: "Renovatie Sporthal De Hoge Dijk", customerName: "Gemeente Dordrecht",
     status: "Lead", werksoort: "Renovatie", startDate: null, endDate: null,
     percentComplete: 0, budgetSales: 485_000, budgetHours: null, billedAmount: 0,
+    estimatedCosting: 420_000, projectLeader: null,
     isWeatherDependent: false, isArchived: false,
   },
   {
@@ -34,6 +35,7 @@ const SHOWCASE_PROJECTS: Project[] = [
     status: "In uitvoering", werksoort: "Renovatie",
     startDate: new Date("2026-02-01"), endDate: new Date("2026-08-31"),
     percentComplete: 38, budgetSales: 1_150_000, budgetHours: 2300, billedAmount: 437_000,
+    estimatedCosting: 1_020_000, projectLeader: "M. Janssen",
     isWeatherDependent: false, isArchived: false,
   },
   {
@@ -41,6 +43,7 @@ const SHOWCASE_PROJECTS: Project[] = [
     status: "In uitvoering", werksoort: "Onderhoud",
     startDate: new Date("2026-03-15"), endDate: new Date("2026-06-30"),
     percentComplete: 71, budgetSales: 340_000, budgetHours: 680, billedAmount: 385_000,
+    estimatedCosting: 305_000, projectLeader: null,
     isWeatherDependent: false, isArchived: false,
   },
   {
@@ -48,12 +51,14 @@ const SHOWCASE_PROJECTS: Project[] = [
     status: "Oplevering", werksoort: "Sloop",
     startDate: new Date("2025-06-01"), endDate: new Date("2026-05-31"),
     percentComplete: 96, budgetSales: 2_100_000, budgetHours: 4_200, billedAmount: 2_016_000,
+    estimatedCosting: 1_890_000, projectLeader: "P. Bakker",
     isWeatherDependent: true, isArchived: false,
   },
   {
     id: "PROJ-0016", projectName: "Inspectie Daken Hendrik-Ido-Ambacht", customerName: "VVE Rivierstraat",
     status: "Lead", werksoort: null, startDate: null, endDate: null,
     percentComplete: 0, budgetSales: 18_500, budgetHours: null, billedAmount: 0,
+    estimatedCosting: 15_000, projectLeader: null,
     isWeatherDependent: false, isArchived: false,
   },
 ];
