@@ -259,10 +259,10 @@ export function ProjectsTable({ projects, isLoading = false, onRowClick }: Proje
                     </div>
                   </td>
                   <td className="px-3 py-2.5 whitespace-nowrap">
-                    {p.projectManager ? (
+                    {p.projectLeader ? (
                       <span className="inline-flex items-center gap-1.5">
-                        <Avatar name={p.projectManager} size="xs" aria-hidden="true" />
-                        <span className="text-slate-700 text-xs">{p.projectManager}</span>
+                        <Avatar name={p.projectLeader} size="xs" aria-hidden="true" />
+                        <span className="text-slate-700 text-xs">{p.projectLeader}</span>
                       </span>
                     ) : (
                       <span className="text-slate-400 text-xs">—</span>

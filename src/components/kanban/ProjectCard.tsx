@@ -126,11 +126,11 @@ export function ProjectCard({ project, onClick, tabIndex = 0 }: ProjectCardProps
 
       {/* Row 6: footer — altijd tonen */}
       <div className="flex items-center mt-1">
-        {project.projectManager ? (
+        {project.projectLeader ? (
           <Avatar
-            name={project.projectManager}
+            name={project.projectLeader}
             size="xs"
-            aria-label={t("a11y.project_manager", { name: project.projectManager })}
+            aria-label={t("a11y.project_manager", { name: project.projectLeader })}
           />
         ) : (
           <div className="flex items-center gap-1.5">

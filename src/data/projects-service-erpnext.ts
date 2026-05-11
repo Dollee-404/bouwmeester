@@ -17,8 +17,12 @@ const FIELDS = [
   "estimated_costing",
   "custom_budget_hours",
   "custom_weersafhankelijk",
+  // custom_project_manager: legacy veld, wordt leeggemaakt in 3F-vervolg nadat alle
+  // Customer Addresses zijn gevuld. Directe query op "Project User" child-doctype via
+  // fetchList werkt niet betrouwbaar (Frappe-permissies op child-doctype, URL-encoding
+  // van spatie). custom_project_manager is de betrouwbare databron totdat het ERPNext-veld
+  // wordt leeggemaakt. De Project-type exposeert het als projectLeader — intern detail.
   "custom_project_manager",
-  "custom_address",
 ];
 
 interface RawProject {
@@ -37,7 +41,6 @@ interface RawProject {
   custom_budget_hours: number | null;
   custom_weersafhankelijk: 0 | 1 | null;
   custom_project_manager: string | null;
-  custom_address: string | null;
 }
 
 const VALID_STATUSES = new Set<BouwmeesterStatus>([
@@ -76,8 +79,7 @@ function toProject(raw: RawProject): Project {
     budgetHours: raw.custom_budget_hours ?? null,
     billedAmount: raw.total_billed_amount ?? 0,
     estimatedCosting: raw.estimated_costing ?? 0,
-    projectManager: raw.custom_project_manager ?? null,
-    address: raw.custom_address ?? null,
+    projectLeader: raw.custom_project_manager ?? null,
     isWeatherDependent: Boolean(raw.custom_weersafhankelijk),
     isArchived: raw.status === "Completed" || raw.status === "Cancelled"
       || raw.custom_bouwmeester_status === "Afgerond"
@@ -85,6 +87,7 @@ function toProject(raw: RawProject): Project {
       || raw.custom_bouwmeester_status === "Geannuleerd",
   };
 }
+
 
 interface CacheEntry {
   data: Project[];

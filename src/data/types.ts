@@ -28,8 +28,7 @@ export interface Project {
   budgetHours: number | null;
   billedAmount: number;
   estimatedCosting: number;
-  projectManager: string | null;
-  address: string | null;
+  projectLeader: string | null;
   isWeatherDependent: boolean;
   isArchived: boolean;
 }

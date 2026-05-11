@@ -52,16 +52,17 @@ Bouwmeester voegt 6 velden toe aan het Project-doctype in ERPNext:
 | `custom_bouwmeester_status` | Select | Aanvraag, Calculatie, Gegund, In uitvoering, Oplevering, Afgerond, Verloren, Geannuleerd |
 | `custom_werksoort` | Select | Renovatie, Nieuwbouw, Sloop, Verbouw, Onderhoud, (leeg) |
 | `custom_budget_hours` | Float | Budget in uren |
-| `custom_project_manager` | Link → User | Projectleider (ERPNext-gebruiker) |
-| `custom_address` | Small Text | Projectadres |
+| `custom_project_manager` | Link → User | Wordt intern nog gebruikt als databron voor de kanban- en tabelweergave (`projectLeader` op het `Project`-type). Directe queries op `Project User` als child-doctype werken niet betrouwbaar via de Y-App bridge (Frappe-permissies). Dit veld wordt leeggemaakt in 3F-vervolg nadat alle installaties zijn gemigreerd en de bridge het child-doctype kan bevragen. |
+| `custom_address` | Small Text | Legacy. Projectadres wordt nu gelezen uit `Customer.customer_primary_address`. Dit veld wordt nog als fallback gebruikt in het detailpaneel totdat alle klanten een Customer Address hebben in ERPNext. |
 | `custom_weersafhankelijk` | Check | Markeert weersafhankelijke projecten |
 
 ## Known limitations
 
 1. **Project aanmaken via Bouwmeester is nog niet beschikbaar.** Maak projecten aan via ERPNext. Gepland voor een volgende versie.
-2. **Project-detailpaneel is nog niet beschikbaar.** Klikken op een kaart opent het project nog niet. Gepland voor een volgende versie.
-3. **Budgetregel verschijnt alleen bij projecten met een gelinkte Sales Order.** Zonder gekoppelde Sales Order toont de kaart geen budget of voortgangsbalk.
-4. **Instance-switch is niet uitgebreid getest.** Bouwmeester is gebouwd voor multi-instance Y-App setups, maar onze testomgeving had slechts één ERPNext-instance. Wissel je in Y-App tussen instances, dan laadt Bouwmeester de data van de actieve instance opnieuw. Meld afwijkend gedrag via de issue tracker.
+2. **Budgetregel verschijnt alleen bij projecten met een gelinkte Sales Order.** Zonder gekoppelde Sales Order toont de kaart geen budget of voortgangsbalk.
+3. **`custom_project_manager` wordt nog intern gebruikt.** Frappe-permissies en URL-encodingproblemen maken directe queries op de `Project User`-kindtabel via de Y-App bridge onbetrouwbaar. De list-service leest de projectleider daarom nog via `custom_project_manager`. Het veld wordt leeggemaakt in 3F-vervolg, nadat de bridge-laag dit betrouwbaar kan oplossen.
+4. **`custom_address` fallback actief in detailpaneel.** Zolang klanten nog geen `customer_primary_address` hebben in ERPNext, valt het detailpaneel terug op `custom_address`. De fallback wordt verwijderd in 3F-vervolg, na vulling van de Customer Addresses.
+5. **Instance-switch is niet uitgebreid getest.** Bouwmeester is gebouwd voor multi-instance Y-App setups, maar onze testomgeving had slechts één ERPNext-instance. Wissel je in Y-App tussen instances, dan laadt Bouwmeester de data van de actieve instance opnieuw. Meld afwijkend gedrag via de issue tracker.
 
 ## Voor ontwikkelaars
 
