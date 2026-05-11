@@ -31,10 +31,16 @@ export interface ProjectTask {
   subject: string;
   parentTask: string | null;
   isMilestone: boolean;
+  isGroup: boolean;
   status: string;
   progress: number;
+  expectedStartDate: Date | null;
   expectedEndDate: Date | null;
   budgetHours: number | null;
+  dependsOn: string[];
+  assignedTo: string[];
+  wachtOp: string | null;
+  wachtOpToelichting: string | null;
 }
 
 export type TimesheetMap = Record<string, number>;

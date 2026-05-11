@@ -11,6 +11,7 @@ import type {
 export interface ProjectDetailService {
   getProjectDetail(projectId: string): Promise<ProjectDetail>;
   getProjectTasks(projectId: string): Promise<ProjectTask[]>;
+  getProjectMilestones(projectId: string): Promise<ProjectTask[]>;
   getProjectTimesheets(projectId: string): Promise<TimesheetMap>;
   getProjectActivity(projectId: string, limit?: number): Promise<ActivityItem[]>;
   getProjectFinancials(projectId: string): Promise<ProjectFinancials>;
@@ -39,6 +40,7 @@ async function getService(): Promise<ProjectDetailService> {
 export const projectDetailService: ProjectDetailService = {
   getProjectDetail: async (id) => (await getService()).getProjectDetail(id),
   getProjectTasks: async (id) => (await getService()).getProjectTasks(id),
+  getProjectMilestones: async (id) => (await getService()).getProjectMilestones(id),
   getProjectTimesheets: async (id) => (await getService()).getProjectTimesheets(id),
   getProjectActivity: async (id, limit) => (await getService()).getProjectActivity(id, limit),
   getProjectFinancials: async (id) => (await getService()).getProjectFinancials(id),

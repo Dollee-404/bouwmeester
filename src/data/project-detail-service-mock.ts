@@ -101,12 +101,18 @@ export const mockDetailService: ProjectDetailService = {
     if (mockCreatedTasks[projectId]) return mockCreatedTasks[projectId];
     if (MOCK_EMPTY_PHASES || projectId !== "PROJ-0009") return [];
     return [
-      { id: "TASK-001", subject: "Sloop",       parentTask: null, isMilestone: false, status: "Completed", progress: 100, expectedEndDate: new Date("2026-03-01"), budgetHours: 200 },
-      { id: "TASK-002", subject: "Ruwbouw",     parentTask: null, isMilestone: false, status: "Open",      progress: 65,  expectedEndDate: new Date("2026-05-01"), budgetHours: 900 },
-      { id: "TASK-003", subject: "Afbouw",      parentTask: null, isMilestone: false, status: "Open",      progress: 10,  expectedEndDate: new Date("2026-07-01"), budgetHours: 450 },
-      { id: "TASK-004", subject: "Installatie", parentTask: null, isMilestone: false, status: "Open",      progress: 0,   expectedEndDate: null,                  budgetHours: null },
-      { id: "TASK-005", subject: "Oplevering",  parentTask: null, isMilestone: false, status: "Open",      progress: 0,   expectedEndDate: null,                  budgetHours: null },
+      { id: "TASK-001", subject: "Sloop",       parentTask: null, isMilestone: false, isGroup: true,  status: "Completed", progress: 100, expectedStartDate: new Date("2026-02-01"), expectedEndDate: new Date("2026-03-01"), budgetHours: 200,  dependsOn: [],            assignedTo: ["r.dekker@example.nl"],  wachtOp: null, wachtOpToelichting: null },
+      { id: "TASK-002", subject: "Ruwbouw",     parentTask: null, isMilestone: false, isGroup: true,  status: "Open",      progress: 65,  expectedStartDate: new Date("2026-03-02"), expectedEndDate: new Date("2026-05-01"), budgetHours: 900,  dependsOn: ["TASK-001"],  assignedTo: ["r.dekker@example.nl"],  wachtOp: null, wachtOpToelichting: null },
+      { id: "TASK-003", subject: "Afbouw",      parentTask: null, isMilestone: false, isGroup: true,  status: "Open",      progress: 10,  expectedStartDate: new Date("2026-05-04"), expectedEndDate: new Date("2026-07-01"), budgetHours: 450,  dependsOn: ["TASK-002"],  assignedTo: [],                       wachtOp: "Materiaal", wachtOpToelichting: null },
+      { id: "TASK-004", subject: "Installatie", parentTask: null, isMilestone: false, isGroup: true,  status: "Open",      progress: 0,   expectedStartDate: new Date("2026-06-01"), expectedEndDate: new Date("2026-07-15"), budgetHours: null, dependsOn: ["TASK-002"],  assignedTo: [],                       wachtOp: "Onderaannemer", wachtOpToelichting: null },
+      { id: "TASK-005", subject: "Oplevering",  parentTask: null, isMilestone: true,  isGroup: false, status: "Open",      progress: 0,   expectedStartDate: new Date("2026-08-29"), expectedEndDate: new Date("2026-08-31"), budgetHours: null, dependsOn: ["TASK-003", "TASK-004"], assignedTo: ["m.janssen@example.nl"], wachtOp: null, wachtOpToelichting: null },
     ];
+  },
+
+  async getProjectMilestones(projectId: string): Promise<ProjectTask[]> {
+    await new Promise((r) => setTimeout(r, 100));
+    const tasks = await mockDetailService.getProjectTasks(projectId);
+    return tasks.filter((t) => t.isMilestone);
   },
 
   async getProjectTimesheets(projectId: string): Promise<TimesheetMap> {
@@ -174,10 +180,16 @@ export const mockDetailService: ProjectDetailService = {
       subject: phase,
       parentTask: null,
       isMilestone: false,
+      isGroup: true,
       status: "Open",
       progress: 0,
+      expectedStartDate: null,
       expectedEndDate: null,
       budgetHours: null,
+      dependsOn: [],
+      assignedTo: [],
+      wachtOp: null,
+      wachtOpToelichting: null,
     }));
     return { created: [...template.phases], skipped: [], failed: [] };
   },
