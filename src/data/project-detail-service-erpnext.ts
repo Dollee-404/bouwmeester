@@ -1,6 +1,6 @@
 import { fetchDocument, fetchList, callMethod, createDocument } from "../bridge";
 import { getPhaseTemplate } from "./default-phase-templates";
-import { parseDependsOn, parseAssign } from "./planning-helpers";
+import { parseDependsOn, parseAssign, enrichTasksWithWachtOp } from "./planning-helpers";
 import type { BouwmeesterStatus, Werksoort } from "./types";
 import type {
   ProjectDetail,
@@ -200,7 +200,7 @@ export const erpnextDetailService: ProjectDetailService = {
       });
     }
 
-    return rows.map((t) => ({
+    return enrichTasksWithWachtOp(rows.map((t) => ({
       id: t.name,
       subject: t.subject,
       parentTask: t.parent_task || null,
@@ -218,7 +218,7 @@ export const erpnextDetailService: ProjectDetailService = {
       assignedTo: parseAssign(t._assign),
       wachtOp: t.custom_wacht_op ?? null,
       wachtOpToelichting: t.custom_wacht_op_toelichting ?? null,
-    }));
+    })));
   },
 
   async getProjectMilestones(projectId: string): Promise<ProjectTask[]> {
@@ -246,7 +246,7 @@ export const erpnextDetailService: ProjectDetailService = {
       });
     }
 
-    return rows.map((t) => ({
+    return enrichTasksWithWachtOp(rows.map((t) => ({
       id: t.name,
       subject: t.subject,
       parentTask: t.parent_task || null,
@@ -264,7 +264,7 @@ export const erpnextDetailService: ProjectDetailService = {
       assignedTo: parseAssign(t._assign),
       wachtOp: t.custom_wacht_op ?? null,
       wachtOpToelichting: t.custom_wacht_op_toelichting ?? null,
-    }));
+    })));
   },
 
   async getProjectTimesheets(projectId: string): Promise<TimesheetMap> {

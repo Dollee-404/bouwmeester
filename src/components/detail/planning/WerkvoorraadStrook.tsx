@@ -12,7 +12,7 @@ const MAX_ZICHTBAAR = 7;
 // Amber (binnenkort): start vandaag · klaar vóór · mijlpaal
 // Neutraal: start [dag] · kan starten · alle wacht-op-varianten
 
-function tagConfig(reden: WerkvoorraadReden): { label: string; className: string } {
+function tagConfig(reden: WerkvoorraadReden): { label: string; className: string; tooltip?: string } {
   switch (reden.type) {
     case "achterstallig":
       return { label: "achterstallig", className: "text-red-600" };
@@ -32,7 +32,7 @@ function tagConfig(reden: WerkvoorraadReden): { label: string; className: string
     case "vrijgekomen":
       return { label: "kan starten", className: "text-slate-400" };
     case "wacht-op":
-      return { label: reden.label, className: "text-slate-400" };
+      return { label: reden.label, className: "text-slate-400", tooltip: reden.tooltip };
   }
 }
 
@@ -63,7 +63,7 @@ function WerkvoorraadRij({
         <p className="text-sm font-semibold text-slate-900 leading-snug truncate">
           {item.subject}
         </p>
-        <p className={`mt-1 text-xs font-medium ${tag.className}`}>
+        <p className={`mt-1 text-xs font-medium ${tag.className}`} title={tag.tooltip}>
           {tag.label}
         </p>
       </div>
@@ -107,10 +107,6 @@ export function WerkvoorraadStrook({ items, onItemClick }: WerkvoorraadStrookPro
 
   return (
     <div className="mt-6">
-      <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
-        Werkvoorraad deze week
-      </h3>
-
       <div className="rounded-xl border border-slate-200 bg-white divide-y divide-slate-100 overflow-hidden shadow-sm">
         {zichtbaar.map((item) => (
           <WerkvoorraadRij

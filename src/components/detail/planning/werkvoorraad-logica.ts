@@ -10,7 +10,7 @@ export type WerkvoorraadReden =
   | { type: "klaar-voor"; dag: string }
   | { type: "mijlpaal"; overDagen: number }
   | { type: "vrijgekomen" }
-  | { type: "wacht-op"; label: string };
+  | { type: "wacht-op"; label: string; tooltip?: string };
 
 export interface WerkvoorraadItem {
   id: string;
@@ -54,13 +54,13 @@ function dagNaam(date: Date): string {
 function urgentie(reden: WerkvoorraadReden): number {
   switch (reden.type) {
     case "achterstallig": return 0;
-    case "start-vandaag": return 1;
-    case "vrijgekomen":   return 2;
-    case "start-morgen":  return 3;
-    case "start-dag":     return 4;
-    case "klaar-voor":    return 5;
-    case "mijlpaal":      return 6;
-    case "wacht-op":      return 7;
+    case "wacht-op":      return 1; // blokkade is even urgent als achterstand
+    case "start-vandaag": return 2;
+    case "vrijgekomen":   return 3;
+    case "start-morgen":  return 4;
+    case "start-dag":     return 5;
+    case "klaar-voor":    return 6;
+    case "mijlpaal":      return 7;
   }
 }
 
@@ -132,11 +132,23 @@ export function computeWerkvoorraad(
       reden = { type: "klaar-voor", dag: dagNaam(end) };
     }
 
+    // Criterium 6: actieve wacht-op-status, task had moeten starten (start ≤ weekEnd), nog niet gereed
+    // Vangt taken die tussen wal en schip vallen: ze voldoen niet aan c1-c5 maar zijn wél geblokkeerd.
+    if (!reden && task.wachtOp && start && start <= weekEnd) {
+      reden = { type: "wacht-op", label: "" }; // label wordt direct hieronder ingevuld
+    }
+
     if (!reden) continue;
 
-    // wacht-op overlay: als het veld gezet is, vervangt het de why-tag (4F vult dit verder in)
+    // wacht-op overlay: handmatig veld of auto-detectie (enrichTasksWithWachtOp) vervangt de why-tag
     if (task.wachtOp) {
-      reden = { type: "wacht-op", label: `wacht op ${task.wachtOp.toLowerCase()}` };
+      if (task.wachtOp === "Anders" && task.wachtOpToelichting) {
+        const tekst = task.wachtOpToelichting;
+        const afgekapt = tekst.length > 25 ? tekst.slice(0, 25) + "…" : tekst;
+        reden = { type: "wacht-op", label: afgekapt, tooltip: tekst };
+      } else {
+        reden = { type: "wacht-op", label: `wacht op ${task.wachtOp.toLowerCase()}` };
+      }
     }
 
     const heeftDiscrepantie =

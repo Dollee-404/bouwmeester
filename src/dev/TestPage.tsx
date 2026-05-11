@@ -8,6 +8,7 @@ import type { WerkvoorraadItem } from "../components/detail/planning/werkvoorraa
 import { GanttStrook } from "../components/detail/planning/GanttStrook";
 import { computeGanttData } from "../components/detail/planning/gantt-logica";
 import { TaskDetailPaneel } from "../components/detail/planning/TaskDetailPaneel";
+import { enrichTasksWithWachtOp } from "../data/planning-helpers";
 import type { ProjectTask, TimesheetMap } from "../data/detail-types";
 
 import { HOST_ORIGIN, INSTANCE_ID, ERPNEXT_URL, LANG } from "../bridge";
@@ -478,6 +479,9 @@ export function TestPage() {
 
     {/* ── TaskDetailPaneel showcase (4E) ───────────────────────────────── */}
     <TaskDetailPaneelShowcase />
+
+    {/* ── Wacht-op showcase (4F) ───────────────────────────────────────── */}
+    <WachtOpShowcase />
   </>
   );
 }
@@ -1505,6 +1509,118 @@ function TaskDetailPaneelShowcase() {
           timesheets={PANEL_DEMO_TIMESHEETS}
           initialId={open.id}
           initialMode={open.mode}
+          onClose={() => setOpen(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+// ── 4F: Wacht-op showcase — vier scenario's ───────────────────────────────────
+
+// Vier expliciete taken die elk scenario demonstreren (vóór enrichment)
+const WACHT_OP_RAW: ProjectTask[] = [
+  {
+    // Scenario 1: geen wachtOp, geen blokkerende voorganger → niets getoond
+    id: "WO-A", subject: "Binnenschilder", parentTask: null, isMilestone: false, isGroup: false,
+    status: "Open", progress: 0,
+    expectedStartDate: new Date("2026-05-11"), expectedEndDate: new Date("2026-05-15"),
+    actualStartDate: null, actualEndDate: null, budgetHours: 40, description: null,
+    dependsOn: ["WO-DONE"], assignedTo: [], wachtOp: null, wachtOpToelichting: null,
+  },
+  {
+    // Voorganger (afgerond) — geen blokker voor WO-A
+    id: "WO-DONE", subject: "Pleisterwerk", parentTask: null, isMilestone: false, isGroup: false,
+    status: "Completed", progress: 100,
+    expectedStartDate: new Date("2026-05-01"), expectedEndDate: new Date("2026-05-10"),
+    actualStartDate: new Date("2026-05-01"), actualEndDate: new Date("2026-05-10"),
+    budgetHours: 30, description: null,
+    dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null,
+  },
+  {
+    // Scenario 2: geen wachtOp, WÉL blokkerende open voorganger → auto-detectie
+    id: "WO-B", subject: "Tegelwerk badkamer", parentTask: null, isMilestone: false, isGroup: false,
+    status: "Open", progress: 0,
+    expectedStartDate: new Date("2026-05-11"), expectedEndDate: new Date("2026-05-17"),
+    actualStartDate: null, actualEndDate: null, budgetHours: 60, description: null,
+    dependsOn: ["WO-BLOCKER"], assignedTo: [], wachtOp: null, wachtOpToelichting: null,
+  },
+  {
+    // Blokkerende open voorganger voor WO-B
+    id: "WO-BLOCKER", subject: "Leidingwerk sanitair", parentTask: null, isMilestone: false, isGroup: false,
+    status: "Open", progress: 40,
+    expectedStartDate: new Date("2026-05-11"), expectedEndDate: new Date("2026-05-17"),
+    actualStartDate: null, actualEndDate: null, budgetHours: 50, description: null,
+    dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null,
+  },
+  {
+    // Scenario 3: handmatig custom_wacht_op = "Materiaal", geen blokkerende voorganger
+    id: "WO-C", subject: "Dakisolatie", parentTask: null, isMilestone: false, isGroup: false,
+    status: "Open", progress: 0,
+    expectedStartDate: new Date("2026-05-11"), expectedEndDate: new Date("2026-05-20"),
+    actualStartDate: null, actualEndDate: null, budgetHours: 80, description: null,
+    dependsOn: [], assignedTo: [], wachtOp: "Materiaal", wachtOpToelichting: null,
+  },
+  {
+    // Scenario 4: handmatig "Materiaal" + blokkerende voorganger → handmatig wint
+    id: "WO-D", subject: "Vloerverwarming", parentTask: null, isMilestone: false, isGroup: false,
+    status: "Open", progress: 0,
+    expectedStartDate: new Date("2026-05-11"), expectedEndDate: new Date("2026-05-22"),
+    actualStartDate: null, actualEndDate: null, budgetHours: 70, description: null,
+    dependsOn: ["WO-BLOCKER"], assignedTo: [], wachtOp: "Materiaal", wachtOpToelichting: null,
+  },
+];
+
+// Na enrichment: WO-B krijgt auto-detect "Voorgaande taak: Leidingwerk sanitair"
+//                WO-D behoudt "Materiaal" (handmatig wint)
+const WACHT_OP_TASKS = enrichTasksWithWachtOp(WACHT_OP_RAW);
+const WACHT_OP_TIMESHEETS: TimesheetMap = {};
+
+const SCENARIO_LABELS: Record<string, string> = {
+  "WO-A": "Scenario 1 — geen wacht-op, voorganger afgerond → niets getoond",
+  "WO-B": "Scenario 2 — auto-detectie: voorganger nog open",
+  "WO-C": "Scenario 3 — handmatig: Materiaal",
+  "WO-D": "Scenario 4 — conflict: handmatig + blokkerende dep → handmatig wint",
+};
+
+function WachtOpShowcase() {
+  const [open, setOpen] = useState<{ id: string } | null>(null);
+
+  return (
+    <div className="mt-12 border-t-2 border-slate-300 pt-8 pb-16 px-8">
+      <h2 className="text-lg font-bold text-slate-700 mb-1">Wacht op — 4F showcase</h2>
+      <p className="text-xs text-slate-400 mb-6">
+        Vier scenario's die de volledige dekkingsmatrix tonen. Klik op een rij om het detail-paneel te openen
+        en de wacht-op-sectie daarin te verifiëren.
+      </p>
+
+      <div className="flex flex-col gap-6">
+        {(["WO-A", "WO-B", "WO-C", "WO-D"] as const).map((id) => {
+          const task = WACHT_OP_TASKS.find((t) => t.id === id)!;
+          return (
+            <div key={id}>
+              <p className="text-xs font-semibold text-slate-500 mb-2">{SCENARIO_LABELS[id]}</p>
+              <div className="rounded-xl border border-slate-200 bg-white shadow-sm max-w-sm overflow-hidden">
+                <WerkvoorraadStrook
+                  items={computeWerkvoorraad([task], WACHT_OP_TIMESHEETS, new Date("2026-05-11"))}
+                  onItemClick={() => setOpen({ id })}
+                />
+              </div>
+              <p className="mt-1 text-[10px] text-slate-300">
+                wachtOp na enrichment: {task.wachtOp ?? "(null)"} | toelichting: {task.wachtOpToelichting ?? "(null)"}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+
+      {open && (
+        <TaskDetailPaneel
+          key={open.id}
+          tasks={WACHT_OP_TASKS}
+          timesheets={WACHT_OP_TIMESHEETS}
+          initialId={open.id}
+          initialMode="task"
           onClose={() => setOpen(null)}
         />
       )}

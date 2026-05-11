@@ -108,6 +108,43 @@ export function getISOWeek(d: Date): number {
   return Math.ceil(((date.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
 }
 
+// ─── Wacht-op verrijking ─────────────────────────────────────────────────────
+
+import type { ProjectTask } from "./detail-types";
+
+const AFGEROND_STATUSSEN = new Set(["Completed", "Cancelled"]);
+
+/**
+ * Verrijkt elke Task met een automatisch afgeleid wacht-op-veld als:
+ * - custom_wacht_op leeg is (handmatig veld heeft altijd voorrang)
+ * - de task niet afgerond/geannuleerd is
+ * - minstens één depends_on-taak nog niet afgerond is
+ *
+ * Geeft de blokkerende taaknamen mee als wachtOpToelichting zodat het
+ * detail-paneel "Voorgaande taak: Metselwerk, Isolatie" kan tonen.
+ */
+export function enrichTasksWithWachtOp(tasks: ProjectTask[]): ProjectTask[] {
+  const taskById = new Map(tasks.map((t) => [t.id, t]));
+
+  return tasks.map((task) => {
+    if (task.wachtOp) return task; // handmatig veld heeft voorrang
+    if (AFGEROND_STATUSSEN.has(task.status)) return task;
+    if (task.dependsOn.length === 0) return task;
+
+    const blokkerend = task.dependsOn
+      .map((id) => taskById.get(id))
+      .filter((dep): dep is ProjectTask => dep !== undefined && !AFGEROND_STATUSSEN.has(dep.status));
+
+    if (blokkerend.length === 0) return task;
+
+    return {
+      ...task,
+      wachtOp: "Voorgaande taak",
+      wachtOpToelichting: blokkerend.map((d) => d.subject).join(", "),
+    };
+  });
+}
+
 // ─── Task-data parse-helpers ─────────────────────────────────────────────────
 // Geëxporteerd zodat unit-tests de productiecode raken (niet een kopie).
 
