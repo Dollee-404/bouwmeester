@@ -54,8 +54,11 @@ interface RawTask {
   is_group: 0 | 1;
   exp_start_date: string | null;
   exp_end_date: string | null;
+  act_start_date?: string | null;
+  act_end_date?: string | null;
   progress: number;
   expected_time?: number;
+  description?: string | null;
   depends_on_tasks: string | null;
   _assign: string | null;
   custom_wacht_op?: string | null;
@@ -175,7 +178,8 @@ export const erpnextDetailService: ProjectDetailService = {
   async getProjectTasks(projectId: string): Promise<ProjectTask[]> {
     const baseFields = [
       "name", "subject", "parent_task", "status", "is_milestone", "is_group",
-      "exp_start_date", "exp_end_date", "progress", "expected_time",
+      "exp_start_date", "exp_end_date", "act_start_date", "act_end_date",
+      "progress", "expected_time", "description",
       "depends_on_tasks", "_assign",
     ];
 
@@ -206,7 +210,10 @@ export const erpnextDetailService: ProjectDetailService = {
       progress: t.progress ?? 0,
       expectedStartDate: parseDate(t.exp_start_date),
       expectedEndDate: parseDate(t.exp_end_date),
+      actualStartDate: parseDate(t.act_start_date ?? null),
+      actualEndDate: parseDate(t.act_end_date ?? null),
       budgetHours: t.expected_time ?? null,
+      description: t.description?.trim() || null,
       dependsOn: parseDependsOn(t.depends_on_tasks),
       assignedTo: parseAssign(t._assign),
       wachtOp: t.custom_wacht_op ?? null,
@@ -217,7 +224,8 @@ export const erpnextDetailService: ProjectDetailService = {
   async getProjectMilestones(projectId: string): Promise<ProjectTask[]> {
     const baseFields = [
       "name", "subject", "parent_task", "status", "is_milestone", "is_group",
-      "exp_start_date", "exp_end_date", "progress", "expected_time",
+      "exp_start_date", "exp_end_date", "act_start_date", "act_end_date",
+      "progress", "expected_time", "description",
       "depends_on_tasks", "_assign",
     ];
 
@@ -248,7 +256,10 @@ export const erpnextDetailService: ProjectDetailService = {
       progress: t.progress ?? 0,
       expectedStartDate: parseDate(t.exp_start_date),
       expectedEndDate: parseDate(t.exp_end_date),
+      actualStartDate: parseDate(t.act_start_date ?? null),
+      actualEndDate: parseDate(t.act_end_date ?? null),
       budgetHours: t.expected_time ?? null,
+      description: t.description?.trim() || null,
       dependsOn: parseDependsOn(t.depends_on_tasks),
       assignedTo: parseAssign(t._assign),
       wachtOp: t.custom_wacht_op ?? null,

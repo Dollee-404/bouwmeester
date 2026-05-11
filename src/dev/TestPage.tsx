@@ -7,7 +7,7 @@ import { computeWerkvoorraad } from "../components/detail/planning/werkvoorraad-
 import type { WerkvoorraadItem } from "../components/detail/planning/werkvoorraad-logica";
 import { GanttStrook } from "../components/detail/planning/GanttStrook";
 import { computeGanttData } from "../components/detail/planning/gantt-logica";
-import type { GanttData } from "../components/detail/planning/gantt-logica";
+import { TaskDetailPaneel } from "../components/detail/planning/TaskDetailPaneel";
 import type { ProjectTask, TimesheetMap } from "../data/detail-types";
 
 import { HOST_ORIGIN, INSTANCE_ID, ERPNEXT_URL, LANG } from "../bridge";
@@ -475,6 +475,9 @@ export function TestPage() {
 
     {/* ── Gantt palet-keuze (4D) ───────────────────────────────────────── */}
     <GanttPaletteShowcase />
+
+    {/* ── TaskDetailPaneel showcase (4E) ───────────────────────────────── */}
+    <TaskDetailPaneelShowcase />
   </>
   );
 }
@@ -799,99 +802,99 @@ const SYNTH_TASKS: ProjectTask[] = [
     parentTask: null, isMilestone: false, isGroup: false, status: "Open", progress: 40,
     expectedStartDate: new Date("2026-04-28"), expectedEndDate: new Date("2026-05-05"),
     budgetHours: 10, dependsOn: [], assignedTo: ["jan.de.vries@test.nl"],
-    wachtOp: null, wachtOpToelichting: null },
+    wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
 
   // Criterium 1: start vandaag (maandag 11 mei)
   { id: "S2", subject: "Fundering gieten [start vandaag]",
     parentTask: null, isMilestone: false, isGroup: false, status: "Open", progress: 0,
     expectedStartDate: new Date("2026-05-11"), expectedEndDate: new Date("2026-05-20"),
     budgetHours: 8, dependsOn: [], assignedTo: ["m.janssen@test.nl"],
-    wachtOp: null, wachtOpToelichting: null },
+    wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
 
   // Criterium 2: einddatum vrijdag 15 mei (deze week), discrepantie (13.5u/16u, 60%)
   { id: "S3", subject: "Stucwerk [klaar vóór vrijdag + discrepantie]",
     parentTask: null, isMilestone: false, isGroup: false, status: "Open", progress: 60,
     expectedStartDate: new Date("2026-05-04"), expectedEndDate: new Date("2026-05-15"),
     budgetHours: 16, dependsOn: [], assignedTo: [],
-    wachtOp: null, wachtOpToelichting: null },
+    wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
 
   // Criterium 4: kan starten — S5 (dep) is Completed, start 11 mei ≤ weekEnd 17 mei
   { id: "S4", subject: "Isolatiewerk [kan starten — dep S5 is klaar]",
     parentTask: null, isMilestone: false, isGroup: false, status: "Open", progress: 0,
     expectedStartDate: new Date("2026-05-11"), expectedEndDate: new Date("2026-05-22"),
     budgetHours: 12, dependsOn: ["S5"], assignedTo: ["p.bakker@test.nl"],
-    wachtOp: null, wachtOpToelichting: null },
+    wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
 
   // Afgeronde dep voor S4 — zelf NIET in werkvoorraad
   { id: "S5", subject: "Fundering [Completed — dep van S4, NIET in lijst]",
     parentTask: null, isMilestone: false, isGroup: false, status: "Completed", progress: 100,
     expectedStartDate: new Date("2026-04-20"), expectedEndDate: new Date("2026-05-08"),
     budgetHours: 20, dependsOn: [], assignedTo: [],
-    wachtOp: null, wachtOpToelichting: null },
+    wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
 
   // Criterium 5: mijlpaal zondag 17 mei (6 dagen)
   { id: "S6", subject: "Oplevering ruwbouw [mijlpaal over 6d]",
     parentTask: null, isMilestone: true, isGroup: false, status: "Open", progress: 0,
     expectedStartDate: null, expectedEndDate: new Date("2026-05-17"),
     budgetHours: null, dependsOn: [], assignedTo: ["j.smit@test.nl"],
-    wachtOp: null, wachtOpToelichting: null },
+    wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
 
   // UITGESLOTEN: toekomstige start buiten week, geen deps, geen mijlpaal
   { id: "S7", subject: "Toekomstig werk [GEEN kwalificatie — start 1 jun]",
     parentTask: null, isMilestone: false, isGroup: false, status: "Open", progress: 0,
     expectedStartDate: new Date("2026-06-01"), expectedEndDate: new Date("2026-06-30"),
     budgetHours: null, dependsOn: [], assignedTo: [],
-    wachtOp: null, wachtOpToelichting: null },
+    wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
 
   // UITGESLOTEN: isGroup = true
   { id: "S8", subject: "Fase A [GEEN kwalificatie — groeptaak]",
     parentTask: null, isMilestone: false, isGroup: true, status: "Open", progress: 0,
     expectedStartDate: new Date("2026-05-11"), expectedEndDate: new Date("2026-05-30"),
     budgetHours: null, dependsOn: [], assignedTo: [],
-    wachtOp: null, wachtOpToelichting: null },
+    wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
 
   // Extra taken → 12 kwalificerende items zodat "+5 meer" aantoonbaar werkt op echte logica
   { id: "S9", subject: "Dakgoten installeren [start morgen]",
     parentTask: null, isMilestone: false, isGroup: false, status: "Open", progress: 0,
     expectedStartDate: new Date("2026-05-12"), expectedEndDate: new Date("2026-05-19"),
     budgetHours: null, dependsOn: [], assignedTo: ["a.visser@test.nl"],
-    wachtOp: null, wachtOpToelichting: null },
+    wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
   { id: "S10", subject: "Tegelwerk badkamer [start woensdag]",
     parentTask: null, isMilestone: false, isGroup: false, status: "Open", progress: 0,
     expectedStartDate: new Date("2026-05-13"), expectedEndDate: new Date("2026-05-22"),
     budgetHours: null, dependsOn: [], assignedTo: [],
-    wachtOp: null, wachtOpToelichting: null },
+    wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
   { id: "S11", subject: "Schilderwerk trapportaal [start donderdag]",
     parentTask: null, isMilestone: false, isGroup: false, status: "Open", progress: 0,
     expectedStartDate: new Date("2026-05-14"), expectedEndDate: new Date("2026-05-21"),
     budgetHours: null, dependsOn: [], assignedTo: ["m.janssen@test.nl"],
-    wachtOp: null, wachtOpToelichting: null },
+    wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
   { id: "S12", subject: "Parketvloer leggen [klaar vóór woensdag]",
     parentTask: null, isMilestone: false, isGroup: false, status: "Open", progress: 50,
     expectedStartDate: new Date("2026-05-04"), expectedEndDate: new Date("2026-05-13"),
     budgetHours: null, dependsOn: [], assignedTo: ["jan.de.vries@test.nl"],
-    wachtOp: null, wachtOpToelichting: null },
+    wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
   { id: "S13", subject: "Elektrische installatie [klaar vóór donderdag]",
     parentTask: null, isMilestone: false, isGroup: false, status: "Open", progress: 30,
     expectedStartDate: new Date("2026-05-06"), expectedEndDate: new Date("2026-05-14"),
     budgetHours: null, dependsOn: [], assignedTo: [],
-    wachtOp: null, wachtOpToelichting: null },
+    wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
   { id: "S14", subject: "Vloerverwarming leggen [kan starten — dep S15 klaar]",
     parentTask: null, isMilestone: false, isGroup: false, status: "Open", progress: 0,
     expectedStartDate: new Date("2026-05-13"), expectedEndDate: new Date("2026-05-20"),
     budgetHours: null, dependsOn: ["S15"], assignedTo: ["p.bakker@test.nl"],
-    wachtOp: null, wachtOpToelichting: null },
+    wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
   // Completed dep voor S14 — NIET in werkvoorraad
   { id: "S15", subject: "Betonvloer [Completed — dep van S14, NIET in lijst]",
     parentTask: null, isMilestone: false, isGroup: false, status: "Completed", progress: 100,
     expectedStartDate: new Date("2026-04-25"), expectedEndDate: new Date("2026-05-09"),
     budgetHours: null, dependsOn: [], assignedTo: [],
-    wachtOp: null, wachtOpToelichting: null },
+    wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
   { id: "S16", subject: "Sleuteloverdracht [mijlpaal volgende week]",
     parentTask: null, isMilestone: true, isGroup: false, status: "Open", progress: 0,
     expectedStartDate: null, expectedEndDate: new Date("2026-05-21"),
     budgetHours: null, dependsOn: [], assignedTo: [],
-    wachtOp: null, wachtOpToelichting: null },
+    wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
 ];
 
 const SYNTH_TIMESHEETS: TimesheetMap = {
@@ -941,43 +944,10 @@ function WerkvoorraadLogicaTest() {
 
 const GANTT_TODAY = new Date("2026-05-11");
 
-const GANTT_DUMMY: GanttData = {
-  fases: [
-    {
-      id: "GF1", subject: "Fundering & Grondwerk",
-      plannedStart: new Date("2026-02-02"), plannedEnd: new Date("2026-03-20"),
-      progress: 100, isCritical: true,
-    },
-    {
-      id: "GF2", subject: "Ruwbouw & Constructie",
-      plannedStart: new Date("2026-03-16"), plannedEnd: new Date("2026-06-19"),
-      progress: 63, isCritical: true,
-    },
-    {
-      id: "GF3", subject: "Installaties",
-      plannedStart: new Date("2026-06-01"), plannedEnd: new Date("2026-08-07"),
-      progress: 0, isCritical: true,
-    },
-    {
-      id: "GF4", subject: "Afwerking",
-      plannedStart: new Date("2026-07-20"), plannedEnd: new Date("2026-09-11"),
-      progress: 0, isCritical: true,
-    },
-    {
-      id: "GF5", subject: "Buitenterrein",
-      plannedStart: new Date("2026-04-06"), plannedEnd: new Date("2026-06-12"),
-      progress: 15, isCritical: false,
-    },
-  ],
-  mijlpalen: [
-    { id: "GM1", subject: "Oplevering ruwbouw", date: new Date("2026-06-19") },
-    { id: "GM2", subject: "Sleuteloverdracht",  date: new Date("2026-09-11") },
-  ],
-  projectStart: new Date("2026-02-02"),
-  projectEnd:   new Date("2026-09-11"),
-};
-
 function GanttStrookShowcase() {
+  const [panel, setPanel] = useState<{ id: string; mode: "task" | "phase" } | null>(null);
+  const ganttData = computeGanttData(PANEL_DEMO_TASKS);
+
   return (
     <div className="mt-12 border-t border-slate-200 pt-8">
       <h2 className="text-lg font-bold text-slate-700 mb-1 px-8">
@@ -986,9 +956,14 @@ function GanttStrookShowcase() {
       <p className="text-xs text-slate-400 px-8 mb-6">
         5 fases, 2 mijlpalen. "Vandaag" = 2026-05-11.
         Amber balk + onderlijn = kritiek pad. Drie zoomknoppen: Week / Maand / Heel project.
+        Klik op een fase-balk → opent Fase-modus paneel.
       </p>
       <div className="px-8 pb-12 max-w-4xl">
-        <GanttStrook data={GANTT_DUMMY} today={GANTT_TODAY} />
+        <GanttStrook
+          data={ganttData}
+          today={GANTT_TODAY}
+          onFaseClick={(id) => setPanel({ id, mode: "phase" })}
+        />
       </div>
 
       <h3 className="text-sm font-semibold text-slate-500 mb-1 px-8">Edge case — leeg</h3>
@@ -999,6 +974,17 @@ function GanttStrookShowcase() {
           today={GANTT_TODAY}
         />
       </div>
+
+      {panel && (
+        <TaskDetailPaneel
+          key={panel.id}
+          tasks={PANEL_DEMO_TASKS}
+          timesheets={PANEL_DEMO_TIMESHEETS}
+          initialId={panel.id}
+          initialMode={panel.mode}
+          onClose={() => setPanel(null)}
+        />
+      )}
     </div>
   );
 }
@@ -1010,73 +996,73 @@ const GANTT_SYNTH_TASKS: ProjectTask[] = [
   { id: "GF1", subject: "Fundering & Grondwerk",
     parentTask: null, isMilestone: false, isGroup: true, status: "Open", progress: 80,
     expectedStartDate: null, expectedEndDate: null,
-    budgetHours: null, dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null },
+    budgetHours: null, dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
   { id: "GC1", subject: "Grondwerk & sleuven graven",
     parentTask: "GF1", isMilestone: false, isGroup: false, status: "Completed", progress: 100,
     expectedStartDate: new Date("2026-02-02"), expectedEndDate: new Date("2026-03-06"),
-    budgetHours: 40, dependsOn: [], assignedTo: ["j.de.vries@bouw.nl"], wachtOp: null, wachtOpToelichting: null },
+    budgetHours: 40, dependsOn: [], assignedTo: ["j.de.vries@bouw.nl"], wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
   { id: "GC2", subject: "Fundering storten",
     parentTask: "GF1", isMilestone: false, isGroup: false, status: "Completed", progress: 100,
     expectedStartDate: new Date("2026-03-02"), expectedEndDate: new Date("2026-03-20"),
-    budgetHours: 30, dependsOn: ["GC1"], assignedTo: [], wachtOp: null, wachtOpToelichting: null },
+    budgetHours: 30, dependsOn: ["GC1"], assignedTo: [], wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
 
   // Fase 2: Ruwbouw (gedeeltelijk)
   { id: "GF2", subject: "Ruwbouw & Constructie",
     parentTask: null, isMilestone: false, isGroup: true, status: "Open", progress: 40,
     expectedStartDate: new Date("2026-03-16"), expectedEndDate: new Date("2026-06-19"),
-    budgetHours: null, dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null },
+    budgetHours: null, dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
   { id: "GC3", subject: "Muren metselen — begane grond",
     parentTask: "GF2", isMilestone: false, isGroup: false, status: "Open", progress: 100,
     expectedStartDate: new Date("2026-03-16"), expectedEndDate: new Date("2026-04-17"),
-    budgetHours: 80, dependsOn: ["GC2"], assignedTo: ["m.janssen@bouw.nl"], wachtOp: null, wachtOpToelichting: null },
+    budgetHours: 80, dependsOn: ["GC2"], assignedTo: ["m.janssen@bouw.nl"], wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
   { id: "GC4", subject: "Vloeren storten — verdieping",
     parentTask: "GF2", isMilestone: false, isGroup: false, status: "Open", progress: 25,
     expectedStartDate: new Date("2026-04-13"), expectedEndDate: new Date("2026-06-19"),
-    budgetHours: 100, dependsOn: ["GC3"], assignedTo: ["m.janssen@bouw.nl"], wachtOp: null, wachtOpToelichting: null },
+    budgetHours: 100, dependsOn: ["GC3"], assignedTo: ["m.janssen@bouw.nl"], wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
 
   // Fase 3: Installaties (nog niet begonnen, datums van children)
   { id: "GF3", subject: "Installaties",
     parentTask: null, isMilestone: false, isGroup: true, status: "Open", progress: 0,
     expectedStartDate: null, expectedEndDate: null,
-    budgetHours: null, dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null },
+    budgetHours: null, dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
   { id: "GC5", subject: "Elektra & sanitair ruw",
     parentTask: "GF3", isMilestone: false, isGroup: false, status: "Open", progress: 0,
     expectedStartDate: new Date("2026-06-01"), expectedEndDate: new Date("2026-08-07"),
-    budgetHours: 60, dependsOn: ["GC4"], assignedTo: [], wachtOp: null, wachtOpToelichting: null },
+    budgetHours: 60, dependsOn: ["GC4"], assignedTo: [], wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
 
   // Fase 4: Afwerking (GC6=kritiek, GC7=niet-kritiek parallel)
   { id: "GF4", subject: "Afwerking",
     parentTask: null, isMilestone: false, isGroup: true, status: "Open", progress: 0,
     expectedStartDate: null, expectedEndDate: null,
-    budgetHours: null, dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null },
+    budgetHours: null, dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
   { id: "GC6", subject: "Stukadoor & schilderwerk",
     parentTask: "GF4", isMilestone: false, isGroup: false, status: "Open", progress: 0,
     expectedStartDate: new Date("2026-07-20"), expectedEndDate: new Date("2026-09-11"),
-    budgetHours: 80, dependsOn: ["GC5"], assignedTo: [], wachtOp: null, wachtOpToelichting: null },
+    budgetHours: 80, dependsOn: ["GC5"], assignedTo: [], wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
   { id: "GC7", subject: "Tegelwerk badkamer",
     parentTask: "GF4", isMilestone: false, isGroup: false, status: "Open", progress: 0,
     expectedStartDate: new Date("2026-08-03"), expectedEndDate: new Date("2026-08-28"),
-    budgetHours: 20, dependsOn: ["GC5"], assignedTo: [], wachtOp: null, wachtOpToelichting: null },
+    budgetHours: 20, dependsOn: ["GC5"], assignedTo: [], wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
 
   // Fase 5: Buitenterrein (parallel, NIET kritiek)
   { id: "GF5", subject: "Buitenterrein",
     parentTask: null, isMilestone: false, isGroup: true, status: "Open", progress: 0,
     expectedStartDate: null, expectedEndDate: null,
-    budgetHours: null, dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null },
+    budgetHours: null, dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
   { id: "GC8", subject: "Terreininrichting & bestrating",
     parentTask: "GF5", isMilestone: false, isGroup: false, status: "Open", progress: 15,
     expectedStartDate: new Date("2026-04-06"), expectedEndDate: new Date("2026-06-12"),
-    budgetHours: 30, dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null },
+    budgetHours: 30, dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
 
   // Mijlpalen
   { id: "GM1", subject: "Oplevering ruwbouw",
     parentTask: null, isMilestone: true, isGroup: false, status: "Open", progress: 0,
     expectedStartDate: null, expectedEndDate: new Date("2026-06-19"),
-    budgetHours: null, dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null },
+    budgetHours: null, dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
   { id: "GM2", subject: "Sleuteloverdracht",
     parentTask: null, isMilestone: true, isGroup: false, status: "Open", progress: 0,
     expectedStartDate: null, expectedEndDate: new Date("2026-09-11"),
-    budgetHours: null, dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null },
+    budgetHours: null, dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null, actualStartDate: null, actualEndDate: null, description: null },
 ];
 
 const GANTT_SYNTH_RESULT = computeGanttData(GANTT_SYNTH_TASKS);
@@ -1377,6 +1363,151 @@ function GanttPaletteShowcase() {
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+// ── 4E: TaskDetailPaneel showcase ────────────────────────────────────────────
+
+const PANEL_DEMO_TASKS: ProjectTask[] = [
+  {
+    id: "TASK-001", subject: "Sloop", parentTask: null, isMilestone: false, isGroup: true,
+    status: "Completed", progress: 100,
+    expectedStartDate: new Date("2026-02-01"), expectedEndDate: new Date("2026-03-01"),
+    actualStartDate: new Date("2026-02-03"), actualEndDate: new Date("2026-03-05"),
+    budgetHours: 200, description: "Sloopwerkzaamheden inclusief asbest-inventarisatie.",
+    dependsOn: [], assignedTo: ["r.dekker@example.nl"],
+    wachtOp: null, wachtOpToelichting: null,
+  },
+  {
+    id: "TASK-002", subject: "Ruwbouw", parentTask: null, isMilestone: false, isGroup: true,
+    status: "Open", progress: 65,
+    expectedStartDate: new Date("2026-03-02"), expectedEndDate: new Date("2026-05-01"),
+    actualStartDate: new Date("2026-03-06"), actualEndDate: null,
+    budgetHours: 900, description: "Betonvloer, metselwerk en dakafdekking.",
+    dependsOn: ["TASK-001"], assignedTo: ["r.dekker@example.nl"],
+    wachtOp: null, wachtOpToelichting: null,
+  },
+  {
+    id: "TASK-002A", subject: "Betonvloer", parentTask: "TASK-002", isMilestone: false, isGroup: false,
+    status: "Completed", progress: 100,
+    expectedStartDate: new Date("2026-03-06"), expectedEndDate: new Date("2026-03-20"),
+    actualStartDate: new Date("2026-03-06"), actualEndDate: new Date("2026-03-22"),
+    budgetHours: 200, description: null,
+    dependsOn: [], assignedTo: ["r.dekker@example.nl"],
+    wachtOp: null, wachtOpToelichting: null,
+  },
+  {
+    id: "TASK-002B", subject: "Metselwerk", parentTask: "TASK-002", isMilestone: false, isGroup: false,
+    status: "Open", progress: 70,
+    expectedStartDate: new Date("2026-03-23"), expectedEndDate: new Date("2026-04-18"),
+    actualStartDate: new Date("2026-03-24"), actualEndDate: null,
+    budgetHours: 480, description: null,
+    dependsOn: ["TASK-002A"], assignedTo: ["r.dekker@example.nl"],
+    wachtOp: null, wachtOpToelichting: null,
+  },
+  {
+    id: "TASK-002C", subject: "Dakafdekking", parentTask: "TASK-002", isMilestone: false, isGroup: false,
+    status: "Open", progress: 20,
+    expectedStartDate: new Date("2026-04-19"), expectedEndDate: new Date("2026-05-01"),
+    actualStartDate: null, actualEndDate: null,
+    budgetHours: 220, description: null,
+    dependsOn: ["TASK-002B"], assignedTo: [],
+    wachtOp: "Materiaal", wachtOpToelichting: "Dakpannen verwacht week 19.",
+  },
+  {
+    id: "TASK-003", subject: "Afbouw", parentTask: null, isMilestone: false, isGroup: true,
+    status: "Open", progress: 10,
+    expectedStartDate: new Date("2026-05-04"), expectedEndDate: new Date("2026-07-01"),
+    actualStartDate: null, actualEndDate: null,
+    budgetHours: 450, description: null,
+    dependsOn: ["TASK-002"], assignedTo: [],
+    wachtOp: "Materiaal", wachtOpToelichting: "Leverancier bevestigt levering week 24.",
+  },
+  {
+    id: "TASK-004", subject: "Installatie", parentTask: null, isMilestone: false, isGroup: true,
+    status: "Open", progress: 0,
+    expectedStartDate: new Date("2026-06-01"), expectedEndDate: new Date("2026-07-15"),
+    actualStartDate: null, actualEndDate: null,
+    budgetHours: null, description: "E- en W-installaties door onderaannemer.",
+    dependsOn: ["TASK-002"], assignedTo: [],
+    wachtOp: "Onderaannemer", wachtOpToelichting: null,
+  },
+  {
+    id: "TASK-005", subject: "Oplevering", parentTask: null, isMilestone: true, isGroup: false,
+    status: "Open", progress: 0,
+    expectedStartDate: new Date("2026-08-29"), expectedEndDate: new Date("2026-08-31"),
+    actualStartDate: null, actualEndDate: null,
+    budgetHours: null, description: null,
+    dependsOn: ["TASK-003", "TASK-004"], assignedTo: ["m.janssen@example.nl"],
+    wachtOp: null, wachtOpToelichting: null,
+  },
+];
+
+const PANEL_DEMO_TIMESHEETS: TimesheetMap = {
+  "TASK-001": 240,
+  "TASK-002": 580,
+  "TASK-003": 80,
+};
+
+function TaskDetailPaneelShowcase() {
+  const [open, setOpen] = useState<{ id: string; mode: "task" | "phase" } | null>(null);
+
+  return (
+    <div className="mt-12 border-t-2 border-slate-300 pt-8 pb-16 px-8">
+      <h2 className="text-lg font-bold text-slate-700 mb-1">
+        Task detail-paneel — 4E
+      </h2>
+      <p className="text-xs text-slate-400 mb-6">
+        Adaptief paneel: side-panel ≥1280px, bottom-sheet &lt;1280px. Klik de knoppen om Task-modus of Fase-modus te openen.
+        Binnen het paneel klik je op afhankelijkheden om te navigeren.
+      </p>
+
+      <div className="flex flex-wrap gap-3 mb-4">
+        <button
+          type="button"
+          onClick={() => setOpen({ id: "TASK-002", mode: "task" })}
+          className="px-4 py-2 rounded-lg bg-y-teal text-white text-sm font-medium hover:bg-y-teal-dark transition-colors"
+        >
+          Open Task-modus (Ruwbouw, 65%)
+        </button>
+        <button
+          type="button"
+          onClick={() => setOpen({ id: "TASK-003", mode: "task" })}
+          className="px-4 py-2 rounded-lg bg-slate-600 text-white text-sm font-medium hover:bg-slate-700 transition-colors"
+        >
+          Open Task-modus (Afbouw, wacht-op)
+        </button>
+        <button
+          type="button"
+          onClick={() => setOpen({ id: "TASK-002", mode: "phase" })}
+          className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors"
+        >
+          Open Fase-modus (Ruwbouw, 3 sub-taken)
+        </button>
+        <button
+          type="button"
+          onClick={() => setOpen({ id: "TASK-005", mode: "task" })}
+          className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors"
+        >
+          Open Mijlpaal (Oplevering, 2 deps)
+        </button>
+      </div>
+
+      <p className="text-xs text-slate-400">
+        PROJ-0009 Renovatie Gemeentehuis Sliedrecht — 5 fases + timesheets geladen.
+      </p>
+
+      {open && (
+        <TaskDetailPaneel
+          key={open.id}
+          tasks={PANEL_DEMO_TASKS}
+          timesheets={PANEL_DEMO_TIMESHEETS}
+          initialId={open.id}
+          initialMode={open.mode}
+          onClose={() => setOpen(null)}
+        />
+      )}
     </div>
   );
 }

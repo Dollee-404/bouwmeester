@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { ProjectDetail, ProjectTask, TimesheetMap } from "../../../data/detail-types";
 import { countWorkingDays } from "../../../data/planning-helpers";
 import { SituatieStrook, type PlanningStatus, type MijlpaalMark } from "./SituatieStrook";
@@ -5,6 +6,7 @@ import { computeWerkvoorraad } from "./werkvoorraad-logica";
 import { WerkvoorraadStrook } from "./WerkvoorraadStrook";
 import { computeGanttData } from "./gantt-logica";
 import { GanttStrook } from "./GanttStrook";
+import { TaskDetailPaneel } from "./TaskDetailPaneel";
 
 interface PlanningTabProps {
   detail: ProjectDetail;
@@ -88,11 +90,18 @@ function computePlanning(detail: ProjectDetail, tasks: ProjectTask[], today: Dat
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
+interface PanelState {
+  id: string;
+  mode: "task" | "phase";
+}
+
 export function PlanningTab({ detail, tasks, timesheets, today }: PlanningTabProps) {
   const now = today ?? new Date();
   const planning = computePlanning(detail, tasks, now);
   const werkvoorraad = computeWerkvoorraad(tasks, timesheets, now);
   const gantt = computeGanttData(tasks);
+
+  const [panel, setPanel] = useState<PanelState | null>(null);
 
   return (
     <div className="py-4">
@@ -106,8 +115,26 @@ export function PlanningTab({ detail, tasks, timesheets, today }: PlanningTabPro
         today={now}
         mijlpalen={planning.mijlpalen}
       />
-      <WerkvoorraadStrook items={werkvoorraad} />
-      <GanttStrook data={gantt} today={now} />
+      <WerkvoorraadStrook
+        items={werkvoorraad}
+        onItemClick={(id) => setPanel({ id, mode: "task" })}
+      />
+      <GanttStrook
+        data={gantt}
+        today={now}
+        onFaseClick={(id) => setPanel({ id, mode: "phase" })}
+      />
+
+      {panel && (
+        <TaskDetailPaneel
+          key={panel.id}
+          tasks={tasks}
+          timesheets={timesheets}
+          initialId={panel.id}
+          initialMode={panel.mode}
+          onClose={() => setPanel(null)}
+        />
+      )}
     </div>
   );
 }

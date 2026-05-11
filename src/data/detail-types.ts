@@ -36,7 +36,10 @@ export interface ProjectTask {
   progress: number;
   expectedStartDate: Date | null;
   expectedEndDate: Date | null;
+  actualStartDate: Date | null;
+  actualEndDate: Date | null;
   budgetHours: number | null;
+  description: string | null;
   dependsOn: string[];
   assignedTo: string[];
   wachtOp: string | null;
