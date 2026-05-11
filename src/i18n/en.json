@@ -87,7 +87,8 @@
   },
   "card": {
     "no_end_date": "No end date",
-    "no_project_manager": "No project manager"
+    "no_project_manager": "No project manager",
+    "no_budget": "No budget"
   },
   "deadline": {
     "on_track": "on schedule",
@@ -117,7 +118,7 @@
     "load_error": "Error loading project",
     "project_lost": "Project lost",
     "project_cancelled": "Project cancelled",
-    "action_uren": "Hours",
+    "action_uren": "Register hours",
     "action_factureren": "Invoice",
     "action_actie": "Action"
   },

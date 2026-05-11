@@ -87,7 +87,8 @@
   },
   "card": {
     "no_end_date": "Geen einddatum",
-    "no_project_manager": "Geen projectleider"
+    "no_project_manager": "Geen projectleider",
+    "no_budget": "Geen budget"
   },
   "deadline": {
     "on_track": "op schema",
@@ -117,7 +118,7 @@
     "load_error": "Fout bij laden",
     "project_lost": "Project verloren",
     "project_cancelled": "Project geannuleerd",
-    "action_uren": "Uren",
+    "action_uren": "Uren registreren",
     "action_factureren": "Factureren",
     "action_actie": "Actie"
   },

@@ -108,21 +108,25 @@ export function ProjectCard({ project, onClick, tabIndex = 0 }: ProjectCardProps
         </div>
       )}
 
-      {/* Row 5: budget + progress bar */}
-      {project.budgetSales > 0 && (
-        <div className="mb-2.5">
-          <div className="flex items-center justify-between text-[11px] text-slate-500 mb-1">
-            <span>Besteed: € {project.billedAmount.toLocaleString("nl-NL")}</span>
-            <span className="text-slate-500">€ {project.budgetSales.toLocaleString("nl-NL")}</span>
-          </div>
-          <div className="h-1 rounded-full bg-slate-100 overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all ${isOverBudget ? "bg-red-500" : "bg-emerald-500"}`}
-              style={{ width: `${progressPct}%` }}
-            />
-          </div>
-        </div>
-      )}
+      {/* Row 5: budget + progress bar — altijd tonen voor uniforme kaarthoogte */}
+      <div className="mb-2.5">
+        {project.budgetSales > 0 ? (
+          <>
+            <div className="flex items-center justify-between text-[11px] text-slate-500 mb-1">
+              <span>Besteed: € {project.billedAmount.toLocaleString("nl-NL")}</span>
+              <span>€ {project.budgetSales.toLocaleString("nl-NL")}</span>
+            </div>
+            <div className="h-1 rounded-full bg-slate-100 overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${isOverBudget ? "bg-red-500" : "bg-emerald-500"}`}
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+          </>
+        ) : (
+          <span className="text-[11px] text-slate-400">{t("card.no_budget")}</span>
+        )}
+      </div>
 
       {/* Row 6: footer — altijd tonen */}
       <div className="flex items-center mt-1">
