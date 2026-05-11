@@ -5,6 +5,9 @@ import { SituatieStrook, type SituatieStrookProps } from "../components/detail/p
 import { WerkvoorraadStrook } from "../components/detail/planning/WerkvoorraadStrook";
 import { computeWerkvoorraad } from "../components/detail/planning/werkvoorraad-logica";
 import type { WerkvoorraadItem } from "../components/detail/planning/werkvoorraad-logica";
+import { GanttStrook } from "../components/detail/planning/GanttStrook";
+import { computeGanttData } from "../components/detail/planning/gantt-logica";
+import type { GanttData } from "../components/detail/planning/gantt-logica";
 import type { ProjectTask, TimesheetMap } from "../data/detail-types";
 
 import { HOST_ORIGIN, INSTANCE_ID, ERPNEXT_URL, LANG } from "../bridge";
@@ -463,6 +466,15 @@ export function TestPage() {
 
     {/* ── Werkvoorraad logica-test (4C) ────────────────────────────────── */}
     <WerkvoorraadLogicaTest />
+
+    {/* ── Gantt showcase (4D) ──────────────────────────────────────────── */}
+    <GanttStrookShowcase />
+
+    {/* ── Gantt logica-test (4D) ───────────────────────────────────────── */}
+    <GanttLogicaTest />
+
+    {/* ── Gantt palet-keuze (4D) ───────────────────────────────────────── */}
+    <GanttPaletteShowcase />
   </>
   );
 }
@@ -921,6 +933,450 @@ function WerkvoorraadLogicaTest() {
           </li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+// ── Gantt: dummy-data voor showcase ───────────────────────────────────────────
+
+const GANTT_TODAY = new Date("2026-05-11");
+
+const GANTT_DUMMY: GanttData = {
+  fases: [
+    {
+      id: "GF1", subject: "Fundering & Grondwerk",
+      plannedStart: new Date("2026-02-02"), plannedEnd: new Date("2026-03-20"),
+      progress: 100, isCritical: true,
+    },
+    {
+      id: "GF2", subject: "Ruwbouw & Constructie",
+      plannedStart: new Date("2026-03-16"), plannedEnd: new Date("2026-06-19"),
+      progress: 63, isCritical: true,
+    },
+    {
+      id: "GF3", subject: "Installaties",
+      plannedStart: new Date("2026-06-01"), plannedEnd: new Date("2026-08-07"),
+      progress: 0, isCritical: true,
+    },
+    {
+      id: "GF4", subject: "Afwerking",
+      plannedStart: new Date("2026-07-20"), plannedEnd: new Date("2026-09-11"),
+      progress: 0, isCritical: true,
+    },
+    {
+      id: "GF5", subject: "Buitenterrein",
+      plannedStart: new Date("2026-04-06"), plannedEnd: new Date("2026-06-12"),
+      progress: 15, isCritical: false,
+    },
+  ],
+  mijlpalen: [
+    { id: "GM1", subject: "Oplevering ruwbouw", date: new Date("2026-06-19") },
+    { id: "GM2", subject: "Sleuteloverdracht",  date: new Date("2026-09-11") },
+  ],
+  projectStart: new Date("2026-02-02"),
+  projectEnd:   new Date("2026-09-11"),
+};
+
+function GanttStrookShowcase() {
+  return (
+    <div className="mt-12 border-t border-slate-200 pt-8">
+      <h2 className="text-lg font-bold text-slate-700 mb-1 px-8">
+        Gantt-strook — 4D showcase (dummy-fases)
+      </h2>
+      <p className="text-xs text-slate-400 px-8 mb-6">
+        5 fases, 2 mijlpalen. "Vandaag" = 2026-05-11.
+        Amber balk + onderlijn = kritiek pad. Drie zoomknoppen: Week / Maand / Heel project.
+      </p>
+      <div className="px-8 pb-12 max-w-4xl">
+        <GanttStrook data={GANTT_DUMMY} today={GANTT_TODAY} />
+      </div>
+
+      <h3 className="text-sm font-semibold text-slate-500 mb-1 px-8">Edge case — leeg</h3>
+      <p className="text-xs text-slate-400 px-8 mb-4">Geen fases met planningsdatums</p>
+      <div className="px-8 pb-12 max-w-4xl">
+        <GanttStrook
+          data={{ fases: [], mijlpalen: [], projectStart: null, projectEnd: null }}
+          today={GANTT_TODAY}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ── Gantt: synthetische logica-test ───────────────────────────────────────────
+
+const GANTT_SYNTH_TASKS: ProjectTask[] = [
+  // Fase 1: Fundering (alle children afgerond → progress=100%)
+  { id: "GF1", subject: "Fundering & Grondwerk",
+    parentTask: null, isMilestone: false, isGroup: true, status: "Open", progress: 80,
+    expectedStartDate: null, expectedEndDate: null,
+    budgetHours: null, dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null },
+  { id: "GC1", subject: "Grondwerk & sleuven graven",
+    parentTask: "GF1", isMilestone: false, isGroup: false, status: "Completed", progress: 100,
+    expectedStartDate: new Date("2026-02-02"), expectedEndDate: new Date("2026-03-06"),
+    budgetHours: 40, dependsOn: [], assignedTo: ["j.de.vries@bouw.nl"], wachtOp: null, wachtOpToelichting: null },
+  { id: "GC2", subject: "Fundering storten",
+    parentTask: "GF1", isMilestone: false, isGroup: false, status: "Completed", progress: 100,
+    expectedStartDate: new Date("2026-03-02"), expectedEndDate: new Date("2026-03-20"),
+    budgetHours: 30, dependsOn: ["GC1"], assignedTo: [], wachtOp: null, wachtOpToelichting: null },
+
+  // Fase 2: Ruwbouw (gedeeltelijk)
+  { id: "GF2", subject: "Ruwbouw & Constructie",
+    parentTask: null, isMilestone: false, isGroup: true, status: "Open", progress: 40,
+    expectedStartDate: new Date("2026-03-16"), expectedEndDate: new Date("2026-06-19"),
+    budgetHours: null, dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null },
+  { id: "GC3", subject: "Muren metselen — begane grond",
+    parentTask: "GF2", isMilestone: false, isGroup: false, status: "Open", progress: 100,
+    expectedStartDate: new Date("2026-03-16"), expectedEndDate: new Date("2026-04-17"),
+    budgetHours: 80, dependsOn: ["GC2"], assignedTo: ["m.janssen@bouw.nl"], wachtOp: null, wachtOpToelichting: null },
+  { id: "GC4", subject: "Vloeren storten — verdieping",
+    parentTask: "GF2", isMilestone: false, isGroup: false, status: "Open", progress: 25,
+    expectedStartDate: new Date("2026-04-13"), expectedEndDate: new Date("2026-06-19"),
+    budgetHours: 100, dependsOn: ["GC3"], assignedTo: ["m.janssen@bouw.nl"], wachtOp: null, wachtOpToelichting: null },
+
+  // Fase 3: Installaties (nog niet begonnen, datums van children)
+  { id: "GF3", subject: "Installaties",
+    parentTask: null, isMilestone: false, isGroup: true, status: "Open", progress: 0,
+    expectedStartDate: null, expectedEndDate: null,
+    budgetHours: null, dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null },
+  { id: "GC5", subject: "Elektra & sanitair ruw",
+    parentTask: "GF3", isMilestone: false, isGroup: false, status: "Open", progress: 0,
+    expectedStartDate: new Date("2026-06-01"), expectedEndDate: new Date("2026-08-07"),
+    budgetHours: 60, dependsOn: ["GC4"], assignedTo: [], wachtOp: null, wachtOpToelichting: null },
+
+  // Fase 4: Afwerking (GC6=kritiek, GC7=niet-kritiek parallel)
+  { id: "GF4", subject: "Afwerking",
+    parentTask: null, isMilestone: false, isGroup: true, status: "Open", progress: 0,
+    expectedStartDate: null, expectedEndDate: null,
+    budgetHours: null, dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null },
+  { id: "GC6", subject: "Stukadoor & schilderwerk",
+    parentTask: "GF4", isMilestone: false, isGroup: false, status: "Open", progress: 0,
+    expectedStartDate: new Date("2026-07-20"), expectedEndDate: new Date("2026-09-11"),
+    budgetHours: 80, dependsOn: ["GC5"], assignedTo: [], wachtOp: null, wachtOpToelichting: null },
+  { id: "GC7", subject: "Tegelwerk badkamer",
+    parentTask: "GF4", isMilestone: false, isGroup: false, status: "Open", progress: 0,
+    expectedStartDate: new Date("2026-08-03"), expectedEndDate: new Date("2026-08-28"),
+    budgetHours: 20, dependsOn: ["GC5"], assignedTo: [], wachtOp: null, wachtOpToelichting: null },
+
+  // Fase 5: Buitenterrein (parallel, NIET kritiek)
+  { id: "GF5", subject: "Buitenterrein",
+    parentTask: null, isMilestone: false, isGroup: true, status: "Open", progress: 0,
+    expectedStartDate: null, expectedEndDate: null,
+    budgetHours: null, dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null },
+  { id: "GC8", subject: "Terreininrichting & bestrating",
+    parentTask: "GF5", isMilestone: false, isGroup: false, status: "Open", progress: 15,
+    expectedStartDate: new Date("2026-04-06"), expectedEndDate: new Date("2026-06-12"),
+    budgetHours: 30, dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null },
+
+  // Mijlpalen
+  { id: "GM1", subject: "Oplevering ruwbouw",
+    parentTask: null, isMilestone: true, isGroup: false, status: "Open", progress: 0,
+    expectedStartDate: null, expectedEndDate: new Date("2026-06-19"),
+    budgetHours: null, dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null },
+  { id: "GM2", subject: "Sleuteloverdracht",
+    parentTask: null, isMilestone: true, isGroup: false, status: "Open", progress: 0,
+    expectedStartDate: null, expectedEndDate: new Date("2026-09-11"),
+    budgetHours: null, dependsOn: [], assignedTo: [], wachtOp: null, wachtOpToelichting: null },
+];
+
+const GANTT_SYNTH_RESULT = computeGanttData(GANTT_SYNTH_TASKS);
+
+function GanttLogicaTest() {
+  const { fases, mijlpalen } = GANTT_SYNTH_RESULT;
+
+  return (
+    <div className="mt-8 border-t border-slate-200 pt-8">
+      <h2 className="text-lg font-bold text-slate-700 mb-1 px-8">
+        Gantt-logica — synthetische test
+      </h2>
+      <p className="text-xs text-slate-400 px-8 mb-1">
+        5 fases, 8 leaftaken + 2 mijlpalen. GF1/GF3/GF4/GF5 datums afgeleid van children.
+        Kritiek pad: GC1→GC2→GC3→GC4→GC5→GC6. GC7 en GC8 zijn NIET kritiek.
+      </p>
+      <p className="text-xs text-slate-400 px-8 mb-6">
+        Verwacht: GF1(100%, krit.), GF2(63%, krit.), GF3(0%, krit.), GF4(0%, krit.), GF5(15%, <strong>niet krit.</strong>)
+      </p>
+
+      <div className="px-8 pb-6 max-w-4xl">
+        <GanttStrook data={GANTT_SYNTH_RESULT} today={GANTT_TODAY} />
+      </div>
+
+      <table className="mx-8 mb-8 text-xs font-mono border-collapse">
+        <thead>
+          <tr className="text-slate-400">
+            <th className="text-left pr-4 pb-1">ID</th>
+            <th className="text-left pr-4 pb-1">Fase</th>
+            <th className="text-right pr-4 pb-1">Start</th>
+            <th className="text-right pr-4 pb-1">Einde</th>
+            <th className="text-right pr-4 pb-1">Voortg.</th>
+            <th className="text-left pb-1">Kritiek</th>
+          </tr>
+        </thead>
+        <tbody>
+          {fases.map(f => (
+            <tr key={f.id} className="text-slate-600">
+              <td className="pr-4 py-0.5 text-slate-400">{f.id}</td>
+              <td className="pr-4 py-0.5">{f.subject}</td>
+              <td className="pr-4 py-0.5 text-right">{f.plannedStart?.toLocaleDateString("nl-NL") ?? "—"}</td>
+              <td className="pr-4 py-0.5 text-right">{f.plannedEnd?.toLocaleDateString("nl-NL") ?? "—"}</td>
+              <td className="pr-4 py-0.5 text-right">{f.progress}%</td>
+              <td className={`py-0.5 font-semibold ${f.isCritical ? "text-amber-600" : "text-slate-400"}`}>
+                {f.isCritical ? "ja" : "nee"}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <h3 className="text-sm font-semibold text-slate-500 mb-2 px-8">
+        Mijlpalen ({mijlpalen.length})
+      </h3>
+      <ul className="px-8 pb-12 flex flex-col gap-1 text-xs font-mono text-slate-500">
+        {mijlpalen.map(m => (
+          <li key={m.id} className="flex gap-3">
+            <span className="text-slate-400">{m.id}</span>
+            <span>{m.subject}</span>
+            <span className="text-amber-600">{m.date.toLocaleDateString("nl-NL")}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+// ── Gantt palet-keuze showcase ────────────────────────────────────────────────
+// Toont 3 paletten × 2 baseline-strategieën = 6 mini-Gantt-varianten.
+// Vaste "Heel project"-posities (feb–sep 2026), geen zoomknoppen nodig.
+
+type MiniFaseKleur = { deep: string; light: string };
+
+type MiniFase = {
+  id: string;
+  label: string;
+  start: number;  // % van viewStart
+  end: number;
+  progress: number;
+  critical: boolean;
+  aarde: MiniFaseKleur;
+  koel: MiniFaseKleur;
+  harmonie: MiniFaseKleur;
+};
+
+// feb 2 – sep 11 = 221 dagen; 11 mei = dag 98 → 44.3%
+const MINI_VANDAAG_PCT = 44.3;
+const MINI_MIJLPALEN_PCT = [62, 100]; // oplevering ruwbouw (19 jun), sleuteloverdracht (11 sep)
+
+const MINI_FASES: MiniFase[] = [
+  {
+    id: "GF1", label: "Fundering", start: 0, end: 20.8, progress: 100, critical: true,
+    aarde:    { deep: "#6b8f68", light: "#c4d6c2" }, // sage groen
+    koel:     { deep: "#4d8c8a", light: "#aed4d2" }, // gedempt teal
+    harmonie: { deep: "#6b8f68", light: "#c4d6c2" }, // sage
+  },
+  {
+    id: "GF2", label: "Ruwbouw", start: 19, end: 62, progress: 63, critical: true,
+    aarde:    { deep: "#8c6d3f", light: "#d6c0a2" }, // gedempt brons
+    koel:     { deep: "#5060a0", light: "#b2bad8" }, // indigo
+    harmonie: { deep: "#a07080", light: "#d8bec6" }, // dusty rose
+  },
+  {
+    id: "GF3", label: "Installaties", start: 53.8, end: 84.2, progress: 0, critical: true,
+    aarde:    { deep: "#b06040", light: "#e0b8a8" }, // terracotta
+    koel:     { deep: "#3d6898", light: "#a2c0d6" }, // denim
+    harmonie: { deep: "#4d8c8a", light: "#aed4d2" }, // gedempt teal
+  },
+  {
+    id: "GF4", label: "Afwerking", start: 76, end: 100, progress: 0, critical: true,
+    aarde:    { deep: "#8a6858", light: "#d0b8b0" }, // klei
+    koel:     { deep: "#5a6880", light: "#bac4d0" }, // slate-blauw
+    harmonie: { deep: "#a89048", light: "#ddd0a0" }, // soft amber
+  },
+  {
+    id: "GF5", label: "Buitenterrein", start: 28.5, end: 58.8, progress: 15, critical: false,
+    aarde:    { deep: "#9a9060", light: "#ddd8c0" }, // leem
+    koel:     { deep: "#7868a0", light: "#c6bcd8" }, // lavender
+    harmonie: { deep: "#3d6898", light: "#a2c0d6" }, // denim
+  },
+];
+
+const MINI_ROW_H   = 42;
+const MINI_BAR_TOP = 13;
+const MINI_BAR_H   = 16;
+const MINI_MILE_H  = 28;
+const MINI_LABEL_W = 88;
+
+function MiniGanttCard({
+  palet,
+  strategy,
+  strategyLabel,
+}: {
+  palet: "aarde" | "koel" | "harmonie";
+  strategy: "A" | "B";
+  strategyLabel: string;
+}) {
+  const totalH = MINI_MILE_H + MINI_FASES.length * MINI_ROW_H;
+
+  return (
+    <div>
+      <p className="text-xs font-semibold text-slate-700 mb-0.5">
+        {strategy === "A" ? "A — Eenkleurig per fase" : "B — Universele baseline"}
+      </p>
+      <p className="text-[10px] text-slate-400 mb-2">{strategyLabel}</p>
+
+      <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="flex">
+          {/* Labelkolom */}
+          <div className="flex-none flex flex-col border-r border-slate-100" style={{ width: MINI_LABEL_W }}>
+            <div style={{ height: MINI_MILE_H }} className="flex items-center px-2 border-b border-slate-200">
+              <span className="text-[9px] text-slate-400 font-medium">Mijlpalen</span>
+            </div>
+            {MINI_FASES.map(fase => (
+              <div
+                key={fase.id}
+                style={{
+                  height: MINI_ROW_H,
+                  borderLeft: fase.critical ? "3px solid #334155" : "3px solid transparent",
+                }}
+                className="flex items-center border-t border-slate-100"
+              >
+                <span className="text-[10px] font-medium text-slate-700 truncate px-2">
+                  {fase.label}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Grafiekkolom */}
+          <div className="flex-1 relative overflow-hidden" style={{ height: totalH }}>
+            {/* Vandaag-lijn */}
+            <div
+              className="absolute top-0 bottom-0"
+              style={{
+                left: `${MINI_VANDAAG_PCT}%`,
+                width: 1.5,
+                backgroundColor: "#3b82f6",
+                opacity: 0.4,
+                transform: "translateX(-50%)",
+              }}
+            />
+
+            {/* Mijlpaalrij */}
+            <div className="relative border-b border-slate-200" style={{ height: MINI_MILE_H }}>
+              {MINI_MIJLPALEN_PCT.map((pct, i) =>
+                pct <= 100 ? (
+                  <div
+                    key={i}
+                    className="absolute border-2 border-white"
+                    style={{
+                      left: `${pct}%`,
+                      top: "50%",
+                      width: 10,
+                      height: 10,
+                      transform: "translate(-50%, -50%) rotate(45deg)",
+                      backgroundColor: "#f59e0b",
+                    }}
+                  />
+                ) : null
+              )}
+            </div>
+
+            {/* Faserijen */}
+            {MINI_FASES.map(fase => {
+              const kleur = fase[palet];
+              const bWidth = fase.end - fase.start;
+              const pWidth = bWidth * (fase.progress / 100);
+              const baselineColor = strategy === "A" ? kleur.light : "#e2e8f0";
+
+              return (
+                <div key={fase.id} style={{ height: MINI_ROW_H }} className="relative border-t border-slate-100">
+                  {/* Baseline */}
+                  <div
+                    className="absolute"
+                    style={{
+                      left: `${fase.start}%`,
+                      width: `${bWidth}%`,
+                      top: MINI_BAR_TOP,
+                      height: MINI_BAR_H,
+                      backgroundColor: baselineColor,
+                      borderRadius: 8,
+                    }}
+                  />
+                  {/* Voortgang */}
+                  {pWidth > 0 && (
+                    <div
+                      className="absolute"
+                      style={{
+                        left: `${fase.start}%`,
+                        width: `${pWidth}%`,
+                        top: MINI_BAR_TOP,
+                        height: MINI_BAR_H,
+                        backgroundColor: kleur.deep,
+                        borderRadius: 8,
+                      }}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function GanttPaletteShowcase() {
+  const paletInfo = [
+    {
+      key: "aarde" as const,
+      naam: "1 — Aardetinten",
+      omschrijving: "Sage groen · Gedempt brons · Terracotta · Klei · Leem",
+    },
+    {
+      key: "koel" as const,
+      naam: "2 — Koele tinten",
+      omschrijving: "Gedempt teal · Indigo · Denim · Slate-blauw · Lavender",
+    },
+    {
+      key: "harmonie" as const,
+      naam: "3 — Gemengd harmonie",
+      omschrijving: "Sage · Dusty rose · Gedempt teal · Soft amber · Denim",
+    },
+  ];
+
+  return (
+    <div className="mt-12 border-t-2 border-slate-300 pt-8 pb-16">
+      <h2 className="text-lg font-bold text-slate-700 mb-1 px-8">
+        Gantt palet-keuze — 4D
+      </h2>
+      <p className="text-xs text-slate-400 px-8 mb-1">
+        Vaste Heel-project-weergave (feb–sep 2026). Donkere accentbalk links = kritiek pad. Amber ruiten = mijlpalen. Blauw = vandaag.
+      </p>
+      <p className="text-xs text-slate-400 px-8 mb-8">
+        <strong className="text-slate-600">A</strong> = baseline in lichte fase-kleur, voortgang in diepere tint van dezelfde kleur.&nbsp;&nbsp;
+        <strong className="text-slate-600">B</strong> = universele lichtgrijze baseline, voortgang in fase-kleur.
+      </p>
+
+      <div className="flex flex-col gap-10 px-8">
+        {paletInfo.map(({ key, naam, omschrijving }) => (
+          <div key={key}>
+            <h3 className="text-sm font-semibold text-slate-800 mb-0.5">{naam}</h3>
+            <p className="text-xs text-slate-400 mb-3">{omschrijving}</p>
+            <div className="grid grid-cols-2 gap-5">
+              <MiniGanttCard
+                palet={key}
+                strategy="A"
+                strategyLabel="Baseline = lichte fase-tint"
+              />
+              <MiniGanttCard
+                palet={key}
+                strategy="B"
+                strategyLabel="Baseline = universeel lichtgrijs"
+              />
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

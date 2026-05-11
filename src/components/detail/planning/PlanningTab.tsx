@@ -3,6 +3,8 @@ import { countWorkingDays } from "../../../data/planning-helpers";
 import { SituatieStrook, type PlanningStatus, type MijlpaalMark } from "./SituatieStrook";
 import { computeWerkvoorraad } from "./werkvoorraad-logica";
 import { WerkvoorraadStrook } from "./WerkvoorraadStrook";
+import { computeGanttData } from "./gantt-logica";
+import { GanttStrook } from "./GanttStrook";
 
 interface PlanningTabProps {
   detail: ProjectDetail;
@@ -90,6 +92,7 @@ export function PlanningTab({ detail, tasks, timesheets, today }: PlanningTabPro
   const now = today ?? new Date();
   const planning = computePlanning(detail, tasks, now);
   const werkvoorraad = computeWerkvoorraad(tasks, timesheets, now);
+  const gantt = computeGanttData(tasks);
 
   return (
     <div className="py-4">
@@ -104,6 +107,7 @@ export function PlanningTab({ detail, tasks, timesheets, today }: PlanningTabPro
         mijlpalen={planning.mijlpalen}
       />
       <WerkvoorraadStrook items={werkvoorraad} />
+      <GanttStrook data={gantt} today={now} />
     </div>
   );
 }

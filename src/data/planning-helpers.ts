@@ -1,44 +1,46 @@
 // Statische NL-feestdagen 2025-2027 (YYYY-MM-DD).
 // Variabele feestdagen (Pasen, Hemelvaart, Pinksteren) zijn vooraf berekend.
 // Koningsdag verschuift naar zaterdag als 27 april een zondag is.
-const NL_HOLIDAYS: readonly string[] = [
+interface NLHoliday { date: string; name: string }
+
+const NL_HOLIDAYS: readonly NLHoliday[] = [
   // 2025
-  "2025-01-01", // Nieuwjaarsdag
-  "2025-04-18", // Goede Vrijdag
-  "2025-04-20", // Eerste Paasdag
-  "2025-04-21", // Tweede Paasdag
-  "2025-04-26", // Koningsdag (27 apr = zondag → 26 apr)
-  "2025-05-05", // Bevrijdingsdag (lustrum: 80 jaar bevrijding)
-  "2025-05-29", // Hemelvaartsdag
-  "2025-06-08", // Eerste Pinksterdag
-  "2025-06-09", // Tweede Pinksterdag
-  "2025-12-25", // Eerste Kerstdag
-  "2025-12-26", // Tweede Kerstdag
+  { date: "2025-01-01", name: "Nieuwjaarsdag" },
+  { date: "2025-04-18", name: "Goede Vrijdag" },
+  { date: "2025-04-20", name: "Eerste Paasdag" },
+  { date: "2025-04-21", name: "Tweede Paasdag" },
+  { date: "2025-04-26", name: "Koningsdag" }, // 27 apr = zondag → 26 apr
+  { date: "2025-05-05", name: "Bevrijdingsdag" }, // lustrum: 80 jaar bevrijding
+  { date: "2025-05-29", name: "Hemelvaartsdag" },
+  { date: "2025-06-08", name: "Eerste Pinksterdag" },
+  { date: "2025-06-09", name: "Tweede Pinksterdag" },
+  { date: "2025-12-25", name: "Eerste Kerstdag" },
+  { date: "2025-12-26", name: "Tweede Kerstdag" },
   // 2026 — Bevrijdingsdag is geen vrije dag (geen lustrum; volgende: 2030)
-  "2026-01-01", // Nieuwjaarsdag
-  "2026-04-03", // Goede Vrijdag
-  "2026-04-05", // Eerste Paasdag
-  "2026-04-06", // Tweede Paasdag
-  "2026-04-27", // Koningsdag (27 apr = maandag)
-  "2026-05-14", // Hemelvaartsdag
-  "2026-05-24", // Eerste Pinksterdag
-  "2026-05-25", // Tweede Pinksterdag
-  "2026-12-25", // Eerste Kerstdag
-  "2026-12-26", // Tweede Kerstdag
+  { date: "2026-01-01", name: "Nieuwjaarsdag" },
+  { date: "2026-04-03", name: "Goede Vrijdag" },
+  { date: "2026-04-05", name: "Eerste Paasdag" },
+  { date: "2026-04-06", name: "Tweede Paasdag" },
+  { date: "2026-04-27", name: "Koningsdag" },
+  { date: "2026-05-14", name: "Hemelvaartsdag" },
+  { date: "2026-05-24", name: "Eerste Pinksterdag" },
+  { date: "2026-05-25", name: "Tweede Pinksterdag" },
+  { date: "2026-12-25", name: "Eerste Kerstdag" },
+  { date: "2026-12-26", name: "Tweede Kerstdag" },
   // 2027 — Bevrijdingsdag is geen vrije dag (geen lustrum; volgende: 2030)
-  "2027-01-01", // Nieuwjaarsdag
-  "2027-03-26", // Goede Vrijdag
-  "2027-03-28", // Eerste Paasdag
-  "2027-03-29", // Tweede Paasdag
-  "2027-04-27", // Koningsdag (27 apr = dinsdag)
-  "2027-05-06", // Hemelvaartsdag
-  "2027-05-16", // Eerste Pinksterdag
-  "2027-05-17", // Tweede Pinksterdag
-  "2027-12-25", // Eerste Kerstdag
-  "2027-12-26", // Tweede Kerstdag
+  { date: "2027-01-01", name: "Nieuwjaarsdag" },
+  { date: "2027-03-26", name: "Goede Vrijdag" },
+  { date: "2027-03-28", name: "Eerste Paasdag" },
+  { date: "2027-03-29", name: "Tweede Paasdag" },
+  { date: "2027-04-27", name: "Koningsdag" },
+  { date: "2027-05-06", name: "Hemelvaartsdag" },
+  { date: "2027-05-16", name: "Eerste Pinksterdag" },
+  { date: "2027-05-17", name: "Tweede Pinksterdag" },
+  { date: "2027-12-25", name: "Eerste Kerstdag" },
+  { date: "2027-12-26", name: "Tweede Kerstdag" },
 ];
 
-const HOLIDAY_SET = new Set(NL_HOLIDAYS);
+const HOLIDAY_SET = new Set(NL_HOLIDAYS.map(h => h.date));
 
 function toDateKey(d: Date): string {
   return d.toISOString().slice(0, 10);
@@ -79,14 +81,14 @@ export function countWorkingDays(startDate: Date, endDate: Date): number {
  * Geeft de feestdagen terug die in de opgegeven periode vallen,
  * gesorteerd op datum. Handig voor console-output / debugging.
  */
-export function getHolidaysInRange(startDate: Date, endDate: Date): string[] {
+export function getHolidaysInRange(startDate: Date, endDate: Date): NLHoliday[] {
   const start = new Date(startDate);
   start.setHours(0, 0, 0, 0);
   const end = new Date(endDate);
   end.setHours(0, 0, 0, 0);
 
   return NL_HOLIDAYS.filter((h) => {
-    const d = new Date(h);
+    const d = new Date(h.date);
     return d >= start && d <= end;
   });
 }
