@@ -179,5 +179,66 @@
     "error_boundary_body": "An unexpected error occurred. Refresh the page to start again.",
     "refresh_page": "Refresh page",
     "show_technical_details": "Show technical details"
+  },
+  "planning": {
+    "situatie": {
+      "werkdag_one": "working day",
+      "werkdag_other": "working days",
+      "overschreden_deel1": "The planned completion was {{days}} {{unit}} ago.",
+      "overschreden_deel2": "The project is not yet finished.",
+      "voor_schema": "Project is {{days}} {{unit}} ahead of schedule.",
+      "op_schema": "Project is on schedule.",
+      "achter": "Project is {{days}} {{unit}} behind schedule.",
+      "mijlpaal_zin": "Next milestone: {{subject}} in {{days}} {{unit}}.",
+      "geen_datums": "No planning dates",
+      "geen_planning": "No planning dates have been set.",
+      "weersafhankelijk": "weather-dependent project"
+    },
+    "gantt": {
+      "tijdlijn": "Timeline",
+      "zoom_week": "Week",
+      "zoom_maand": "Month",
+      "zoom_project": "Full project",
+      "week_lang": "Week {{n}}",
+      "week_kort": "w{{n}}",
+      "mijlpalen": "Milestones",
+      "leeg": "No phases with planning dates."
+    },
+    "werkvoorraad": {
+      "leeg": "No items requiring attention this week.",
+      "meer": "+{{count}} more",
+      "achterstallig": "overdue",
+      "start_vandaag": "starts today",
+      "start_morgen": "starts tomorrow",
+      "start_dag": "starts {{dag}}",
+      "klaar_voor": "due {{dag}}",
+      "mijlpaal_vandaag": "milestone today",
+      "mijlpaal_over": "milestone in {{n}}d",
+      "kan_starten": "can start"
+    },
+    "taak_paneel": {
+      "niet_gevonden": "Task not found ({{id}})",
+      "toegewezen_aan": "Assigned to",
+      "datums": "Planning",
+      "gepland": "Planned",
+      "werkelijk": "Actual",
+      "voortgang": "Progress",
+      "omschrijving": "Description",
+      "wacht_op": "Waiting for",
+      "afhankelijk_van": "Depends on",
+      "taken_in_fase": "Tasks in this phase ({{count}})",
+      "geen_taken": "No tasks linked to this phase.",
+      "uur_besteed": "{{hours}} hours logged",
+      "uur_begroot": "{{hours}} hours budgeted",
+      "uren_lopen_uit": "(hours overrunning)",
+      "pct_gereed": "{{pct}}% complete",
+      "open_erpnext": "Open in ERPNext",
+      "status_open": "Open",
+      "status_in_werk": "In progress",
+      "status_gereed": "Completed",
+      "status_geannuleerd": "Cancelled",
+      "status_achterstallig": "Overdue",
+      "badge_mijlpaal": "Milestone"
+    }
   }
 }

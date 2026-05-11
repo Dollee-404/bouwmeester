@@ -75,7 +75,7 @@ export async function checkRequiredFields(): Promise<SetupCheckResult> {
   const existing = await fetchList<{ fieldname: string }>("Custom Field", {
     fields: ["fieldname"],
     filters: [
-      ["dt", "in", ["Project", "Project User", "Sales Order"]],
+      ["dt", "in", [...new Set(REQUIRED_CUSTOM_FIELDS.map((f) => f.dt))]],
       ["fieldname", "in", FIELD_NAMES],
     ],
     limit_page_length: 20,

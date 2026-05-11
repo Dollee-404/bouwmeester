@@ -179,5 +179,66 @@
     "error_boundary_body": "Er is een onverwachte fout opgetreden. Vernieuw de pagina om opnieuw te beginnen.",
     "refresh_page": "Vernieuw pagina",
     "show_technical_details": "Toon technische details"
+  },
+  "planning": {
+    "situatie": {
+      "werkdag_one": "werkdag",
+      "werkdag_other": "werkdagen",
+      "overschreden_deel1": "De geplande oplevering was {{days}} {{unit}} geleden.",
+      "overschreden_deel2": "Project is nog niet afgerond.",
+      "voor_schema": "Project loopt {{days}} {{unit}} voor op schema.",
+      "op_schema": "Project loopt op schema.",
+      "achter": "Project loopt {{days}} {{unit}} achter.",
+      "mijlpaal_zin": "Volgende mijlpaal: {{subject}} over {{days}} {{unit}}.",
+      "geen_datums": "Geen planningsdatums",
+      "geen_planning": "Nog geen planningsdatums ingesteld.",
+      "weersafhankelijk": "weersafhankelijk project"
+    },
+    "gantt": {
+      "tijdlijn": "Tijdlijn",
+      "zoom_week": "Week",
+      "zoom_maand": "Maand",
+      "zoom_project": "Heel project",
+      "week_lang": "Week {{n}}",
+      "week_kort": "w{{n}}",
+      "mijlpalen": "Mijlpalen",
+      "leeg": "Geen fases met planningsdatums."
+    },
+    "werkvoorraad": {
+      "leeg": "Geen aandachtspunten voor deze week.",
+      "meer": "+{{count}} meer",
+      "achterstallig": "achterstallig",
+      "start_vandaag": "start vandaag",
+      "start_morgen": "start morgen",
+      "start_dag": "start {{dag}}",
+      "klaar_voor": "klaar vóór {{dag}}",
+      "mijlpaal_vandaag": "mijlpaal vandaag",
+      "mijlpaal_over": "mijlpaal over {{n}}d",
+      "kan_starten": "kan starten"
+    },
+    "taak_paneel": {
+      "niet_gevonden": "Taak niet gevonden ({{id}})",
+      "toegewezen_aan": "Toegewezen aan",
+      "datums": "Planning",
+      "gepland": "Gepland",
+      "werkelijk": "Werkelijk",
+      "voortgang": "Voortgang",
+      "omschrijving": "Omschrijving",
+      "wacht_op": "Wacht op",
+      "afhankelijk_van": "Afhankelijk van",
+      "taken_in_fase": "Taken in deze fase ({{count}})",
+      "geen_taken": "Geen taken gekoppeld aan deze fase.",
+      "uur_besteed": "{{hours}} uur besteed",
+      "uur_begroot": "{{hours}} uur begroot",
+      "uren_lopen_uit": "(uren lopen uit)",
+      "pct_gereed": "{{pct}}% gereed",
+      "open_erpnext": "Open in ERPNext",
+      "status_open": "Open",
+      "status_in_werk": "In werk",
+      "status_gereed": "Gereed",
+      "status_geannuleerd": "Geannuleerd",
+      "status_achterstallig": "Achterstallig",
+      "badge_mijlpaal": "Mijlpaal"
+    }
   }
 }

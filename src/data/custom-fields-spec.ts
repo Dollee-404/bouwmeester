@@ -71,6 +71,21 @@ export const REQUIRED_CUSTOM_FIELDS: CustomFieldSpec[] = [
     default: "0",
     insert_after: "customer",
   },
+  {
+    dt: "Task",
+    fieldname: "custom_wacht_op",
+    label: "Wacht op",
+    fieldtype: "Select",
+    options: "\nVoorgaande taak\nWeer\nVergunning of keuring\nOnderaannemer\nMateriaal\nAnders",
+    insert_after: "status",
+  },
+  {
+    dt: "Task",
+    fieldname: "custom_wacht_op_toelichting",
+    label: "Wacht op (toelichting)",
+    fieldtype: "Small Text",
+    insert_after: "custom_wacht_op",
+  },
 ];
 
 export const FIELD_NAMES = REQUIRED_CUSTOM_FIELDS.map((f) => f.fieldname);
