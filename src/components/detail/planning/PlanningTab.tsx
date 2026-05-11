@@ -1,6 +1,8 @@
 import type { ProjectDetail, ProjectTask, TimesheetMap } from "../../../data/detail-types";
 import { countWorkingDays } from "../../../data/planning-helpers";
 import { SituatieStrook, type PlanningStatus, type MijlpaalMark } from "./SituatieStrook";
+import { computeWerkvoorraad } from "./werkvoorraad-logica";
+import { WerkvoorraadStrook } from "./WerkvoorraadStrook";
 
 interface PlanningTabProps {
   detail: ProjectDetail;
@@ -84,9 +86,10 @@ function computePlanning(detail: ProjectDetail, tasks: ProjectTask[], today: Dat
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export function PlanningTab({ detail, tasks, timesheets: _timesheets, today }: PlanningTabProps) {
+export function PlanningTab({ detail, tasks, timesheets, today }: PlanningTabProps) {
   const now = today ?? new Date();
   const planning = computePlanning(detail, tasks, now);
+  const werkvoorraad = computeWerkvoorraad(tasks, timesheets, now);
 
   return (
     <div className="py-4">
@@ -100,6 +103,7 @@ export function PlanningTab({ detail, tasks, timesheets: _timesheets, today }: P
         today={now}
         mijlpalen={planning.mijlpalen}
       />
+      <WerkvoorraadStrook items={werkvoorraad} />
     </div>
   );
 }

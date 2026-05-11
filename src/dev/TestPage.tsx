@@ -2,6 +2,10 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Search, LayoutGrid, List, Hammer } from "lucide-react";
 import { SituatieStrook, type SituatieStrookProps } from "../components/detail/planning/SituatieStrook";
+import { WerkvoorraadStrook } from "../components/detail/planning/WerkvoorraadStrook";
+import { computeWerkvoorraad } from "../components/detail/planning/werkvoorraad-logica";
+import type { WerkvoorraadItem } from "../components/detail/planning/werkvoorraad-logica";
+import type { ProjectTask, TimesheetMap } from "../data/detail-types";
 
 import { HOST_ORIGIN, INSTANCE_ID, ERPNEXT_URL, LANG } from "../bridge";
 import { useProjects } from "../hooks/use-projects";
@@ -453,6 +457,12 @@ export function TestPage() {
 
     {/* ── Situatiestrook showcase (4B) ──────────────────────────────────── */}
     <SituatieStrookShowcase />
+
+    {/* ── Werkvoorraad showcase (4C) ───────────────────────────────────── */}
+    <WerkvoorraadStrookShowcase />
+
+    {/* ── Werkvoorraad logica-test (4C) ────────────────────────────────── */}
+    <WerkvoorraadLogicaTest />
   </>
   );
 }
@@ -649,6 +659,268 @@ function SituatieStrookShowcase() {
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+// ── Werkvoorraad dummy-data (alle tag-types) ──────────────────────────────────
+
+const WERKVOORRAAD_DUMMY: WerkvoorraadItem[] = [
+  {
+    id: "TASK-001",
+    subject: "Sloopwerkzaamheden garage",
+    assignedTo: "j.de.vries@bouw.nl",
+    heeftDiscrepantie: false,
+    reden: { type: "achterstallig" },
+  },
+  {
+    id: "TASK-002",
+    subject: "Fundering gieten — fase 2",
+    assignedTo: "m.janssen@bouw.nl",
+    heeftDiscrepantie: true,
+    reden: { type: "start-vandaag" },
+  },
+  {
+    id: "TASK-003",
+    subject: "Isolatiewerk buitenmuur",
+    assignedTo: "p.bakker@bouw.nl",
+    heeftDiscrepantie: false,
+    reden: { type: "vrijgekomen" },
+  },
+  {
+    id: "TASK-004",
+    subject: "Installatie dakgoten",
+    assignedTo: null,
+    heeftDiscrepantie: false,
+    reden: { type: "start-morgen" },
+  },
+  {
+    id: "TASK-005",
+    subject: "Tegelwerk badkamer verdieping",
+    assignedTo: "a.visser@bouw.nl",
+    heeftDiscrepantie: false,
+    reden: { type: "start-dag", dag: "donderdag" },
+  },
+  {
+    id: "TASK-006",
+    subject: "Schilderwerk trapportaal",
+    assignedTo: "m.janssen@bouw.nl",
+    heeftDiscrepantie: true,
+    reden: { type: "klaar-voor", dag: "vrijdag" },
+  },
+  {
+    id: "TASK-007",
+    subject: "Oplevering ruwbouw",
+    assignedTo: "p.bakker@bouw.nl",
+    heeftDiscrepantie: false,
+    reden: { type: "mijlpaal", overDagen: 8 },
+  },
+  {
+    id: "TASK-008",
+    subject: "Parketvloer leggen woonkamer",
+    assignedTo: "j.de.vries@bouw.nl",
+    heeftDiscrepantie: false,
+    reden: { type: "wacht-op", label: "wacht op materiaal" },
+  },
+  {
+    id: "TASK-009",
+    subject: "Gevelisolatie buitengevels",
+    assignedTo: null,
+    heeftDiscrepantie: false,
+    reden: { type: "wacht-op", label: "wacht op weer" },
+  },
+  {
+    id: "TASK-010",
+    subject: "Stucwerk wanden slaapkamers",
+    assignedTo: "a.visser@bouw.nl",
+    heeftDiscrepantie: false,
+    reden: { type: "wacht-op", label: "wacht op voorgaande taak" },
+  },
+  {
+    id: "TASK-011",
+    subject: "Dakkapel plaatsen — voorzijde",
+    assignedTo: "k.smit@bouw.nl",
+    heeftDiscrepantie: false,
+    reden: { type: "wacht-op", label: "wacht op vergunning" },
+  },
+  {
+    id: "TASK-012",
+    subject: "Elektra ruw — verdieping",
+    assignedTo: null,
+    heeftDiscrepantie: false,
+    reden: { type: "wacht-op", label: "wacht op onderaannemer" },
+  },
+];
+
+function WerkvoorraadStrookShowcase() {
+  return (
+    <div className="mt-12 border-t border-slate-200 pt-8">
+      <h2 className="text-lg font-bold text-slate-700 mb-1 px-8">
+        Werkvoorraad-strook — 4C showcase (alle tag-types)
+      </h2>
+      <p className="text-xs text-slate-400 px-8 mb-6">
+        12 dummy-items — eerste 7 zichtbaar, "+5 meer" klapbaar. Klikbaar maar nog geen actie (4E).
+      </p>
+      <div className="px-8 pb-12 max-w-2xl">
+        <WerkvoorraadStrook items={WERKVOORRAAD_DUMMY} />
+      </div>
+
+      <h3 className="text-sm font-semibold text-slate-500 mb-1 px-8">Edge case — leeg</h3>
+      <p className="text-xs text-slate-400 px-8 mb-4">Geen aandachtspunten deze week</p>
+      <div className="px-8 pb-12 max-w-2xl">
+        <div className="bg-white border border-slate-200 rounded-lg shadow-sm">
+          <WerkvoorraadStrook items={[]} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Synthetische testcase: selectie-logica + assign-parsing + discrepantie ────
+// "today" = 2026-05-11 (maandag), week = 2026-05-11 t/m 2026-05-17
+
+const SYNTH_TODAY = new Date("2026-05-11");
+
+const SYNTH_TASKS: ProjectTask[] = [
+  // Criterium 3: achterstallig — einddatum 5 mei (verleden), discrepantie (9u/10u, 40%)
+  { id: "S1", subject: "Sloopwerk [achterstallig + discrepantie]",
+    parentTask: null, isMilestone: false, isGroup: false, status: "Open", progress: 40,
+    expectedStartDate: new Date("2026-04-28"), expectedEndDate: new Date("2026-05-05"),
+    budgetHours: 10, dependsOn: [], assignedTo: ["jan.de.vries@test.nl"],
+    wachtOp: null, wachtOpToelichting: null },
+
+  // Criterium 1: start vandaag (maandag 11 mei)
+  { id: "S2", subject: "Fundering gieten [start vandaag]",
+    parentTask: null, isMilestone: false, isGroup: false, status: "Open", progress: 0,
+    expectedStartDate: new Date("2026-05-11"), expectedEndDate: new Date("2026-05-20"),
+    budgetHours: 8, dependsOn: [], assignedTo: ["m.janssen@test.nl"],
+    wachtOp: null, wachtOpToelichting: null },
+
+  // Criterium 2: einddatum vrijdag 15 mei (deze week), discrepantie (13.5u/16u, 60%)
+  { id: "S3", subject: "Stucwerk [klaar vóór vrijdag + discrepantie]",
+    parentTask: null, isMilestone: false, isGroup: false, status: "Open", progress: 60,
+    expectedStartDate: new Date("2026-05-04"), expectedEndDate: new Date("2026-05-15"),
+    budgetHours: 16, dependsOn: [], assignedTo: [],
+    wachtOp: null, wachtOpToelichting: null },
+
+  // Criterium 4: kan starten — S5 (dep) is Completed, start 11 mei ≤ weekEnd 17 mei
+  { id: "S4", subject: "Isolatiewerk [kan starten — dep S5 is klaar]",
+    parentTask: null, isMilestone: false, isGroup: false, status: "Open", progress: 0,
+    expectedStartDate: new Date("2026-05-11"), expectedEndDate: new Date("2026-05-22"),
+    budgetHours: 12, dependsOn: ["S5"], assignedTo: ["p.bakker@test.nl"],
+    wachtOp: null, wachtOpToelichting: null },
+
+  // Afgeronde dep voor S4 — zelf NIET in werkvoorraad
+  { id: "S5", subject: "Fundering [Completed — dep van S4, NIET in lijst]",
+    parentTask: null, isMilestone: false, isGroup: false, status: "Completed", progress: 100,
+    expectedStartDate: new Date("2026-04-20"), expectedEndDate: new Date("2026-05-08"),
+    budgetHours: 20, dependsOn: [], assignedTo: [],
+    wachtOp: null, wachtOpToelichting: null },
+
+  // Criterium 5: mijlpaal zondag 17 mei (6 dagen)
+  { id: "S6", subject: "Oplevering ruwbouw [mijlpaal over 6d]",
+    parentTask: null, isMilestone: true, isGroup: false, status: "Open", progress: 0,
+    expectedStartDate: null, expectedEndDate: new Date("2026-05-17"),
+    budgetHours: null, dependsOn: [], assignedTo: ["j.smit@test.nl"],
+    wachtOp: null, wachtOpToelichting: null },
+
+  // UITGESLOTEN: toekomstige start buiten week, geen deps, geen mijlpaal
+  { id: "S7", subject: "Toekomstig werk [GEEN kwalificatie — start 1 jun]",
+    parentTask: null, isMilestone: false, isGroup: false, status: "Open", progress: 0,
+    expectedStartDate: new Date("2026-06-01"), expectedEndDate: new Date("2026-06-30"),
+    budgetHours: null, dependsOn: [], assignedTo: [],
+    wachtOp: null, wachtOpToelichting: null },
+
+  // UITGESLOTEN: isGroup = true
+  { id: "S8", subject: "Fase A [GEEN kwalificatie — groeptaak]",
+    parentTask: null, isMilestone: false, isGroup: true, status: "Open", progress: 0,
+    expectedStartDate: new Date("2026-05-11"), expectedEndDate: new Date("2026-05-30"),
+    budgetHours: null, dependsOn: [], assignedTo: [],
+    wachtOp: null, wachtOpToelichting: null },
+
+  // Extra taken → 12 kwalificerende items zodat "+5 meer" aantoonbaar werkt op echte logica
+  { id: "S9", subject: "Dakgoten installeren [start morgen]",
+    parentTask: null, isMilestone: false, isGroup: false, status: "Open", progress: 0,
+    expectedStartDate: new Date("2026-05-12"), expectedEndDate: new Date("2026-05-19"),
+    budgetHours: null, dependsOn: [], assignedTo: ["a.visser@test.nl"],
+    wachtOp: null, wachtOpToelichting: null },
+  { id: "S10", subject: "Tegelwerk badkamer [start woensdag]",
+    parentTask: null, isMilestone: false, isGroup: false, status: "Open", progress: 0,
+    expectedStartDate: new Date("2026-05-13"), expectedEndDate: new Date("2026-05-22"),
+    budgetHours: null, dependsOn: [], assignedTo: [],
+    wachtOp: null, wachtOpToelichting: null },
+  { id: "S11", subject: "Schilderwerk trapportaal [start donderdag]",
+    parentTask: null, isMilestone: false, isGroup: false, status: "Open", progress: 0,
+    expectedStartDate: new Date("2026-05-14"), expectedEndDate: new Date("2026-05-21"),
+    budgetHours: null, dependsOn: [], assignedTo: ["m.janssen@test.nl"],
+    wachtOp: null, wachtOpToelichting: null },
+  { id: "S12", subject: "Parketvloer leggen [klaar vóór woensdag]",
+    parentTask: null, isMilestone: false, isGroup: false, status: "Open", progress: 50,
+    expectedStartDate: new Date("2026-05-04"), expectedEndDate: new Date("2026-05-13"),
+    budgetHours: null, dependsOn: [], assignedTo: ["jan.de.vries@test.nl"],
+    wachtOp: null, wachtOpToelichting: null },
+  { id: "S13", subject: "Elektrische installatie [klaar vóór donderdag]",
+    parentTask: null, isMilestone: false, isGroup: false, status: "Open", progress: 30,
+    expectedStartDate: new Date("2026-05-06"), expectedEndDate: new Date("2026-05-14"),
+    budgetHours: null, dependsOn: [], assignedTo: [],
+    wachtOp: null, wachtOpToelichting: null },
+  { id: "S14", subject: "Vloerverwarming leggen [kan starten — dep S15 klaar]",
+    parentTask: null, isMilestone: false, isGroup: false, status: "Open", progress: 0,
+    expectedStartDate: new Date("2026-05-13"), expectedEndDate: new Date("2026-05-20"),
+    budgetHours: null, dependsOn: ["S15"], assignedTo: ["p.bakker@test.nl"],
+    wachtOp: null, wachtOpToelichting: null },
+  // Completed dep voor S14 — NIET in werkvoorraad
+  { id: "S15", subject: "Betonvloer [Completed — dep van S14, NIET in lijst]",
+    parentTask: null, isMilestone: false, isGroup: false, status: "Completed", progress: 100,
+    expectedStartDate: new Date("2026-04-25"), expectedEndDate: new Date("2026-05-09"),
+    budgetHours: null, dependsOn: [], assignedTo: [],
+    wachtOp: null, wachtOpToelichting: null },
+  { id: "S16", subject: "Sleuteloverdracht [mijlpaal volgende week]",
+    parentTask: null, isMilestone: true, isGroup: false, status: "Open", progress: 0,
+    expectedStartDate: null, expectedEndDate: new Date("2026-05-21"),
+    budgetHours: null, dependsOn: [], assignedTo: [],
+    wachtOp: null, wachtOpToelichting: null },
+];
+
+const SYNTH_TIMESHEETS: TimesheetMap = {
+  "S1": 9.0,   // 90% van 10u budget, voortgang 40% → discrepantie ✓
+  "S3": 13.5,  // 84% van 16u budget, voortgang 60% → discrepantie ✓
+};
+
+// Berekend op module-niveau (puur, geen side-effects)
+const SYNTH_RESULT = computeWerkvoorraad(SYNTH_TASKS, SYNTH_TIMESHEETS, SYNTH_TODAY);
+const SYNTH_MATCHED_IDS = new Set(SYNTH_RESULT.map((i) => i.id));
+const SYNTH_EXCLUDED = SYNTH_TASKS.filter((t) => !SYNTH_MATCHED_IDS.has(t.id));
+
+function WerkvoorraadLogicaTest() {
+  return (
+    <div className="mt-8 border-t border-slate-200 pt-8">
+      <h2 className="text-lg font-bold text-slate-700 mb-1 px-8">
+        Werkvoorraad-logica — synthetische test
+      </h2>
+      <p className="text-xs text-slate-400 px-8 mb-1">
+        "Vandaag" = 2026-05-11 (maandag). Week = 2026-05-11 t/m 2026-05-17.
+        Toont criteria 1-5, assign-parsing (email→initialen) en discrepantie-indicator.
+      </p>
+      <p className="text-xs text-slate-400 px-8 mb-6">
+        Verwachte volgorde: <span className="font-mono">S1 achterstallig → S2 start vandaag → S4 kan starten → S3 klaar vóór vrijdag → S6 mijlpaal</span>
+      </p>
+
+      <div className="px-8 pb-8 max-w-2xl">
+        <WerkvoorraadStrook items={SYNTH_RESULT} />
+      </div>
+
+      <h3 className="text-sm font-semibold text-slate-500 mb-2 px-8">
+        Terecht uitgesloten ({SYNTH_EXCLUDED.length} taken)
+      </h3>
+      <ul className="px-8 pb-12 flex flex-col gap-1 text-xs font-mono text-slate-500 max-w-2xl">
+        {SYNTH_EXCLUDED.map((t) => (
+          <li key={t.id} className="flex gap-2">
+            <span className="text-slate-400">{t.id}</span>
+            <span className="text-slate-600 truncate">{t.subject}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
