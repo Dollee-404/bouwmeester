@@ -51,7 +51,7 @@ function computePlanning(detail: ProjectDetail, tasks: ProjectTask[], today: Dat
   // Geen datums: niet te berekenen
   if (!startDate || !endDate) {
     return {
-      status: "op-schema" as PlanningStatus,
+      status: "geen-data" as PlanningStatus,
       achterstandDagen: 0,
       volgendeMijlpaal,
       isWeatherDependent,

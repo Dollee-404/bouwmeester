@@ -1,8 +1,10 @@
+import { useTranslation } from "react-i18next";
 import { CloudRain } from "lucide-react";
+import type { TFunction } from "i18next";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
-export type PlanningStatus = "op-schema" | "licht-achter" | "fors-achter" | "overschreden";
+export type PlanningStatus = "op-schema" | "licht-achter" | "fors-achter" | "overschreden" | "geen-data";
 
 export interface MijlpaalMark {
   date: Date;
@@ -23,43 +25,47 @@ export interface SituatieStrookProps {
 
 // ── Zin-constructie ──────────────────────────────────────────────────────────
 
-function dag(n: number): string {
-  return `werkdag${n === 1 ? "" : "en"}`;
-}
+function buildZin(
+  props: SituatieStrookProps,
+  t: TFunction,
+): { deel1: string; deel2: string | null } {
+  // Geen start- of einddatum → planning niet berekend
+  if (!props.projectStart || !props.projectEnd) {
+    return { deel1: t("planning.situatie.geen_planning"), deel2: null };
+  }
 
-function buildZin(props: SituatieStrookProps): { deel1: string; deel2: string | null } {
   const { status, achterstandDagen, volgendeMijlpaal } = props;
   const abs = Math.abs(achterstandDagen);
-
-  let deel1: string;
-  let deel2: string | null = null;
+  const unit = t("planning.situatie.werkdag", { count: abs });
 
   const mijlpaalZin = volgendeMijlpaal
-    ? `Volgende mijlpaal: ${volgendeMijlpaal.subject} over ${volgendeMijlpaal.overDagen} ${dag(volgendeMijlpaal.overDagen)}.`
+    ? t("planning.situatie.mijlpaal_zin", {
+        subject: volgendeMijlpaal.subject,
+        days: volgendeMijlpaal.overDagen,
+        unit: t("planning.situatie.werkdag", { count: volgendeMijlpaal.overDagen }),
+      })
     : null;
 
   switch (status) {
     case "overschreden":
-      deel1 = `De geplande oplevering was ${abs} ${dag(abs)} geleden.`;
-      deel2 = "Project is nog niet afgerond.";
-      break;
-
+      return {
+        deel1: t("planning.situatie.overschreden_deel1", { days: abs, unit }),
+        deel2: t("planning.situatie.overschreden_deel2"),
+      };
     case "op-schema":
-      deel1 = achterstandDagen < -1
-        ? `Project loopt ${abs} ${dag(abs)} voor op schema.`
-        : "Project loopt op schema.";
-      deel2 = mijlpaalZin;
-      break;
-
+      return {
+        deel1: achterstandDagen < -1
+          ? t("planning.situatie.voor_schema", { days: abs, unit })
+          : t("planning.situatie.op_schema"),
+        deel2: mijlpaalZin,
+      };
     case "licht-achter":
     case "fors-achter":
-      deel1 = `Project loopt ${abs} ${dag(abs)} achter.`;
-      // Geen mijlpaal → geen tweede zin; de status zegt al genoeg.
-      deel2 = mijlpaalZin;
-      break;
+      return {
+        deel1: t("planning.situatie.achter", { days: abs, unit }),
+        deel2: mijlpaalZin,
+      };
   }
-
-  return { deel1, deel2 };
 }
 
 // ── Kleurpalet per status ─────────────────────────────────────────────────────
@@ -88,6 +94,13 @@ function palette(status: PlanningStatus) {
         text:    "text-red-700",
         accent:  "#ef4444",
       };
+    case "geen-data":
+      return {
+        bar:     "bg-slate-300",
+        trackFg: "#cbd5e1",
+        text:    "text-slate-500",
+        accent:  "#cbd5e1",
+      };
   }
 }
 
@@ -104,13 +117,14 @@ function MiniTijdsstrook({
   mijlpalen,
   status,
 }: Pick<SituatieStrookProps, "projectStart" | "projectEnd" | "today" | "mijlpalen" | "status">) {
+  const { t } = useTranslation();
   const now = today ?? new Date();
 
   if (!projectStart || !projectEnd || projectEnd <= projectStart) {
     return (
       <div className="mt-3 flex items-center gap-2">
         <div className="flex-1 h-1.5 rounded-full bg-slate-200" />
-        <span className="text-xs text-slate-400">Geen planningsdatums</span>
+        <span className="text-xs text-slate-400">{t("planning.situatie.geen_datums")}</span>
       </div>
     );
   }
@@ -126,22 +140,16 @@ function MiniTijdsstrook({
     (m) => m.date >= projectStart && m.date <= projectEnd,
   );
 
-  // Vandaag-label verbergen wanneer te dicht bij de randen (voorkomt overlap)
   const showVandaagLabel = todayPct >= 12 && todayPct <= 88;
 
   return (
     <div className="mt-4 select-none">
-      {/* Puur CSS — geen SVG viewBox-distortie, capsule aan beide uiteinden */}
       <div className="relative" style={{ height: 32 }}>
-
-        {/* Track achtergrond: volledige breedte, capsule */}
         <div
           className="absolute bg-slate-200"
           style={{ left: 0, right: 0, top: TRACK_Y, height: TRACK_H, borderRadius: TRACK_H / 2 }}
           aria-hidden="true"
         />
-
-        {/* Afgelegde deel: capsule aan beide kanten */}
         <div
           className="absolute"
           style={{
@@ -155,8 +163,6 @@ function MiniTijdsstrook({
           }}
           aria-hidden="true"
         />
-
-        {/* Mijlpaal-ruitjes: 12 × 12 px, gecentreerd op de trackbalk */}
         {relevantMijlpalen.map((m, i) => (
           <div
             key={i}
@@ -172,8 +178,6 @@ function MiniTijdsstrook({
             aria-hidden="true"
           />
         ))}
-
-        {/* Vandaag: dunne verticale lijn, altijd 1.5 px breed */}
         <div
           className="absolute"
           style={{
@@ -190,7 +194,6 @@ function MiniTijdsstrook({
         />
       </div>
 
-      {/* Labels: absoluut gepositioneerd zodat "vandaag" de werkelijke positie volgt */}
       <div className="relative mt-1 h-4">
         <span className="absolute left-0 text-xs text-slate-400 whitespace-nowrap">
           {projectStart.toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}
@@ -201,7 +204,7 @@ function MiniTijdsstrook({
             className={`absolute text-xs font-medium whitespace-nowrap ${cl.text}`}
             style={{ left: `${todayPct}%`, transform: "translateX(-50%)" }}
           >
-            vandaag
+            {t("common.today")}
           </span>
         )}
 
@@ -216,18 +219,16 @@ function MiniTijdsstrook({
 // ── Hoofd-component ───────────────────────────────────────────────────────────
 
 export function SituatieStrook(props: SituatieStrookProps) {
+  const { t } = useTranslation();
   const { status, isWeatherDependent } = props;
   const cl = palette(status);
-  const { deel1, deel2 } = buildZin(props);
+  const { deel1, deel2 } = buildZin(props, t);
 
   return (
     <div className="flex gap-3">
-      {/* Accentbalk links */}
       <div className={`w-1 shrink-0 rounded-full self-stretch min-h-[2.5rem] ${cl.bar}`} aria-hidden="true" />
 
-      {/* Content */}
       <div className="flex-1 min-w-0">
-        {/* Situatiezin */}
         <p className="text-base font-semibold text-slate-800 leading-snug">
           {deel1}
           {deel2 && (
@@ -238,15 +239,13 @@ export function SituatieStrook(props: SituatieStrookProps) {
           )}
         </p>
 
-        {/* Weersafhankelijk indicator */}
         {isWeatherDependent && (
           <p className="flex items-center gap-1 mt-1 text-xs text-slate-500">
             <CloudRain size={12} aria-hidden="true" />
-            weersafhankelijk project
+            {t("planning.situatie.weersafhankelijk")}
           </p>
         )}
 
-        {/* Mini-tijdsstrook */}
         <MiniTijdsstrook
           projectStart={props.projectStart}
           projectEnd={props.projectEnd}

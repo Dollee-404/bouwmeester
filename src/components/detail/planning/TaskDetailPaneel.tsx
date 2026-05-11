@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { X, ChevronLeft, ExternalLink, ChevronRight, Clock } from "lucide-react";
 import { Avatar } from "../../ui/avatar";
 import { Badge } from "../../ui/badge";
@@ -36,15 +37,6 @@ function taskStatusVariant(status: string): "neutral" | "warning" | "success" | 
   if (status === "Working") return "warning";
   if (status === "Overdue") return "danger";
   return "neutral";
-}
-
-function taskStatusLabel(status: string): string {
-  if (status === "Open") return "Open";
-  if (status === "Working") return "In werk";
-  if (status === "Completed") return "Gereed";
-  if (status === "Cancelled") return "Geannuleerd";
-  if (status === "Overdue") return "Achterstallig";
-  return status;
 }
 
 // ── Voortgangsbalk ────────────────────────────────────────────────────────────
@@ -89,20 +81,30 @@ function TaskInhoud({
   timesheets: TimesheetMap;
   onNavigate: (id: string, mode: "task" | "phase") => void;
 }) {
+  const { t } = useTranslation();
   const besteed = timesheets[task.id] ?? 0;
   const budget = task.budgetHours;
   const urenPct = budget && budget > 0 ? (besteed / budget) * 100 : null;
+
+  function statusLabel(status: string): string {
+    if (status === "Open") return t("planning.taak_paneel.status_open");
+    if (status === "Working") return t("planning.taak_paneel.status_in_werk");
+    if (status === "Completed") return t("planning.taak_paneel.status_gereed");
+    if (status === "Cancelled") return t("planning.taak_paneel.status_geannuleerd");
+    if (status === "Overdue") return t("planning.taak_paneel.status_achterstallig");
+    return status;
+  }
 
   return (
     <div className="flex flex-col gap-5 p-5 overflow-y-auto">
       {/* Status */}
       <div className="flex items-center gap-2">
         <Badge variant={taskStatusVariant(task.status)} size="xs">
-          {taskStatusLabel(task.status)}
+          {statusLabel(task.status)}
         </Badge>
         {task.isMilestone && (
           <Badge variant="info" size="xs">
-            Mijlpaal
+            {t("planning.taak_paneel.badge_mijlpaal")}
           </Badge>
         )}
       </div>
@@ -111,7 +113,7 @@ function TaskInhoud({
       {task.assignedTo.length > 0 && (
         <div>
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-            Toegewezen aan
+            {t("planning.taak_paneel.toegewezen_aan")}
           </p>
           <div className="flex flex-wrap gap-2">
             {task.assignedTo.map((email) => (
@@ -127,12 +129,12 @@ function TaskInhoud({
       {/* Datums */}
       <div>
         <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-          Planning
+          {t("planning.taak_paneel.datums")}
         </p>
         <div className="flex flex-col gap-1.5">
-          <DateRow label="Gepland" start={task.expectedStartDate} end={task.expectedEndDate} />
+          <DateRow label={t("planning.taak_paneel.gepland")} start={task.expectedStartDate} end={task.expectedEndDate} />
           {(task.actualStartDate || task.actualEndDate) && (
-            <DateRow label="Werkelijk" start={task.actualStartDate} end={task.actualEndDate} />
+            <DateRow label={t("planning.taak_paneel.werkelijk")} start={task.actualStartDate} end={task.actualEndDate} />
           )}
         </div>
       </div>
@@ -141,17 +143,18 @@ function TaskInhoud({
       <div>
         <div className="flex items-center justify-between mb-1.5">
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-            Voortgang
+            {t("planning.taak_paneel.voortgang")}
           </p>
           <span className="text-xs text-slate-600">{task.progress}%</span>
         </div>
         <ProgressBar pct={task.progress} />
         {(besteed > 0 || budget) && (
           <p className="mt-1.5 text-xs text-slate-500">
-            {besteed.toFixed(1)} uur besteed
-            {budget ? ` / ${budget} uur begroot` : ""}
+            {besteed > 0 && t("planning.taak_paneel.uur_besteed", { hours: besteed.toFixed(1) })}
+            {besteed > 0 && budget ? " / " : ""}
+            {budget ? t("planning.taak_paneel.uur_begroot", { hours: budget }) : ""}
             {urenPct !== null && urenPct > 80 && task.progress < 80 && (
-              <span className="ml-1 text-amber-600">(uren lopen uit)</span>
+              <span className="ml-1 text-amber-600">{t("planning.taak_paneel.uren_lopen_uit")}</span>
             )}
           </p>
         )}
@@ -161,7 +164,7 @@ function TaskInhoud({
       {task.description && (
         <div>
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-            Omschrijving
+            {t("planning.taak_paneel.omschrijving")}
           </p>
           <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
             {task.description}
@@ -169,11 +172,11 @@ function TaskInhoud({
         </div>
       )}
 
-      {/* Wacht op — placeholder voor 4F */}
+      {/* Wacht op */}
       {task.wachtOp && (
         <div>
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-            Wacht op
+            {t("planning.taak_paneel.wacht_op")}
           </p>
           <div className="flex items-start gap-2 rounded-lg px-3 py-2.5 bg-amber-100">
             <Clock size={14} className="text-amber-600 mt-0.5 shrink-0" />
@@ -191,7 +194,7 @@ function TaskInhoud({
       {task.dependsOn.length > 0 && (
         <div>
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-            Afhankelijk van
+            {t("planning.taak_paneel.afhankelijk_van")}
           </p>
           <div className="flex flex-col gap-1">
             {task.dependsOn.map((depId) => {
@@ -226,26 +229,36 @@ function FaseInhoud({
   tasks: ProjectTask[];
   onNavigate: (id: string, mode: "task" | "phase") => void;
 }) {
+  const { t } = useTranslation();
   const subTasks = tasks.filter((t) => t.parentTask === fase.id);
+
+  function statusLabel(status: string): string {
+    if (status === "Open") return t("planning.taak_paneel.status_open");
+    if (status === "Working") return t("planning.taak_paneel.status_in_werk");
+    if (status === "Completed") return t("planning.taak_paneel.status_gereed");
+    if (status === "Cancelled") return t("planning.taak_paneel.status_geannuleerd");
+    if (status === "Overdue") return t("planning.taak_paneel.status_achterstallig");
+    return status;
+  }
 
   return (
     <div className="flex flex-col gap-5 p-5 overflow-y-auto">
       {/* Status */}
       <div>
         <Badge variant={taskStatusVariant(fase.status)} size="xs">
-          {taskStatusLabel(fase.status)}
+          {statusLabel(fase.status)}
         </Badge>
       </div>
 
       {/* Datums */}
       <div>
         <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-          Planning
+          {t("planning.taak_paneel.datums")}
         </p>
         <div className="flex flex-col gap-1.5">
-          <DateRow label="Gepland" start={fase.expectedStartDate} end={fase.expectedEndDate} />
+          <DateRow label={t("planning.taak_paneel.gepland")} start={fase.expectedStartDate} end={fase.expectedEndDate} />
           {(fase.actualStartDate || fase.actualEndDate) && (
-            <DateRow label="Werkelijk" start={fase.actualStartDate} end={fase.actualEndDate} />
+            <DateRow label={t("planning.taak_paneel.werkelijk")} start={fase.actualStartDate} end={fase.actualEndDate} />
           )}
         </div>
       </div>
@@ -254,14 +267,14 @@ function FaseInhoud({
       <div>
         <div className="flex items-center justify-between mb-1.5">
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-            Voortgang
+            {t("planning.taak_paneel.voortgang")}
           </p>
           <span className="text-xs text-slate-600">{fase.progress}%</span>
         </div>
         <ProgressBar pct={fase.progress} />
         {fase.budgetHours && (
           <p className="mt-1.5 text-xs text-slate-500">
-            {fase.budgetHours} uur begroot
+            {t("planning.taak_paneel.uur_begroot", { hours: fase.budgetHours })}
           </p>
         )}
       </div>
@@ -270,7 +283,7 @@ function FaseInhoud({
       {fase.description && (
         <div>
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-            Omschrijving
+            {t("planning.taak_paneel.omschrijving")}
           </p>
           <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
             {fase.description}
@@ -282,23 +295,25 @@ function FaseInhoud({
       {subTasks.length > 0 && (
         <div>
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-            Taken in deze fase ({subTasks.length})
+            {t("planning.taak_paneel.taken_in_fase", { count: subTasks.length })}
           </p>
           <div className="flex flex-col divide-y divide-slate-100 rounded-xl border border-slate-200 overflow-hidden">
-            {subTasks.map((t) => (
+            {subTasks.map((sub) => (
               <button
-                key={t.id}
+                key={sub.id}
                 type="button"
-                onClick={() => onNavigate(t.id, "task")}
+                onClick={() => onNavigate(sub.id, "task")}
                 className="flex items-center justify-between gap-2 px-4 py-3 text-sm text-left hover:bg-slate-50 transition-colors"
               >
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-slate-900 truncate">{t.subject}</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{t.progress}% gereed</p>
+                  <p className="font-medium text-slate-900 truncate">{sub.subject}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {t("planning.taak_paneel.pct_gereed", { pct: sub.progress })}
+                  </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <Badge variant={taskStatusVariant(t.status)} size="xs">
-                    {taskStatusLabel(t.status)}
+                  <Badge variant={taskStatusVariant(sub.status)} size="xs">
+                    {statusLabel(sub.status)}
                   </Badge>
                   <ChevronRight size={14} className="text-slate-400" />
                 </div>
@@ -309,7 +324,7 @@ function FaseInhoud({
       )}
 
       {subTasks.length === 0 && (
-        <p className="text-sm text-slate-400">Geen taken gekoppeld aan deze fase.</p>
+        <p className="text-sm text-slate-400">{t("planning.taak_paneel.geen_taken")}</p>
       )}
     </div>
   );
@@ -324,11 +339,19 @@ export function TaskDetailPaneel({
   initialMode,
   onClose,
 }: TaskDetailPaneelProps) {
+  const { t } = useTranslation();
   const [stack, setStack] = useState<NavEntry[]>([{ id: initialId, mode: initialMode }]);
   const isNarrow = useMediaQuery(1280);
 
   const current = stack[stack.length - 1];
   const task = tasks.find((t) => t.id === current.id);
+
+  // ESC sluit het paneel (beide layouts)
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [onClose]);
 
   function navigate(id: string, mode: "task" | "phase") {
     setStack((s) => [...s, { id, mode }]);
@@ -351,7 +374,7 @@ export function TaskDetailPaneel({
             type="button"
             onClick={goBack}
             className="p-1 rounded hover:bg-slate-100 transition-colors text-slate-500"
-            aria-label="Terug"
+            aria-label={t("panel.back")}
           >
             <ChevronLeft size={18} />
           </button>
@@ -363,7 +386,7 @@ export function TaskDetailPaneel({
           type="button"
           onClick={onClose}
           className="p-1 rounded hover:bg-slate-100 transition-colors text-slate-500 shrink-0"
-          aria-label="Sluiten"
+          aria-label={t("common.close")}
         >
           <X size={18} />
         </button>
@@ -384,7 +407,7 @@ export function TaskDetailPaneel({
           className="inline-flex items-center gap-1.5 text-xs font-medium text-y-teal-dark hover:underline"
         >
           <ExternalLink size={13} />
-          Open in ERPNext
+          {t("planning.taak_paneel.open_erpnext")}
         </a>
       </div>
     );
@@ -396,7 +419,7 @@ export function TaskDetailPaneel({
     if (!task) {
       return (
         <div className="p-5 text-sm text-slate-400">
-          Taak niet gevonden ({current.id})
+          {t("planning.taak_paneel.niet_gevonden", { id: current.id })}
         </div>
       );
     }
@@ -424,15 +447,12 @@ export function TaskDetailPaneel({
   if (isNarrow) {
     return (
       <>
-        {/* Backdrop */}
         <div
           className="fixed inset-0 bg-black/20 z-40"
           onClick={onClose}
           aria-hidden="true"
         />
-        {/* Sheet */}
         <div className="fixed bottom-0 left-0 right-0 z-50 flex flex-col bg-white rounded-t-2xl shadow-2xl max-h-[70vh]">
-          {/* Drag handle */}
           <div className="flex justify-center pt-2.5 pb-1 shrink-0">
             <div className="w-10 h-1 rounded-full bg-slate-300" />
           </div>

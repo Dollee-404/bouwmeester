@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { getHolidaysInRange, getISOWeek } from "../../../data/planning-helpers";
 import type { GanttData, GanttFase, GanttMijlpaal } from "./gantt-logica";
 import { getPhaseColor, getPhaseBaselineColor } from "./phase-colors";
@@ -245,6 +246,7 @@ export interface GanttStrookProps {
 }
 
 export function GanttStrook({ data, today, onFaseClick }: GanttStrookProps) {
+  const { t } = useTranslation();
   const [zoom, setZoom] = useState<GanttZoom>("project");
   const now = today ?? new Date();
 
@@ -254,10 +256,10 @@ export function GanttStrook({ data, today, onFaseClick }: GanttStrookProps) {
     return (
       <div className="mt-6">
         <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
-          Tijdlijn
+          {t("planning.gantt.tijdlijn")}
         </h3>
         <div className="py-8 text-center">
-          <p className="text-sm text-slate-400">Geen fases met planningsdatums.</p>
+          <p className="text-sm text-slate-400">{t("planning.gantt.leeg")}</p>
         </div>
       </div>
     );
@@ -298,7 +300,7 @@ export function GanttStrook({ data, today, onFaseClick }: GanttStrookProps) {
     <div className="mt-6">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-          Tijdlijn
+          {t("planning.gantt.tijdlijn")}
         </h3>
         <div className="flex gap-1">
           {(["week", "maand", "project"] as GanttZoom[]).map(z => (
@@ -312,14 +314,18 @@ export function GanttStrook({ data, today, onFaseClick }: GanttStrookProps) {
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
-              {z === "week" ? "Week" : z === "maand" ? "Maand" : "Heel project"}
+              {z === "week"
+                ? t("planning.gantt.zoom_week")
+                : z === "maand"
+                  ? t("planning.gantt.zoom_maand")
+                  : t("planning.gantt.zoom_project")}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <div className="flex" style={{ minWidth: 0 }}>
+      <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-x-auto">
+        <div className="flex" style={{ minWidth: LABEL_W + 280 }}>
 
           {/* ── Labelkolom ─────────────────────────────────────────────────── */}
           {/* Kritiek-pad: 3px linker-accentbalk per faserij (consistent met SituatieStrook) */}
@@ -332,7 +338,7 @@ export function GanttStrook({ data, today, onFaseClick }: GanttStrookProps) {
               style={{ height: MILE_H }}
               className="flex items-center px-3 border-b border-slate-200"
             >
-              <span className="text-xs text-slate-400 font-medium">Mijlpalen</span>
+              <span className="text-xs text-slate-400 font-medium">{t("planning.gantt.mijlpalen")}</span>
             </div>
             {fases.map(fase => (
               <div
@@ -408,21 +414,25 @@ export function GanttStrook({ data, today, onFaseClick }: GanttStrookProps) {
                   />
                 ))}
 
-                {/* Week-labels gecentreerd in elke week-kolom */}
+                {/* Week-labels gecentreerd in elke week-kolom; onderdrukken bij < 8% zichtbaar */}
                 {weekMarks.map((wm, i) => (
-                  <div
-                    key={i}
-                    className="absolute inset-y-0 flex items-center justify-center overflow-hidden"
-                    style={{ left: `${wm.pct}%`, width: `${wm.widthPct}%` }}
-                  >
-                    <span className={`whitespace-nowrap ${
-                      zoom === "week"
-                        ? "text-xs font-bold text-slate-700 tracking-wide"
-                        : "text-[10px] font-semibold text-slate-500"
-                    }`}>
-                      {zoom === "week" ? `Week ${wm.weekNum}` : `w${wm.weekNum}`}
-                    </span>
-                  </div>
+                  wm.widthPct >= 8 && (
+                    <div
+                      key={i}
+                      className="absolute inset-y-0 flex items-center justify-center overflow-hidden"
+                      style={{ left: `${wm.pct}%`, width: `${wm.widthPct}%` }}
+                    >
+                      <span className={`whitespace-nowrap ${
+                        zoom === "week"
+                          ? "text-xs font-bold text-slate-700 tracking-wide"
+                          : "text-[10px] font-semibold text-slate-500"
+                      }`}>
+                        {zoom === "week"
+                          ? t("planning.gantt.week_lang", { n: wm.weekNum })
+                          : t("planning.gantt.week_kort", { n: wm.weekNum })}
+                      </span>
+                    </div>
+                  )
                 ))}
               </div>
             )}
