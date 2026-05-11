@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Search, LayoutGrid, List, Hammer } from "lucide-react";
+import { SituatieStrook, type SituatieStrookProps } from "../components/detail/planning/SituatieStrook";
 
 import { HOST_ORIGIN, INSTANCE_ID, ERPNEXT_URL, LANG } from "../bridge";
 import { useProjects } from "../hooks/use-projects";
@@ -449,6 +450,205 @@ export function TestPage() {
       </div>
       <ProjectsPage key={errorKey} />
     </div>
+
+    {/* ── Situatiestrook showcase (4B) ──────────────────────────────────── */}
+    <SituatieStrookShowcase />
   </>
+  );
+}
+
+// ── Vaste datum voor reproducteerbare screenshots ─────────────────────────────
+const DEMO_TODAY   = new Date("2026-05-11");
+const DEMO_START   = new Date("2026-02-01");
+const DEMO_END     = new Date("2026-08-31");
+const DEMO_MIJLPAAL: SituatieStrookProps["mijlpalen"] = [
+  { date: new Date("2026-06-15"), subject: "oplevering ruwbouw" },
+  { date: new Date("2026-08-10"), subject: "sleuteloverdracht" },
+];
+
+const DEMO_CASES: Array<{ label: string; props: SituatieStrookProps }> = [
+  {
+    label: "Op schema (groen)",
+    props: {
+      status: "op-schema",
+      achterstandDagen: 0,
+      volgendeMijlpaal: { subject: "oplevering ruwbouw", overDagen: 23 },
+      isWeatherDependent: false,
+      projectStart: DEMO_START,
+      projectEnd: DEMO_END,
+      today: DEMO_TODAY,
+      mijlpalen: DEMO_MIJLPAAL,
+    },
+  },
+  {
+    label: "Licht achter — 1-5 dagen (oranje)",
+    props: {
+      status: "licht-achter",
+      achterstandDagen: 3,
+      volgendeMijlpaal: { subject: "oplevering ruwbouw", overDagen: 23 },
+      isWeatherDependent: false,
+      projectStart: DEMO_START,
+      projectEnd: DEMO_END,
+      today: DEMO_TODAY,
+      mijlpalen: DEMO_MIJLPAAL,
+    },
+  },
+  {
+    label: "Fors achter — >5 dagen (rood)",
+    props: {
+      status: "fors-achter",
+      achterstandDagen: 8,
+      volgendeMijlpaal: { subject: "oplevering ruwbouw", overDagen: 8 },
+      isWeatherDependent: true,
+      projectStart: DEMO_START,
+      projectEnd: DEMO_END,
+      today: DEMO_TODAY,
+      mijlpalen: DEMO_MIJLPAAL,
+    },
+  },
+  {
+    label: "Oplevering overschreden (rood — andere toon)",
+    props: {
+      status: "overschreden",
+      achterstandDagen: 12,
+      volgendeMijlpaal: null,
+      isWeatherDependent: false,
+      projectStart: new Date("2025-09-01"),
+      projectEnd: new Date("2026-04-15"),
+      today: DEMO_TODAY,
+      mijlpalen: [{ date: new Date("2026-04-15"), subject: "oplevering" }],
+    },
+  },
+];
+
+// ── Schaal-test: drie projectduren ───────────────────────────────────────────
+const SCALE_CASES: Array<{ label: string; props: SituatieStrookProps }> = [
+  {
+    label: "3 weken (vandaag ≈ 67% — nabij einde)",
+    props: {
+      status: "licht-achter", achterstandDagen: 2,
+      volgendeMijlpaal: { subject: "oplevering", overDagen: 5 },
+      isWeatherDependent: false,
+      projectStart: new Date("2026-04-27"),
+      projectEnd:   new Date("2026-05-18"),
+      today: DEMO_TODAY,
+      mijlpalen: [{ date: new Date("2026-05-16"), subject: "oplevering" }],
+    },
+  },
+  {
+    label: "7 maanden (huidige testcase — vandaag ≈ 47%)",
+    props: {
+      status: "licht-achter", achterstandDagen: 3,
+      volgendeMijlpaal: { subject: "oplevering ruwbouw", overDagen: 23 },
+      isWeatherDependent: false,
+      projectStart: DEMO_START,
+      projectEnd:   DEMO_END,
+      today: DEMO_TODAY,
+      mijlpalen: DEMO_MIJLPAAL,
+    },
+  },
+  {
+    label: "2 jaar (vandaag ≈ 68% — mijlpalen verspreid)",
+    props: {
+      status: "op-schema", achterstandDagen: 0,
+      volgendeMijlpaal: { subject: "casco gereed", overDagen: 42 },
+      isWeatherDependent: false,
+      projectStart: new Date("2025-01-01"),
+      projectEnd:   new Date("2026-12-31"),
+      today: DEMO_TODAY,
+      mijlpalen: [
+        { date: new Date("2025-06-01"), subject: "fundering gereed" },
+        { date: new Date("2025-12-01"), subject: "ruwbouw gereed" },
+        { date: new Date("2026-06-30"), subject: "casco gereed" },
+        { date: new Date("2026-12-15"), subject: "oplevering" },
+      ],
+    },
+  },
+];
+
+// ── Edge cases ────────────────────────────────────────────────────────────────
+const EDGE_CASES: Array<{ label: string; props: SituatieStrookProps }> = [
+  {
+    label: "Lange mijlpaal-naam",
+    props: {
+      status: "licht-achter", achterstandDagen: 3,
+      volgendeMijlpaal: { subject: "oplevering ruwbouw constructiedeel B", overDagen: 23 },
+      isWeatherDependent: false,
+      projectStart: DEMO_START, projectEnd: DEMO_END, today: DEMO_TODAY,
+      mijlpalen: [{ date: new Date("2026-06-15"), subject: "oplevering ruwbouw constructiedeel B" }],
+    },
+  },
+  {
+    label: "Geen mijlpalen geconfigureerd — alleen oplevering",
+    props: {
+      status: "licht-achter", achterstandDagen: 3,
+      volgendeMijlpaal: null,
+      isWeatherDependent: false,
+      projectStart: DEMO_START, projectEnd: DEMO_END, today: DEMO_TODAY,
+      mijlpalen: [],
+    },
+  },
+  {
+    label: "Geen mijlpalen, op schema",
+    props: {
+      status: "op-schema", achterstandDagen: 0,
+      volgendeMijlpaal: null,
+      isWeatherDependent: false,
+      projectStart: DEMO_START, projectEnd: DEMO_END, today: DEMO_TODAY,
+      mijlpalen: [],
+    },
+  },
+];
+
+function SituatieStrookShowcase() {
+  return (
+    <div className="mt-12 border-t border-slate-200 pt-8">
+      <h2 className="text-lg font-bold text-slate-700 mb-1 px-8">
+        Situatiestrook — 4B showcase (alle vier staten)
+      </h2>
+      <p className="text-xs text-slate-400 px-8 mb-6">
+        Vaste datum: {DEMO_TODAY.toLocaleDateString("nl-NL")}
+      </p>
+
+      {/* Vier hoofdstaten */}
+      <div className="px-8 flex flex-col gap-6 mb-10">
+        {DEMO_CASES.map(({ label, props }) => (
+          <div key={label}>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">{label}</p>
+            <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-sm">
+              <SituatieStrook {...props} />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Schaal-test */}
+      <h3 className="text-sm font-semibold text-slate-500 mb-1 px-8">Schaal-test mini-tijdsstrook</h3>
+      <p className="text-xs text-slate-400 px-8 mb-4">3 weken / 7 maanden / 2 jaar — labels mogen niet overlappen</p>
+      <div className="px-8 flex flex-col gap-6 mb-12">
+        {SCALE_CASES.map(({ label, props }) => (
+          <div key={label}>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">{label}</p>
+            <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-sm">
+              <SituatieStrook {...props} />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Edge cases */}
+      <h3 className="text-sm font-semibold text-slate-500 mb-1 px-8">Edge cases</h3>
+      <p className="text-xs text-slate-400 px-8 mb-4">Lange naam / geen mijlpalen</p>
+      <div className="px-8 flex flex-col gap-6 mb-12">
+        {EDGE_CASES.map(({ label, props }) => (
+          <div key={label}>
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">{label}</p>
+            <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-sm">
+              <SituatieStrook {...props} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

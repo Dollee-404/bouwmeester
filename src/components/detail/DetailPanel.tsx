@@ -12,6 +12,7 @@ import { TabBar, type TabKey } from "./TabBar";
 import { PhasesSection } from "./PhasesSection";
 import { ActivityItem } from "./ActivityItem";
 import { Sidebar } from "./Sidebar";
+import { PlanningTab } from "./planning/PlanningTab";
 
 const ANIMATION_MS = 250;
 
@@ -222,7 +223,13 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
           <div className={`flex flex-1 ${mode !== "fullpage" ? "flex-row" : "flex-col"}`}>
             {/* Linker kolom / hoofdcontent */}
             <div className="flex-1 min-w-0 px-6 pt-4 pb-6">
-              {activeTab === "overzicht" ? (
+              {activeTab === "planning" ? (
+                <PlanningTab
+                  detail={detail!}
+                  tasks={tasks ?? []}
+                  timesheets={timesheets ?? {}}
+                />
+              ) : activeTab === "overzicht" ? (
                 <div>
                   {/* Fases */}
                   <PhasesSection
