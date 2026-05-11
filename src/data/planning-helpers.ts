@@ -93,6 +93,21 @@ export function getHolidaysInRange(startDate: Date, endDate: Date): NLHoliday[] 
   });
 }
 
+// ─── ISO-weeknummer ───────────────────────────────────────────────────────────
+
+/**
+ * Berekent het ISO-weeknummer (NL-standaard: maandag = start, week 1 = week
+ * met de eerste donderdag van het jaar).
+ */
+export function getISOWeek(d: Date): number {
+  const date = new Date(d.getTime());
+  date.setHours(0, 0, 0, 0);
+  // Donderdag van de huidige week bepaalt het jaar van de week
+  date.setDate(date.getDate() + 4 - (date.getDay() || 7));
+  const yearStart = new Date(date.getFullYear(), 0, 1);
+  return Math.ceil(((date.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+}
+
 // ─── Task-data parse-helpers ─────────────────────────────────────────────────
 // Geëxporteerd zodat unit-tests de productiecode raken (niet een kopie).
 

@@ -1,16 +1,17 @@
 import { useState } from "react";
-import { getHolidaysInRange } from "../../../data/planning-helpers";
+import { getHolidaysInRange, getISOWeek } from "../../../data/planning-helpers";
 import type { GanttData, GanttFase, GanttMijlpaal } from "./gantt-logica";
 import { getPhaseColor, getPhaseBaselineColor } from "./phase-colors";
 
 // ── Constanten ────────────────────────────────────────────────────────────────
 
-const LABEL_W  = 128; // px breedte fase-labelkolom (incl. 3px accentrand)
-const HEADER_H = 28;  // px hoogte date-header
-const MILE_H   = 38;  // px hoogte mijlpaalrij
-const ROW_H    = 52;  // px hoogte per faserij (meer lucht)
-const BAR_TOP  = 17;  // px — gecentreerd in 52px rij: top=17, bar=18, bottom=17
-const BAR_H    = 18;  // px hoogte van balken
+const LABEL_W     = 128; // px breedte fase-labelkolom (incl. 3px accentrand)
+const WEEK_BAND_H = 16;  // px hoogte week-band (boven date-ticks, week/maand-zoom)
+const HEADER_H    = 28;  // px hoogte date-ticks-rij
+const MILE_H      = 38;  // px hoogte mijlpaalrij
+const ROW_H       = 52;  // px hoogte per faserij (meer lucht)
+const BAR_TOP     = 17;  // px — gecentreerd in 52px rij: top=17, bar=18, bottom=17
+const BAR_H       = 18;  // px hoogte van balken
 
 // ── Zoom-types ────────────────────────────────────────────────────────────────
 
@@ -113,6 +114,34 @@ function headerTicks(
     }
   }
   return ticks;
+}
+
+// ── Week-markeringen (week-zoom en maand-zoom) ────────────────────────────────
+
+function computeWeekMarks(
+  viewStart: Date,
+  viewEnd: Date,
+  toPercent: (d: Date) => number,
+): Array<{ weekNum: number; pct: number; widthPct: number }> {
+  const marks: Array<{ weekNum: number; pct: number; widthPct: number }> = [];
+  // Terug naar de maandag op of vóór viewStart
+  const cur = new Date(viewStart);
+  cur.setHours(0, 0, 0, 0);
+  const dow = cur.getDay() || 7; // 1=ma … 7=zo
+  if (dow !== 1) cur.setDate(cur.getDate() - (dow - 1));
+
+  while (cur <= viewEnd) {
+    const weekNum = getISOWeek(cur);
+    const nextMon = new Date(cur);
+    nextMon.setDate(nextMon.getDate() + 7);
+    const startPct = toPercent(cur);
+    const endPct   = toPercent(nextMon);
+    if (endPct > 0 && startPct < 100) {
+      marks.push({ weekNum, pct: Math.max(0, startPct), widthPct: Math.min(100, endPct) - Math.max(0, startPct) });
+    }
+    cur.setDate(cur.getDate() + 7);
+  }
+  return marks;
 }
 
 // ── Fase-balk ─────────────────────────────────────────────────────────────────
@@ -260,8 +289,10 @@ export function GanttStrook({ data, today, onFaseClick }: GanttStrookProps) {
       })
     : [];
   const ticks = headerTicks(zoom, viewStart, viewEnd, toPercent);
+  const weekMarks = zoom !== "project" ? computeWeekMarks(viewStart, viewEnd, toPercent) : [];
 
-  const totalHeight = HEADER_H + MILE_H + fases.length * ROW_H;
+  const showWeekBand = zoom !== "project";
+  const totalHeight = (showWeekBand ? WEEK_BAND_H : 0) + HEADER_H + MILE_H + fases.length * ROW_H;
 
   return (
     <div className="mt-6">
@@ -293,6 +324,9 @@ export function GanttStrook({ data, today, onFaseClick }: GanttStrookProps) {
           {/* ── Labelkolom ─────────────────────────────────────────────────── */}
           {/* Kritiek-pad: 3px linker-accentbalk per faserij (consistent met SituatieStrook) */}
           <div className="flex-none flex flex-col border-r border-slate-100" style={{ width: LABEL_W }}>
+            {showWeekBand && (
+              <div style={{ height: WEEK_BAND_H }} className="bg-slate-50 border-b border-slate-200" />
+            )}
             <div style={{ height: HEADER_H }} className="border-b border-slate-100" />
             <div
               style={{ height: MILE_H }}
@@ -359,11 +393,46 @@ export function GanttStrook({ data, today, onFaseClick }: GanttStrookProps) {
               />
             )}
 
-            {/* ── Header: datumticks ──────────────────────────────────────── */}
+            {/* ── Week-band (boven date-ticks, alleen week/maand-zoom) ─────── */}
+            {showWeekBand && (
+              <div
+                className="relative bg-slate-50 border-b border-slate-200 overflow-hidden"
+                style={{ height: WEEK_BAND_H }}
+              >
+                {/* Verticale scheidingslijnen tussen week-kolommen (maand-zoom) */}
+                {zoom === "maand" && weekMarks.slice(1).map((wm, i) => (
+                  <div
+                    key={`div-${i}`}
+                    className="absolute inset-y-0 border-l border-slate-200"
+                    style={{ left: `${wm.pct}%` }}
+                  />
+                ))}
+
+                {/* Week-labels gecentreerd in elke week-kolom */}
+                {weekMarks.map((wm, i) => (
+                  <div
+                    key={i}
+                    className="absolute inset-y-0 flex items-center justify-center overflow-hidden"
+                    style={{ left: `${wm.pct}%`, width: `${wm.widthPct}%` }}
+                  >
+                    <span className={`whitespace-nowrap ${
+                      zoom === "week"
+                        ? "text-xs font-bold text-slate-700 tracking-wide"
+                        : "text-[10px] font-semibold text-slate-500"
+                    }`}>
+                      {zoom === "week" ? `Week ${wm.weekNum}` : `w${wm.weekNum}`}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* ── Date-ticks (dag/maandag labels + feestdag hover-targets) ─── */}
             <div
               className="relative border-b border-slate-200"
               style={{ height: HEADER_H }}
             >
+              {/* Datumticks */}
               {ticks.map((t, i) => (
                 <span
                   key={i}
@@ -373,8 +442,8 @@ export function GanttStrook({ data, today, onFaseClick }: GanttStrookProps) {
                   {t.label}
                 </span>
               ))}
-              {/* Feestdag hover-targets in de header — hier wel bereikbaar (normale flow),
-                  in tegenstelling tot de achtergrond-banden die achter fase-rijen liggen. */}
+
+              {/* Feestdag hover-targets — hier bereikbaar, onder de week-band */}
               {holidayBands.map((b, i) => (
                 <div
                   key={`ht-${i}`}
