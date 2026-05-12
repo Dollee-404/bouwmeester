@@ -103,7 +103,8 @@
     "nieuwbouw": "Nieuwbouw",
     "sloop": "Sloop",
     "verbouw": "Verbouw",
-    "onderhoud": "Onderhoud"
+    "onderhoud": "Onderhoud",
+    "sanering": "Sanering"
   },
   "a11y": {
     "search_icon": "Zoeken",

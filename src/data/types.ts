@@ -13,7 +13,8 @@ export type Werksoort =
   | "Nieuwbouw"
   | "Sloop"
   | "Verbouw"
-  | "Onderhoud";
+  | "Onderhoud"   // legacy — custom_werksoort; wordt gemigreerd in 5C
+  | "Sanering";
 
 export interface Project {
   id: string;

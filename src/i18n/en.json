@@ -103,7 +103,8 @@
     "nieuwbouw": "New build",
     "sloop": "Demolition",
     "verbouw": "Conversion",
-    "onderhoud": "Maintenance"
+    "onderhoud": "Maintenance",
+    "sanering": "Remediation"
   },
   "a11y": {
     "search_icon": "Search",
