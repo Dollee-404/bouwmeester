@@ -485,6 +485,9 @@ export function TestPage() {
 
     {/* ── Kleurpalet per werksoort (5E) ────────────────────────────────── */}
     <PalettenShowcase5E />
+
+    {/* ── Werksoort-identiteit ProjectCard mock-up (5F) ───────────────── */}
+    <WerksoortCardShowcase5F />
   </>
   );
 }
@@ -1789,6 +1792,123 @@ function PalettenShowcase5E() {
                   </div>
                 );
               })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── 5F: Werksoort-identiteit in ProjectCard — mock-up ────────────────────────
+
+// Primaire kleur per werksoort = eerste slot uit het 5E palet
+const WERKSOORT_PRIMARY: Record<string, { deep: string; light: string }> = {
+  Nieuwbouw:    { deep: "#4A7850", light: "#D2DDD3" }, // moss
+  Renovatie:    { deep: "#AA5038", light: "#EAD3CD" }, // terracotta
+  Verbouw:      { deep: "#B87528", light: "#EDDDC9" }, // amber
+  Sloop:        { deep: "#5C6E7C", light: "#D6DBDE" }, // slate
+  Sanering:     { deep: "#3D6B9E", light: "#CFDAE7" }, // denim
+  Keukenbladen: { deep: "#0A7384", light: "#C2DCE0" }, // teal
+  Onderhoud:    { deep: "#5C6E7C", light: "#D6DBDE" }, // slate
+  Anders:       { deep: "#58596A", light: "#D5D6DA" }, // charcoal
+};
+const NEUTRAL_PRIMARY = { deep: "#94a3b8", light: "#f1f5f9" };
+
+function getPrimary(werksoort: string | null) {
+  return werksoort ? (WERKSOORT_PRIMARY[werksoort] ?? NEUTRAL_PRIMARY) : NEUTRAL_PRIMARY;
+}
+
+interface MockCardProps {
+  projectName: string;
+  customer: string;
+  werksoort: string | null;
+  statusColor: string;
+  variant: "A" | "B" | "C" | "huidig";
+}
+
+function MockCard({ projectName, customer, werksoort, statusColor, variant }: MockCardProps) {
+  const primary = getPrimary(werksoort);
+
+  const topStripe = (variant === "A" || variant === "C") && werksoort
+    ? { borderTop: `3px solid ${primary.deep}` } : {};
+  const badgeBg   = (variant === "B" || variant === "C") && werksoort
+    ? primary.light : "#f1f5f9";
+  const badgeText = (variant === "B" || variant === "C") && werksoort
+    ? primary.deep  : "#64748b";
+
+  return (
+    <div
+      className="bg-white text-left"
+      style={{
+        borderRight: "0.5px solid #e2e8f0",
+        borderBottom: "0.5px solid #e2e8f0",
+        borderLeft: `3px solid ${statusColor}`,
+        borderRadius: "0 8px 8px 0",
+        padding: "10px 12px",
+        minWidth: 200,
+        ...topStripe,
+      }}
+    >
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="font-mono text-[10px] text-slate-400">PROJ-001</span>
+        {werksoort ? (
+          <span
+            className="text-[10px] font-medium px-1.5 py-0.5 rounded"
+            style={{ backgroundColor: badgeBg, color: badgeText }}
+          >
+            {werksoort}
+          </span>
+        ) : (
+          <span className="text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
+            —
+          </span>
+        )}
+      </div>
+      <p className="text-[13px] font-medium text-slate-900 leading-snug mb-0.5 line-clamp-2">
+        {projectName}
+      </p>
+      <p className="text-[11px] text-slate-500 truncate mb-2">{customer}</p>
+      <div className="h-1 rounded-full bg-slate-100 overflow-hidden mb-2.5">
+        <div className="h-full rounded-full bg-emerald-400" style={{ width: "45%" }} />
+      </div>
+      <div className="w-5 h-5 rounded-full bg-slate-200" />
+    </div>
+  );
+}
+
+const MOCK_CARDS = [
+  { projectName: "Renovatie Sporthal",        customer: "Gemeente Dordrecht",  werksoort: "Renovatie",    statusColor: "#f59e0b" },
+  { projectName: "Nieuwbouw Wooncomplex",      customer: "Bouwfonds BV",        werksoort: "Nieuwbouw",    statusColor: "#10b981" },
+  { projectName: "Asbestsanering Fabriek 12",  customer: "Industriepark BV",    werksoort: "Sanering",     statusColor: "#3b82f6" },
+  { projectName: "Inspectie Daken",            customer: "VVE Rivierstraat",    werksoort: null,           statusColor: "#94a3b8" },
+];
+
+function WerksoortCardShowcase5F() {
+  const variants: { key: MockCardProps["variant"]; label: string; omschrijving: string }[] = [
+    { key: "huidig",  label: "Huidig (referentie)",    omschrijving: "Badge neutraal grijs, geen werksoort-kleur" },
+    { key: "A",       label: "A — Top stripe",          omschrijving: "3px gekleurde balk boven de card; status blijft links" },
+    { key: "B",       label: "B — Gekleurde badge",     omschrijving: "Badge krijgt werksoort-primaire kleur als tint + tekst" },
+    { key: "C",       label: "C — Combinatie",          omschrijving: "Top stripe + gekleurde badge samen" },
+  ];
+
+  return (
+    <div className="mt-12 border-t-2 border-slate-300 pt-8 pb-20 px-8">
+      <h2 className="text-lg font-bold text-slate-700 mb-1">5F — Werksoort-identiteit in ProjectCard (mock-up)</h2>
+      <p className="text-xs text-slate-400 mb-8 max-w-2xl">
+        Vier varianten naast elkaar. Nog geen implementatie in de echte ProjectCard — dit is puur visuele vergelijking.
+        Null-werksoort (laatste kaart) valt terug op neutraal in alle varianten.
+      </p>
+
+      <div className="flex flex-col gap-10">
+        {variants.map(({ key, label, omschrijving }) => (
+          <div key={key}>
+            <h3 className="text-sm font-semibold text-slate-800 mb-0.5">{label}</h3>
+            <p className="text-xs text-slate-400 mb-3">{omschrijving}</p>
+            <div className="flex gap-3 flex-wrap">
+              {MOCK_CARDS.map((c, i) => (
+                <MockCard key={i} {...c} variant={key} />
+              ))}
             </div>
           </div>
         ))}
