@@ -104,7 +104,8 @@
     "sloop": "Demolition",
     "verbouw": "Conversion",
     "onderhoud": "Maintenance",
-    "sanering": "Remediation"
+    "sanering": "Remediation",
+    "keukenbladen": "Worktops"
   },
   "a11y": {
     "search_icon": "Search",
