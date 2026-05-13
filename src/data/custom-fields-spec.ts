@@ -19,6 +19,9 @@ export const REQUIRED_CUSTOM_FIELDS: CustomFieldSpec[] = [
     default: "Lead",
   },
   {
+    // DEPRECATED (RONDE 5C) — wordt verwijderd in RONDE 6+.
+    // Alleen nog lezen als fallback wanneer project_type leeg is.
+    // Primaire bron is nu het standaard ERPNext-veld project_type (Link → Project Type).
     dt: "Project",
     fieldname: "custom_werksoort",
     label: "Werksoort",

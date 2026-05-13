@@ -89,6 +89,15 @@ const TEMPLATES: readonly TemplateDef[] = [
       { subject: "Service",             start: 18, duration: 5  },
     ],
   },
+  {
+    name: "Onderhoud",
+    fases: [
+      { subject: "Aanvraag",    start: 0,  duration: 3  },
+      { subject: "Inspectie",   start: 3,  duration: 3  },
+      { subject: "Uitvoering",  start: 6,  duration: 10 },
+      { subject: "Oplevering",  start: 16, duration: 3  },
+    ],
+  },
 ] as const;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

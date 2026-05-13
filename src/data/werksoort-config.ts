@@ -1,4 +1,4 @@
-export type WerksoortId = "Nieuwbouw" | "Renovatie" | "Verbouw" | "Sloop" | "Sanering" | "Keukenbladen";
+export type WerksoortId = "Nieuwbouw" | "Renovatie" | "Verbouw" | "Sloop" | "Sanering" | "Keukenbladen" | "Onderhoud";
 
 export const WERKSOORT_IDS: readonly WerksoortId[] = [
   "Nieuwbouw",
@@ -7,6 +7,7 @@ export const WERKSOORT_IDS: readonly WerksoortId[] = [
   "Sloop",
   "Sanering",
   "Keukenbladen",
+  "Onderhoud",
 ];
 
 export interface WerksoortConfig {
@@ -32,6 +33,7 @@ const WERKSOORT_CONFIGS: Record<WerksoortId, WerksoortConfig> = {
   Sloop:        { id: "Sloop",        label: "Sloop"        },
   Sanering:     { id: "Sanering",     label: "Sanering"     },
   Keukenbladen: { id: "Keukenbladen", label: "Keukenbladen" },
+  Onderhoud:    { id: "Onderhoud",    label: "Onderhoud"    },
 };
 
 export function getWerksoortConfig(projectType: string | null | undefined): WerksoortConfig {

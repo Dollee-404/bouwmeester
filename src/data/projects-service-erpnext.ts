@@ -8,7 +8,8 @@ const FIELDS = [
   "customer",
   "status",
   "custom_bouwmeester_status",
-  "custom_werksoort",
+  "project_type",       // primaire werksoort-bron (5C+)
+  "custom_werksoort",   // DEPRECATED (5C) — fallback als project_type leeg is
   "expected_start_date",
   "expected_end_date",
   "percent_complete",
@@ -31,6 +32,7 @@ interface RawProject {
   customer: string | null;
   status: string;
   custom_bouwmeester_status: string | null;
+  project_type: string | null;
   custom_werksoort: string | null;
   expected_start_date: string | null;
   expected_end_date: string | null;
@@ -48,7 +50,7 @@ const VALID_STATUSES = new Set<BouwmeesterStatus>([
 ]);
 
 const VALID_WERKSOORTEN = new Set<Werksoort>([
-  "Renovatie", "Nieuwbouw", "Sloop", "Verbouw", "Onderhoud",
+  "Renovatie", "Nieuwbouw", "Sloop", "Verbouw", "Onderhoud", "Sanering", "Keukenbladen",
 ]);
 
 function parseDate(s: string | null | undefined): Date | null {
@@ -62,8 +64,11 @@ function toProject(raw: RawProject): Project {
     ? (raw.custom_bouwmeester_status as BouwmeesterStatus)
     : "Lead";
 
-  const werksoort = VALID_WERKSOORTEN.has(raw.custom_werksoort as Werksoort)
-    ? (raw.custom_werksoort as Werksoort)
+  // project_type is primair (5C+); custom_werksoort is fallback voor projecten
+  // die nog niet gemigreerd zijn.
+  const werksoortRaw = raw.project_type || raw.custom_werksoort;
+  const werksoort = VALID_WERKSOORTEN.has(werksoortRaw as Werksoort)
+    ? (werksoortRaw as Werksoort)
     : null;
 
   return {
@@ -116,7 +121,7 @@ export const erpnextService: ProjectsService = {
       filters.push(["custom_bouwmeester_status", "=", options.status]);
     }
     if (options.werksoort) {
-      filters.push(["custom_werksoort", "=", options.werksoort]);
+      filters.push(["project_type", "=", options.werksoort]);
     }
     if (options.search) {
       filters.push(["project_name", "like", `%${options.search}%`]);

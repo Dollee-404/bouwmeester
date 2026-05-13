@@ -15,6 +15,7 @@ const BOUWMEESTER_PROJECT_TYPES = [
   "Sloop",
   "Sanering",
   "Keukenbladen",
+  "Onderhoud",
 ] as const;
 
 async function apiFetch(method: string, body: Record<string, unknown>): Promise<unknown> {
@@ -60,7 +61,7 @@ console.log(`  Gevonden (${existing.length}): ${existing.join(", ")}\n`);
 const toInstall = BOUWMEESTER_PROJECT_TYPES.filter((t) => !existing.includes(t));
 
 if (toInstall.length === 0) {
-  console.log("  ✓ Alle zes Project Types al aanwezig — niets te installeren.\n");
+  console.log("  ✓ Alle zeven Project Types al aanwezig — niets te installeren.\n");
 } else {
   console.log(`Stap 2 — Installeren (${toInstall.length} ontbreken):\n`);
   for (const name of toInstall) {
