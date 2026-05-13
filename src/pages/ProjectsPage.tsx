@@ -9,6 +9,7 @@ import type { BouwmeesterStatus, Project } from "../data/types";
 import { KanbanBoard } from "../components/kanban/KanbanBoard";
 import { ProjectsTable } from "../components/projects/ProjectsTable";
 import { ProjectsCardList } from "../components/projects/ProjectsCardList";
+import { NewProjectWizard } from "../components/projects/NewProjectWizard";
 import { DetailPanel } from "../components/detail/DetailPanel";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -33,6 +34,7 @@ export function ProjectsPage() {
   const [showArchived, setShowArchived] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("board");
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [wizardOpen, setWizardOpen] = useState(false);
   const { isTablet, isMobile } = useBreakpoint();
 
   // Under 768px the board is not usable — show grouped card list instead
@@ -77,8 +79,10 @@ export function ProjectsPage() {
     setSelectedProjectId(null);
   }, []);
 
-  function notAvailable() {
-    addToast(t("projects.create_not_available"), "info");
+  function handleWizardCreated(projectId: string) {
+    setWizardOpen(false);
+    refetch();
+    setSelectedProjectId(projectId);
   }
 
   async function handleStatusChange(projectId: string, newStatus: BouwmeesterStatus) {
@@ -129,7 +133,7 @@ export function ProjectsPage() {
               icons={[<LayoutGrid size={13} key="b" />, <List size={13} key="t" />]}
             />
           )}
-          <Button variant="primary" size="sm" onClick={notAvailable}>
+          <Button variant="primary" size="sm" onClick={() => setWizardOpen(true)}>
             <Plus size={14} aria-hidden="true" />
             {t("projects.new")}
           </Button>
@@ -169,7 +173,7 @@ export function ProjectsPage() {
             title={t("projects.empty_no_projects_title")}
             description={t("projects.empty_no_projects_body")}
             action={
-              <Button variant="primary" size="sm" onClick={notAvailable}>
+              <Button variant="primary" size="sm" onClick={() => setWizardOpen(true)}>
                 <Plus size={14} aria-hidden="true" />
                 {t("projects.new")}
               </Button>
@@ -198,7 +202,7 @@ export function ProjectsPage() {
             showArchived={showArchived}
             isLoading={loading && !isRefetching}
             onCardClick={handleProjectClick}
-            onAddNew={notAvailable}
+            onAddNew={() => setWizardOpen(true)}
             onStatusChange={handleStatusChange}
           />
         </div>
@@ -224,6 +228,12 @@ export function ProjectsPage() {
       )}
       {selectedProjectId && (
         <DetailPanel projectId={selectedProjectId} onClose={handleClose} />
+      )}
+      {wizardOpen && (
+        <NewProjectWizard
+          onClose={() => setWizardOpen(false)}
+          onCreated={handleWizardCreated}
+        />
       )}
     </main>
   );

@@ -17,7 +17,7 @@ const VALID_STATUSES = new Set<BouwmeesterStatus>([
   "Lead", "Calculatie", "Gegund", "In uitvoering", "Oplevering", "Afgerond",
 ]);
 const VALID_WERKSOORTEN = new Set<Werksoort>([
-  "Renovatie", "Nieuwbouw", "Sloop", "Verbouw", "Onderhoud", "Sanering", "Keukenbladen",
+  "Renovatie", "Nieuwbouw", "Sloop", "Verbouw", "Onderhoud", "Sanering", "Keukenbladen", "Anders",
 ]);
 
 interface RawDetailProject {
@@ -135,11 +135,28 @@ async function fetchCustomerAddress(customer: string): Promise<string | null> {
 export const erpnextDetailService: ProjectDetailService = {
   async getProjectDetail(projectId: string): Promise<ProjectDetail> {
     // fetchDocument geeft het volledige Project incl. users child table mét custom_role.
-    // fetchList("Project User") geeft alleen name terug — Frappe-beperking.
-    const raw = await fetchDocument<RawDetailProject & { users: RawProjectUser[] }>(
-      "Project",
-      projectId,
-    );
+    // Fallback naar fetchList (geen child tables, leeg team) als Frappe Project User
+    // blokkeert op permissies — bekende Frappe-beperking op child-doctypes.
+    let raw: RawDetailProject & { users?: RawProjectUser[] };
+    try {
+      raw = await fetchDocument<RawDetailProject & { users: RawProjectUser[] }>(
+        "Project",
+        projectId,
+      );
+    } catch {
+      const rows = await fetchList<RawDetailProject>("Project", {
+        fields: [
+          "name", "project_name", "customer", "status", "custom_bouwmeester_status",
+          "project_type", "custom_werksoort", "expected_start_date", "expected_end_date",
+          "percent_complete", "total_sales_amount", "total_billed_amount",
+          "estimated_costing", "custom_budget_hours", "custom_weersafhankelijk", "custom_address",
+        ],
+        filters: [["name", "=", projectId]],
+        limit_page_length: 1,
+      });
+      if (!rows.length) throw new Error(`Project niet gevonden: ${projectId}`);
+      raw = { ...rows[0], users: [] };
+    }
 
     const customerAddress = raw.customer
       ? await fetchCustomerAddress(raw.customer)
@@ -270,19 +287,22 @@ export const erpnextDetailService: ProjectDetailService = {
   },
 
   async getProjectTimesheets(projectId: string): Promise<TimesheetMap> {
-    // Timesheet Detail is niet querybaar via fetchList (child doctype) — callMethod omzeilt dit
-    const rows = await callMethod<RawTimesheetDetail[]>("frappe.client.get_list", {
-      doctype: "Timesheet Detail",
-      filters: [["project", "=", projectId]],
-      fields: ["task", "hours"],
-      limit_page_length: 500,
-    });
-    const map: TimesheetMap = {};
-    for (const row of rows ?? []) {
-      if (!row.task) continue;
-      map[row.task] = (map[row.task] ?? 0) + row.hours;
+    try {
+      const rows = await fetchList<RawTimesheetDetail>("Timesheet Detail", {
+        filters: [["project", "=", projectId]],
+        fields: ["task", "hours"],
+        limit_page_length: 500,
+      });
+      const map: TimesheetMap = {};
+      for (const row of rows ?? []) {
+        if (!row.task) continue;
+        map[row.task] = (map[row.task] ?? 0) + row.hours;
+      }
+      return map;
+    } catch {
+      // Timesheet Detail is een child-doctype; sommige Y-App instanties blokkeren deze query.
+      return {};
     }
-    return map;
   },
 
   async getProjectActivity(projectId: string, limit = 20): Promise<ActivityItem[]> {

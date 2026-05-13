@@ -105,7 +105,8 @@
     "verbouw": "Conversion",
     "onderhoud": "Maintenance",
     "sanering": "Remediation",
-    "keukenbladen": "Worktops"
+    "keukenbladen": "Worktops",
+    "anders": "Other"
   },
   "a11y": {
     "search_icon": "Search",
@@ -181,6 +182,22 @@
     "error_boundary_body": "An unexpected error occurred. Refresh the page to start again.",
     "refresh_page": "Refresh page",
     "show_technical_details": "Show technical details"
+  },
+  "wizard": {
+    "title": "New project",
+    "werksoort_label": "Work type",
+    "werksoort_required": "— choose a work type",
+    "name_label": "Project name",
+    "name_placeholder": "E.g. Renovation Community Centre",
+    "name_required": "— required field",
+    "customer_label": "Client",
+    "customer_placeholder": "Search client...",
+    "customer_no_results": "No clients found",
+    "date_label": "Start date",
+    "submit": "Create",
+    "creating": "Creating...",
+    "error_holiday_list": "No default holiday list configured for your company. Run the install script (scripts/install-holiday-list.ts) or set it manually in ERPNext: Company → Default Holiday List.",
+    "error_generic": "Creation failed. Please try again."
   },
   "planning": {
     "situatie": {

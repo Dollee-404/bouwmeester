@@ -105,7 +105,8 @@
     "verbouw": "Verbouw",
     "onderhoud": "Onderhoud",
     "sanering": "Sanering",
-    "keukenbladen": "Keukenbladen"
+    "keukenbladen": "Keukenbladen",
+    "anders": "Anders"
   },
   "a11y": {
     "search_icon": "Zoeken",
@@ -181,6 +182,22 @@
     "error_boundary_body": "Er is een onverwachte fout opgetreden. Vernieuw de pagina om opnieuw te beginnen.",
     "refresh_page": "Vernieuw pagina",
     "show_technical_details": "Toon technische details"
+  },
+  "wizard": {
+    "title": "Nieuw project",
+    "werksoort_label": "Werksoort",
+    "werksoort_required": "— kies een werksoort",
+    "name_label": "Projectnaam",
+    "name_placeholder": "Bijv. Renovatie Woonblok Amsterdam",
+    "name_required": "— verplicht veld",
+    "customer_label": "Klant",
+    "customer_placeholder": "Zoek klant...",
+    "customer_no_results": "Geen klanten gevonden",
+    "date_label": "Startdatum",
+    "submit": "Aanmaken",
+    "creating": "Aanmaken...",
+    "error_holiday_list": "Geen standaard vakantielijst ingesteld voor je bedrijf. Voer het installatiescript uit (scripts/install-holiday-list.ts) of stel dit handmatig in via ERPNext: Bedrijf → Standaard vakantielijst.",
+    "error_generic": "Aanmaken mislukt. Probeer het opnieuw."
   },
   "planning": {
     "situatie": {

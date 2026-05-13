@@ -1,5 +1,5 @@
 import type { Project, BouwmeesterStatus, ListOptions } from "./types";
-import type { ProjectsService } from "./projects-service";
+import type { ProjectsService, CreateProjectParams } from "./projects-service";
 
 const projects: Project[] = [
   {
@@ -424,5 +424,28 @@ export const mockService: ProjectsService = {
     if (_forceFail) throw new Error("Gesimuleerde server-fout voor rollback-test");
     const p = projects.find((p) => p.id === id);
     if (p) p.status = newStatus;
+  },
+
+  async createProject({ projectName, werksoort, customer, startDate }: CreateProjectParams): Promise<string> {
+    await new Promise((r) => setTimeout(r, 600));
+    const id = `PROJ-MOCK-${Date.now()}`;
+    projects.push({
+      id,
+      projectName,
+      customerName: customer ?? "",
+      status: "Lead",
+      werksoort,
+      startDate: startDate ? new Date(startDate) : null,
+      endDate: null,
+      percentComplete: 0,
+      budgetSales: 0,
+      budgetHours: null,
+      billedAmount: 0,
+      estimatedCosting: 0,
+      projectLeader: null,
+      isWeatherDependent: false,
+      isArchived: false,
+    });
+    return id;
   },
 };

@@ -1,6 +1,6 @@
-import { fetchList, updateDocument } from "../bridge";
+import { fetchList, updateDocument, callMethod, createDocument } from "../bridge";
 import type { Project, BouwmeesterStatus, Werksoort, ListOptions } from "./types";
-import type { ProjectsService } from "./projects-service";
+import type { ProjectsService, CreateProjectParams } from "./projects-service";
 
 const FIELDS = [
   "name",
@@ -94,6 +94,28 @@ function toProject(raw: RawProject): Project {
 }
 
 
+async function assertHolidayListConfigured(): Promise<void> {
+  try {
+    const defaults = await callMethod<{ default_company?: string | null }>(
+      "frappe.client.get_value",
+      { doctype: "Global Defaults", fieldname: "default_company" },
+    );
+    const company = defaults?.default_company;
+    if (!company) return;
+
+    const companyDoc = await callMethod<{ default_holiday_list?: string | null }>(
+      "frappe.client.get_value",
+      { doctype: "Company", filters: { name: company }, fieldname: "default_holiday_list" },
+    );
+    if (!companyDoc?.default_holiday_list) {
+      throw new Error("HOLIDAY_LIST_MISSING");
+    }
+  } catch (e) {
+    if (e instanceof Error && e.message === "HOLIDAY_LIST_MISSING") throw e;
+    // Check failed for other reasons (permissions etc.) — proceed and let Frappe validate
+  }
+}
+
 interface CacheEntry {
   data: Project[];
   ts: number;
@@ -152,5 +174,25 @@ export const erpnextService: ProjectsService = {
   async updateStatus(id, newStatus) {
     await updateDocument("Project", id, { custom_bouwmeester_status: newStatus });
     cache.clear();
+  },
+
+  async createProject({ projectName, werksoort, customer, startDate }: CreateProjectParams): Promise<string> {
+    await assertHolidayListConfigured();
+
+    const doc: Record<string, unknown> = {
+      project_name: projectName,
+      project_type: werksoort,
+      custom_bouwmeester_status: "Lead",
+    };
+    // "Anders" heeft geen Project Template; voor alle andere werksoorten matcht de template-naam 1:1
+    if (werksoort !== "Anders") {
+      doc.project_template = werksoort;
+    }
+    if (customer) doc.customer = customer;
+    if (startDate) doc.expected_start_date = startDate;
+
+    const result = await createDocument<{ name: string }>("Project", doc);
+    cache.clear();
+    return result.name;
   },
 };

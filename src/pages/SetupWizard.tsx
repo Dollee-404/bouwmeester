@@ -41,8 +41,8 @@ export function SetupGate({ children }: SetupGateProps) {
       return;
     }
     const [migrationResult, warnings] = await Promise.all([
-      runProjectManagerMigration(),
-      checkAddressWarnings(),
+      runProjectManagerMigration().catch(() => ({ migrated: 0 })),
+      checkAddressWarnings().catch(() => []),
     ]);
     if (migrationResult.migrated > 0) {
       setMigratedCount(migrationResult.migrated);

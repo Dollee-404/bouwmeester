@@ -134,20 +134,19 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
       projectDetailService.getProjectActivity(projectId, 10),
     ]).then(([detailRes, financialsRes, timesheetsRes, tasksRes, activityRes]) => {
       if (cancelled) return;
-      if (
-        detailRes.status === "rejected" ||
-        financialsRes.status === "rejected" ||
-        timesheetsRes.status === "rejected" ||
-        tasksRes.status === "rejected" ||
-        activityRes.status === "rejected"
-      ) {
+      const names = ["getProjectDetail", "getProjectFinancials", "getProjectTimesheets", "getProjectTasks", "getProjectActivity"];
+      [detailRes, financialsRes, timesheetsRes, tasksRes, activityRes].forEach((r, i) => {
+        if (r.status === "rejected") console.error(`[DetailPanel] ${names[i]} failed:`, r.reason);
+      });
+      // Alleen getProjectDetail is blokkerend — de rest degradeert graceful.
+      if (detailRes.status === "rejected") {
         setError(true);
       } else {
         setDetail(detailRes.value);
-        setFinancials(financialsRes.value);
-        setTimesheets(timesheetsRes.value);
-        setTasks(tasksRes.value);
-        setActivity(activityRes.value);
+        setFinancials(financialsRes.status === "fulfilled" ? financialsRes.value : null);
+        setTimesheets(timesheetsRes.status === "fulfilled" ? timesheetsRes.value : {});
+        setTasks(tasksRes.status === "fulfilled" ? tasksRes.value : []);
+        setActivity(activityRes.status === "fulfilled" ? activityRes.value : []);
       }
       setLoading(false);
     });

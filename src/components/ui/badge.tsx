@@ -36,6 +36,7 @@ const WERKSOORT_VARIANT: Record<Werksoort, BadgeVariant> = {
   "Onderhoud":    "neutral",
   "Sanering":     "danger",
   "Keukenbladen": "default",
+  "Anders":       "neutral",
 };
 
 export function WerksoortBadge({ werksoort }: { werksoort: Werksoort | null }) {

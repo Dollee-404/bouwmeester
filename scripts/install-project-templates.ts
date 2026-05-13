@@ -116,8 +116,8 @@ async function apiFetch(method: string, body: Record<string, unknown>): Promise<
   return res.json() as Promise<Record<string, unknown>>;
 }
 
-function taskSubject(templateName: string, fase: string): string {
-  return `[BM-${templateName}] ${fase}`;
+function taskSubject(_templateName: string, fase: string): string {
+  return fase;
 }
 
 // Zoek een bestaand template-Task op subject. Geeft de Frappe-naam terug of null.
