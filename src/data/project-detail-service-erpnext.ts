@@ -17,7 +17,7 @@ const VALID_STATUSES = new Set<BouwmeesterStatus>([
   "Lead", "Calculatie", "Gegund", "In uitvoering", "Oplevering", "Afgerond",
 ]);
 const VALID_WERKSOORTEN = new Set<Werksoort>([
-  "Renovatie", "Nieuwbouw", "Sloop", "Verbouw", "Onderhoud",
+  "Renovatie", "Nieuwbouw", "Sloop", "Verbouw", "Onderhoud", "Sanering", "Keukenbladen",
 ]);
 
 interface RawDetailProject {
@@ -26,6 +26,7 @@ interface RawDetailProject {
   customer: string | null;
   status: string;
   custom_bouwmeester_status: string | null;
+  project_type: string | null;
   custom_werksoort: string | null;
   expected_start_date: string | null;
   expected_end_date: string | null;
@@ -159,7 +160,8 @@ export const erpnextDetailService: ProjectDetailService = {
       customerName: raw.customer ?? "",
       customerAddress: customerAddress ?? raw.custom_address ?? null,
       status,
-      werksoort: parseWerksoort(raw.custom_werksoort),
+      // project_type is primair (5C+); custom_werksoort is fallback voor niet-gemigreerde projecten
+      werksoort: parseWerksoort(raw.project_type || raw.custom_werksoort),
       startDate: parseDate(raw.expected_start_date),
       endDate: parseDate(raw.expected_end_date),
       percentComplete: raw.percent_complete ?? 0,

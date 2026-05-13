@@ -13,7 +13,9 @@ export type Werksoort =
   | "Nieuwbouw"
   | "Sloop"
   | "Verbouw"
-  | "Onderhoud";
+  | "Onderhoud"
+  | "Sanering"
+  | "Keukenbladen";
 
 export interface Project {
   id: string;

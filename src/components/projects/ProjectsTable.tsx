@@ -92,13 +92,15 @@ export function ProjectsTable({ projects, isLoading = false, onRowClick }: Proje
   const sorted = sortProjects(filtered, sortKey, sortDir);
 
   const werksoortOptions: { value: string; label: string }[] = [
-    { value: "all",       label: t("projects.werksoort_filter_all") },
-    { value: "Renovatie", label: t("werksoort.renovatie") },
-    { value: "Nieuwbouw", label: t("werksoort.nieuwbouw") },
-    { value: "Sloop",     label: t("werksoort.sloop") },
-    { value: "Verbouw",   label: t("werksoort.verbouw") },
-    { value: "Onderhoud", label: t("werksoort.onderhoud") },
-    { value: "none",      label: t("projects.werksoort_filter_none") },
+    { value: "all",          label: t("projects.werksoort_filter_all") },
+    { value: "Nieuwbouw",    label: t("werksoort.nieuwbouw") },
+    { value: "Renovatie",    label: t("werksoort.renovatie") },
+    { value: "Verbouw",      label: t("werksoort.verbouw") },
+    { value: "Sloop",        label: t("werksoort.sloop") },
+    { value: "Sanering",     label: t("werksoort.sanering") },
+    { value: "Keukenbladen", label: t("werksoort.keukenbladen") },
+    { value: "Onderhoud",    label: t("werksoort.onderhoud") },
+    { value: "none",         label: t("projects.werksoort_filter_none") },
   ];
 
   function thClass(sortable: boolean, key?: SortKey) {

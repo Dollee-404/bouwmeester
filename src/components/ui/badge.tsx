@@ -29,11 +29,13 @@ const sizeClasses: Record<BadgeSize, string> = {
 };
 
 const WERKSOORT_VARIANT: Record<Werksoort, BadgeVariant> = {
-  "Renovatie": "info",
-  "Nieuwbouw": "success",
-  "Sloop": "warning",
-  "Verbouw": "purple",
-  "Onderhoud": "neutral",
+  "Renovatie":    "info",
+  "Nieuwbouw":    "success",
+  "Sloop":        "warning",
+  "Verbouw":      "purple",
+  "Onderhoud":    "neutral",
+  "Sanering":     "danger",
+  "Keukenbladen": "default",
 };
 
 export function WerksoortBadge({ werksoort }: { werksoort: Werksoort | null }) {

@@ -103,7 +103,9 @@
     "nieuwbouw": "New build",
     "sloop": "Demolition",
     "verbouw": "Conversion",
-    "onderhoud": "Maintenance"
+    "onderhoud": "Maintenance",
+    "sanering": "Remediation",
+    "keukenbladen": "Worktops"
   },
   "a11y": {
     "search_icon": "Search",
