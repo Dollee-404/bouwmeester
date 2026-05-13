@@ -1,69 +1,54 @@
-// ── Fase-kleurenpalet — Palet 2B (Koele tinten) ──────────────────────────────
-//
-// Herbruikbaar voor: GanttStrook, PhaseCards (Overzicht-tab), fase-tags.
-//
-// Palet bevat 8 gedemde koele tints, harmonisch met --color-y-teal (#006876).
-// Items 0-4: kernreeks voor standaard nieuwbouw (5 fases).
-// Items 5-7: uitbreidingen voor projecten met 6-8 fases.
-// Bij 9+ fases herhaalt het palet via modulo — kleuren blijven deterministisch,
-// twee fases kunnen dan dezelfde tint krijgen (known limitation bij ≥9 fases).
+import type { Werksoort } from "../../../data/types";
 
-// Diepe tints — voortgang (progress-balk)
-const COOL_PALETTE = [
-  "#4d8c8a", // 0 — teal         (fundering / grondwerk)
-  "#5060a0", // 1 — indigo       (ruwbouw / casco)
-  "#3d6898", // 2 — denim        (installaties)
-  "#5a6880", // 3 — slate-blauw  (afwerking / afbouw)
-  "#6070a0", // 4 — dusty-indigo (buitenterrein)  ← was #7868a0, gedempt
-  "#387880", // 5 — oceaanteal   (uitbreiding)
-  "#485870", // 6 — donker slate (uitbreiding)
-  "#6888a0", // 7 — staalsblauw  (uitbreiding)
-] as const;
+// ── Bouwmeester basis-kleurenset (5E) ─────────────────────────────────────────
+// 12 gedemte tinten, harmonieus met --color-y-teal (#006876).
+// deep  = voortgangsbalk  (progress-fill)
+// light = baseline-balk   (25%-tint: 0.25×deep + 0.75×#ffffff)
 
-// Lichte tints — baseline-balk (L≈85%, S≈20%, zelfde hue als diep)
-const COOL_PALETTE_LIGHT = [
-  "#c6e2e1", // 0 — licht teal
-  "#c6c8e4", // 1 — licht indigo
-  "#bed6ea", // 2 — licht denim
-  "#cad4df", // 3 — licht slate
-  "#c8cce8", // 4 — licht dusty-indigo
-  "#bddde0", // 5 — licht oceaanteal
-  "#c4ccd8", // 6 — licht donker slate
-  "#c4d6e6", // 7 — licht staalsblauw
-] as const;
+const BM_KLEUREN = {
+  teal:       { deep: "#0A7384", light: "#C2DCE0" },
+  denim:      { deep: "#3D6B9E", light: "#CFDAE7" },
+  indigo:     { deep: "#4350A0", light: "#D0D3E7" },
+  lavender:   { deep: "#635CA4", light: "#D8D6E8" },
+  moss:       { deep: "#4A7850", light: "#D2DDD3" },
+  sage:       { deep: "#5E8B62", light: "#D7E2D8" },
+  amber:      { deep: "#B87528", light: "#EDDDC9" },
+  terracotta: { deep: "#AA5038", light: "#EAD3CD" },
+  dustyRose:  { deep: "#A55868", light: "#E9D5D9" },
+  slate:      { deep: "#5C6E7C", light: "#D6DBDE" },
+  stone:      { deep: "#787060", light: "#DDDBD7" },
+  charcoal:   { deep: "#58596A", light: "#D5D6DA" },
+} as const;
 
-// Vaste mapping voor standaard nieuwbouw-fasenamen.
-// Partial match, case-insensitief. Eerste match wint.
-const KNOWN_PHASES: [string, number][] = [
-  ["grondwerk",    0], ["fundering",   0], ["sloopwerk",  0],
-  ["ruwbouw",      1], ["casco",       1], ["metselwerk", 1],
-  ["installatie",  2], ["elektra",     2], ["loodgieter", 2], ["hvac", 2], ["cv-", 2],
-  ["afwerking",    3], ["afbouw",      3], ["schilderwerk", 3], ["stukadoor", 3],
-  ["buitenterrein",4], ["terrein",     4], ["bestrating", 4], ["tuin", 4],
-];
+type KleurKey = keyof typeof BM_KLEUREN;
 
-function stableHash(s: string): number {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) {
-    h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
-  }
-  return Math.abs(h);
-}
+// ── Paletten per werksoort (6 vaste slots; kortere werksoorten gebruiken N) ───
 
-function getPaletteIndex(subject: string): number {
-  const lower = subject.toLowerCase().trim();
-  for (const [key, idx] of KNOWN_PHASES) {
-    if (lower.includes(key)) return idx;
-  }
-  return stableHash(lower) % COOL_PALETTE.length;
+const BM_PALETTEN: Record<Werksoort, readonly KleurKey[]> = {
+  Nieuwbouw:    ["moss",      "terracotta", "denim",    "slate",     "sage",   "stone"   ],
+  Renovatie:    ["terracotta","teal",       "indigo",   "dustyRose", "sage",   "slate"   ],
+  Verbouw:      ["amber",     "denim",      "terracotta","sage",     "teal",   "stone"   ],
+  Sloop:        ["slate",     "terracotta", "stone",    "indigo",    "moss",   "charcoal"],
+  Sanering:     ["denim",     "lavender",   "teal",     "slate",     "indigo", "stone"   ],
+  Keukenbladen: ["teal",      "denim",      "lavender", "dustyRose", "amber",  "sage"    ],
+  Onderhoud:    ["slate",     "denim",      "sage",     "teal",      "moss",   "stone"   ],
+  Anders:       ["charcoal",  "slate",      "stone",    "charcoal",  "slate",  "stone"   ],
+};
+
+// Fallback voor projecten zonder werksoort
+const FALLBACK_PALET: readonly KleurKey[] = ["slate", "denim", "sage", "teal", "moss", "stone"];
+
+function resolveKey(phaseIndex: number, werksoort: Werksoort | null): KleurKey {
+  const palet = werksoort ? BM_PALETTEN[werksoort] : FALLBACK_PALET;
+  return palet[phaseIndex % palet.length];
 }
 
 /** Diepe fase-kleur — voor de voortgangsbalk. */
-export function getPhaseColor(subject: string): string {
-  return COOL_PALETTE[getPaletteIndex(subject)];
+export function getPhaseColor(phaseIndex: number, werksoort: Werksoort | null): string {
+  return BM_KLEUREN[resolveKey(phaseIndex, werksoort)].deep;
 }
 
 /** Lichte fase-kleur — voor de baseline-balk (niet-gestarte voortgang). */
-export function getPhaseBaselineColor(subject: string): string {
-  return COOL_PALETTE_LIGHT[getPaletteIndex(subject)];
+export function getPhaseBaselineColor(phaseIndex: number, werksoort: Werksoort | null): string {
+  return BM_KLEUREN[resolveKey(phaseIndex, werksoort)].light;
 }

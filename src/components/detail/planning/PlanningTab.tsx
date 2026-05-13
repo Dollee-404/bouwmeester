@@ -121,6 +121,7 @@ export function PlanningTab({ detail, tasks, timesheets, today }: PlanningTabPro
       />
       <GanttStrook
         data={gantt}
+        werksoort={detail.werksoort}
         today={now}
         onFaseClick={(id) => setPanel({ id, mode: "phase" })}
       />

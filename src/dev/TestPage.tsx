@@ -482,6 +482,9 @@ export function TestPage() {
 
     {/* ── Wacht-op showcase (4F) ───────────────────────────────────────── */}
     <WachtOpShowcase />
+
+    {/* ── Kleurpalet per werksoort (5E) ────────────────────────────────── */}
+    <PalettenShowcase5E />
   </>
   );
 }
@@ -1624,6 +1627,172 @@ function WachtOpShowcase() {
           onClose={() => setOpen(null)}
         />
       )}
+    </div>
+  );
+}
+
+// ── 5E: Kleurpalet per werksoort showcase ─────────────────────────────────────
+
+const BM_KLEUREN: Record<string, { hex: string; label: string }> = {
+  teal:       { hex: "#0A7384", label: "Teal"       },
+  denim:      { hex: "#3D6B9E", label: "Denim"      },
+  indigo:     { hex: "#4350A0", label: "Indigo"     },
+  lavender:   { hex: "#635CA4", label: "Lavender"   },
+  moss:       { hex: "#4A7850", label: "Moss"       },
+  sage:       { hex: "#5E8B62", label: "Sage"       },
+  amber:      { hex: "#B87528", label: "Amber"      },
+  terracotta: { hex: "#AA5038", label: "Terracotta" },
+  dustyRose:  { hex: "#A55868", label: "Dusty Rose" },
+  slate:      { hex: "#5C6E7C", label: "Slate"      },
+  stone:      { hex: "#787060", label: "Stone"      },
+  charcoal:   { hex: "#58596A", label: "Charcoal"   },
+};
+
+// 6 kleuren per werksoort; kortere werksoorten gebruiken alleen de eerste N.
+interface WerksoortPaletDef {
+  naam: string;
+  fases: string[];
+  kleuren: (keyof typeof BM_KLEUREN)[];
+}
+
+const PALETTEN_5E: WerksoortPaletDef[] = [
+  {
+    naam: "Nieuwbouw",
+    fases: ["Fundering & Grondwerk", "Ruwbouw & Constructie", "Installaties", "Afwerking", "Buitenterrein"],
+    kleuren: ["moss", "terracotta", "denim", "slate", "sage", "stone"],
+  },
+  {
+    naam: "Renovatie",
+    fases: ["Sloop", "Constructie", "Installaties", "Afbouw", "Oplevering"],
+    kleuren: ["terracotta", "teal", "indigo", "dustyRose", "sage", "slate"],
+  },
+  {
+    naam: "Verbouw",
+    fases: ["Opname", "Voorbereiding", "Ruwbouw", "Afbouw", "Oplevering"],
+    kleuren: ["amber", "denim", "terracotta", "sage", "teal", "stone"],
+  },
+  {
+    naam: "Sloop",
+    fases: ["Inventarisatie", "Sloop", "Afvoer & Verwerking"],
+    kleuren: ["slate", "terracotta", "stone", "indigo", "moss", "charcoal"],
+  },
+  {
+    naam: "Sanering",
+    fases: ["Onderzoek", "Sanering", "Vrijgave & Rapportage"],
+    kleuren: ["denim", "lavender", "teal", "slate", "indigo", "stone"],
+  },
+  {
+    naam: "Keukenbladen",
+    fases: ["Order", "Inmeten", "Tekenen", "Productie", "Levering & Montage", "Service"],
+    kleuren: ["teal", "denim", "lavender", "dustyRose", "amber", "sage"],
+  },
+  {
+    naam: "Onderhoud",
+    fases: ["Aanvraag", "Inspectie", "Uitvoering", "Oplevering"],
+    kleuren: ["slate", "denim", "sage", "teal", "moss", "stone"],
+  },
+  {
+    naam: "Anders",
+    fases: [],
+    kleuren: ["charcoal", "slate", "stone", "charcoal", "slate", "stone"],
+  },
+];
+
+const Y_APP_TOKENS = [
+  { label: "y-teal",       hex: "#006876" },
+  { label: "y-teal-light", hex: "#99c2c8" },
+  { label: "y-teal-dark",  hex: "#043b42" },
+];
+
+function PalettenShowcase5E() {
+  return (
+    <div className="mt-12 border-t-2 border-slate-300 pt-8 pb-20 px-8">
+      <h2 className="text-lg font-bold text-slate-700 mb-1">5E — Kleurpalet per werksoort</h2>
+      <p className="text-xs text-slate-400 mb-8 max-w-2xl">
+        Gedeelde basis-set van 12 kleuren, harmonieus met de Y-App teal-tokens.
+        Elk werksoort kiest een vaste subset van 6. Kortere werksoorten (Sloop, Sanering, Onderhoud)
+        gebruiken alleen de eerste N slots. "Anders" krijgt neutrale grijstinten.
+        <br />
+        <strong className="text-slate-500">Dit is de showcase — nog geen implementatie in de Gantt.</strong>
+      </p>
+
+      {/* Y-App token referentie */}
+      <div className="mb-8">
+        <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+          Y-App teal-tokens (referentie)
+        </h3>
+        <div className="flex gap-3">
+          {Y_APP_TOKENS.map(({ label, hex }) => (
+            <div key={label} className="flex flex-col items-center gap-1">
+              <div
+                className="w-12 h-8 rounded"
+                style={{ backgroundColor: hex }}
+              />
+              <span className="text-[10px] text-slate-500 font-mono">{label}</span>
+              <span className="text-[10px] text-slate-400 font-mono">{hex}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Basis-set */}
+      <div className="mb-10">
+        <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+          Basis-set (12 kleuren)
+        </h3>
+        <div className="flex flex-wrap gap-2">
+          {Object.entries(BM_KLEUREN).map(([key, { hex, label }]) => (
+            <div key={key} className="flex flex-col items-center gap-1">
+              <div
+                className="w-14 h-9 rounded shadow-sm"
+                style={{ backgroundColor: hex }}
+              />
+              <span className="text-[10px] font-medium text-slate-600">{label}</span>
+              <span className="text-[9px] text-slate-400 font-mono">{hex}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Per werksoort */}
+      <div className="flex flex-col gap-8">
+        {PALETTEN_5E.map(({ naam, fases, kleuren }) => (
+          <div key={naam}>
+            <h3 className="text-sm font-semibold text-slate-700 mb-2">{naam}</h3>
+            <div className="flex gap-2">
+              {kleuren.map((kleurKey, i) => {
+                const { hex, label } = BM_KLEUREN[kleurKey];
+                const faseNaam = fases[i];
+                const isActief = faseNaam !== undefined;
+                return (
+                  <div key={i} className="flex flex-col gap-1" style={{ flex: "1 1 0", minWidth: 0 }}>
+                    <div
+                      className="rounded h-10 flex items-center justify-center"
+                      style={{
+                        backgroundColor: hex,
+                        opacity: isActief ? 1 : 0.25,
+                      }}
+                    >
+                      <span className="text-[10px] font-bold text-white/90 select-none">
+                        {i + 1}
+                      </span>
+                    </div>
+                    <p
+                      className="text-[10px] leading-tight text-center"
+                      style={{ color: isActief ? "#374151" : "#9ca3af" }}
+                    >
+                      {faseNaam ?? "—"}
+                    </p>
+                    <p className="text-[9px] text-slate-400 text-center font-mono leading-tight">
+                      {label}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

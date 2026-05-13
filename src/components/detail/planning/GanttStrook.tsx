@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { getHolidaysInRange, getISOWeek } from "../../../data/planning-helpers";
 import type { GanttData, GanttFase, GanttMijlpaal } from "./gantt-logica";
 import { getPhaseColor, getPhaseBaselineColor } from "./phase-colors";
+import type { Werksoort } from "../../../data/types";
 
 // ── Constanten ────────────────────────────────────────────────────────────────
 
@@ -156,9 +157,13 @@ function computeWeekMarks(
 
 function FaseBalk({
   fase,
+  phaseIndex,
+  werksoort,
   toPercent,
 }: {
   fase: GanttFase;
+  phaseIndex: number;
+  werksoort: Werksoort | null;
   toPercent: (d: Date) => number;
 }) {
   const { plannedStart, plannedEnd, progress } = fase;
@@ -175,8 +180,7 @@ function FaseBalk({
 
   return (
     <>
-      {/* Baseline: volledige geplande duur — lichte fase-tint zodat fase-identiteit */}
-      {/* ook zichtbaar is bij 0% voortgang                                         */}
+      {/* Baseline: volledige geplande duur — lichte fase-tint van het werksoort-palet */}
       <div
         className="absolute"
         style={{
@@ -184,12 +188,12 @@ function FaseBalk({
           width: `${bWidth}%`,
           top: BAR_TOP,
           height: BAR_H,
-          backgroundColor: getPhaseBaselineColor(fase.subject),
+          backgroundColor: getPhaseBaselineColor(phaseIndex, werksoort),
           borderRadius: 9,
         }}
         aria-hidden="true"
       />
-      {/* Voortgang: fase-kleur op basis van naam (deterministisch) */}
+      {/* Voortgang: diepe fase-kleur uit het werksoort-palet */}
       {progressWidth > 0 && (
         <div
           className="absolute"
@@ -198,7 +202,7 @@ function FaseBalk({
             width: `${progressWidth}%`,
             top: BAR_TOP,
             height: BAR_H,
-            backgroundColor: getPhaseColor(fase.subject),
+            backgroundColor: getPhaseColor(phaseIndex, werksoort),
             borderRadius: 9,
           }}
           aria-hidden="true"
@@ -241,11 +245,12 @@ function MijlpaalRuit({
 
 export interface GanttStrookProps {
   data: GanttData;
+  werksoort?: Werksoort | null;
   today?: Date;
   onFaseClick?: (faseId: string) => void;
 }
 
-export function GanttStrook({ data, today, onFaseClick }: GanttStrookProps) {
+export function GanttStrook({ data, werksoort = null, today, onFaseClick }: GanttStrookProps) {
   const { t } = useTranslation();
   const [zoom, setZoom] = useState<GanttZoom>("project");
   const now = today ?? new Date();
@@ -479,14 +484,14 @@ export function GanttStrook({ data, today, onFaseClick }: GanttStrookProps) {
             </div>
 
             {/* ── Faserijen ──────────────────────────────────────────────── */}
-            {fases.map(fase => (
+            {fases.map((fase, i) => (
               <div
                 key={fase.id}
                 style={{ height: ROW_H }}
                 className={`relative border-t border-slate-100 ${onFaseClick ? "cursor-pointer hover:bg-slate-50" : ""}`}
                 onClick={onFaseClick ? () => onFaseClick(fase.id) : undefined}
               >
-                <FaseBalk fase={fase} toPercent={toPercent} />
+                <FaseBalk fase={fase} phaseIndex={i} werksoort={werksoort} toPercent={toPercent} />
               </div>
             ))}
           </div>
