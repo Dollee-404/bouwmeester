@@ -10,6 +10,9 @@ import { KanbanBoard } from "../components/kanban/KanbanBoard";
 import { ProjectsTable } from "../components/projects/ProjectsTable";
 import { ProjectsCardList } from "../components/projects/ProjectsCardList";
 import { NewProjectWizard } from "../components/projects/NewProjectWizard";
+import { useUnlinkedQuotations } from "../hooks/use-unlinked-quotations";
+import { DoordrukkenWizard } from "../components/projects/DoordrukkenWizard";
+import type { UnlinkedQuotation } from "../data/detail-types";
 import { DetailPanel } from "../components/detail/DetailPanel";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -29,6 +32,8 @@ export function ProjectsPage() {
   const { t } = useTranslation();
   const { addToast } = useToast();
   const { projects, loading, isRefetching, error, refetch } = useProjects({ includeArchived: true });
+  const { quotations: unlinkedQuotations, refetch: refetchQuotations } = useUnlinkedQuotations();
+  const [doordrukkenQuotation, setDoordrukkenQuotation] = useState<UnlinkedQuotation | null>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [showArchived, setShowArchived] = useState(false);
@@ -81,6 +86,13 @@ export function ProjectsPage() {
 
   function handleWizardCreated(projectId: string) {
     setWizardOpen(false);
+    refetch();
+    setSelectedProjectId(projectId);
+  }
+
+  function handleDoordrukkenCreated(projectId: string) {
+    setDoordrukkenQuotation(null);
+    refetchQuotations();
     refetch();
     setSelectedProjectId(projectId);
   }
@@ -204,6 +216,8 @@ export function ProjectsPage() {
             onCardClick={handleProjectClick}
             onAddNew={() => setWizardOpen(true)}
             onStatusChange={handleStatusChange}
+            unlinkedQuotations={unlinkedQuotations}
+            onDoordrukken={setDoordrukkenQuotation}
           />
         </div>
       )}
@@ -233,6 +247,13 @@ export function ProjectsPage() {
         <NewProjectWizard
           onClose={() => setWizardOpen(false)}
           onCreated={handleWizardCreated}
+        />
+      )}
+      {doordrukkenQuotation && (
+        <DoordrukkenWizard
+          quotation={doordrukkenQuotation}
+          onClose={() => setDoordrukkenQuotation(null)}
+          onCreated={handleDoordrukkenCreated}
         />
       )}
     </main>
