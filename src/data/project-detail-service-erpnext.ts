@@ -1,4 +1,4 @@
-import { fetchDocument, fetchList, callMethod, createDocument } from "../bridge";
+import { fetchDocument, fetchList, callMethod, createDocument, updateDocument } from "../bridge";
 import { getPhaseTemplate } from "./default-phase-templates";
 import { parseDependsOn, parseAssign, enrichTasksWithWachtOp } from "./planning-helpers";
 import type { BouwmeesterStatus, Werksoort } from "./types";
@@ -10,6 +10,8 @@ import type {
   ActivityItem,
   ProjectFinancials,
   CreatePhasesResult,
+  QuotationItem,
+  ProjectQuotation,
 } from "./detail-types";
 import type { ProjectDetailService } from "./project-detail-service";
 
@@ -86,6 +88,32 @@ interface RawComment {
   content: string;
   owner: string;
   creation: string;
+}
+
+interface RawQuotationItem {
+  name: string;           // child-row docname — nodig voor idempotente PUT
+  item_code: string;
+  item_name: string;
+  description: string | null;   // Text Editor → kan HTML bevatten
+  qty: number;
+  uom: string;
+  rate: number;
+  amount: number;
+}
+
+interface RawQuotation {
+  name: string;
+  party_name: string;
+  transaction_date: string;
+  kbf_meetdatum: string | null;
+  kbf_inmeter: string | null;
+  items: RawQuotationItem[];
+}
+
+/** Strip HTML-tags uit Text Editor-beschrijvingen voor plain-text weergave. */
+function stripHtml(html: string | null): string {
+  if (!html) return "";
+  return html.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").trim();
 }
 
 // fetchDocument geeft het volledige document terug inclusief child tables.
@@ -413,5 +441,54 @@ export const erpnextDetailService: ProjectDetailService = {
     }
 
     return { created, skipped, failed };
+  },
+
+  async getProjectQuotations(customerName: string): Promise<ProjectQuotation[]> {
+    const list = await fetchList<{ name: string }>("Quotation", {
+      filters: [
+        ["party_name", "=", customerName],
+        ["kbf_opname", "=", 1],
+      ],
+      fields: ["name"],
+      order_by: "transaction_date desc",
+      limit_page_length: 50,
+    });
+
+    if (list.length === 0) return [];
+
+    const docs = await Promise.all(
+      list.map((q) => fetchDocument<RawQuotation>("Quotation", q.name)),
+    );
+
+    return docs.map((doc): ProjectQuotation => ({
+      name: doc.name,
+      customerName: doc.party_name,
+      transactionDate: new Date(doc.transaction_date),
+      meetdatum: doc.kbf_meetdatum ? new Date(doc.kbf_meetdatum) : null,
+      inmeter: doc.kbf_inmeter ?? null,
+      items: (doc.items ?? []).map((row): QuotationItem => ({
+        rowName: row.name,
+        itemCode: row.item_code,
+        itemName: row.item_name,
+        description: stripHtml(row.description),
+        qty: row.qty,
+        uom: row.uom,
+        rate: row.rate,
+        amount: row.amount,
+      })),
+    }));
+  },
+
+  async updateQuotationItemRate(
+    quotationName: string,
+    rowName: string,
+    newRate: number,
+    allItems: QuotationItem[],
+  ): Promise<void> {
+    const updatedItems = allItems.map((item) => ({
+      name: item.rowName,
+      rate: item.rowName === rowName ? newRate : item.rate,
+    }));
+    await updateDocument("Quotation", quotationName, { items: updatedItems });
   },
 };
