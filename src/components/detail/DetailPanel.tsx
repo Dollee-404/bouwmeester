@@ -13,6 +13,7 @@ import { PhasesSection } from "./PhasesSection";
 import { ActivityItem } from "./ActivityItem";
 import { Sidebar } from "./Sidebar";
 import { PlanningTab } from "./planning/PlanningTab";
+import { CalculatieTab } from "./calculatie/CalculatieTab";
 
 const ANIMATION_MS = 250;
 
@@ -228,6 +229,8 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
                   tasks={tasks ?? []}
                   timesheets={timesheets ?? {}}
                 />
+              ) : activeTab === "calculatie" ? (
+                <CalculatieTab customerName={detail!.customerName} />
               ) : activeTab === "overzicht" ? (
                 <div>
                   {/* Fases */}
