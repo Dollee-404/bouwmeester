@@ -15,6 +15,7 @@ import {
 } from "@dnd-kit/core";
 import { useTranslation } from "react-i18next";
 import type { BouwmeesterStatus, Project } from "../../data/types";
+import type { UnlinkedQuotation } from "../../data/detail-types";
 import { STATUS_ORDER, ARCHIVED_STATUS_ORDER } from "./status-config";
 import { KanbanColumn } from "./KanbanColumn";
 import { ProjectCard } from "./ProjectCard";
@@ -57,6 +58,9 @@ interface KanbanBoardProps {
   onCardClick?: (project: Project) => void;
   onAddNew?: (status: BouwmeesterStatus) => void;
   onStatusChange?: (projectId: string, newStatus: BouwmeesterStatus) => Promise<void>;
+  /** Ontkoppelde opnames — alleen zichtbaar in de Lead-kolom */
+  unlinkedQuotations?: UnlinkedQuotation[];
+  onDoordrukken?: (quotation: UnlinkedQuotation) => void;
 }
 
 export function KanbanBoard({
@@ -66,6 +70,8 @@ export function KanbanBoard({
   onCardClick,
   onAddNew,
   onStatusChange,
+  unlinkedQuotations = [],
+  onDoordrukken,
 }: KanbanBoardProps) {
   const { t } = useTranslation();
   const { addToast } = useToast();
@@ -194,6 +200,8 @@ export function KanbanBoard({
               isLoading={isLoading}
               onCardClick={onCardClick}
               onAddNew={onAddNew}
+              quotations={status === "Lead" ? unlinkedQuotations : undefined}
+              onOpnameClick={status === "Lead" ? onDoordrukken : undefined}
             />
           ))}
         </div>

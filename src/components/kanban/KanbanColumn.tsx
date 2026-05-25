@@ -2,9 +2,11 @@ import { useDroppable } from "@dnd-kit/core";
 import { useTranslation } from "react-i18next";
 import { Plus } from "lucide-react";
 import type { BouwmeesterStatus, Project } from "../../data/types";
+import type { UnlinkedQuotation } from "../../data/detail-types";
 import { STATUS_COLORS, STATUS_LABEL_KEYS } from "./status-config";
 import { DraggableProjectCard } from "./DraggableProjectCard";
 import { ProjectCardSkeleton } from "./ProjectCardSkeleton";
+import { OpnameCard } from "./OpnameCard";
 
 interface KanbanColumnProps {
   status: BouwmeesterStatus;
@@ -13,20 +15,29 @@ interface KanbanColumnProps {
   isLoading?: boolean;
   onCardClick?: (project: Project) => void;
   onAddNew?: (status: BouwmeesterStatus) => void;
+  /** Alleen relevant voor de Lead-kolom */
+  quotations?: UnlinkedQuotation[];
+  onOpnameClick?: (quotation: UnlinkedQuotation) => void;
 }
 
 // Geen React.memo: @dnd-kit's useDroppable() subscribeert
 // op DndContext, dat bij elke drag-tick update. Memo is
-// daardoor effectloos. Performance op dev-build: ~67ms per
-// commit met 15 projecten. Productie-build (geminified)
-// naar verwachting fors lager. Bij toekomstige performance-
-// issues: overweeg useDroppable in een aparte wrapper-
-// component te plaatsen zodat memo wel effect heeft.
-export function KanbanColumn({ status, projects, savingIds, isLoading = false, onCardClick, onAddNew }: KanbanColumnProps) {
+// daardoor effectloos.
+export function KanbanColumn({
+  status,
+  projects,
+  savingIds,
+  isLoading = false,
+  onCardClick,
+  onAddNew,
+  quotations = [],
+  onOpnameClick,
+}: KanbanColumnProps) {
   const { t } = useTranslation();
   const color = STATUS_COLORS[status];
   const labelKey = STATUS_LABEL_KEYS[status];
   const { isOver, setNodeRef } = useDroppable({ id: status });
+  const totalCount = projects.length + quotations.length;
 
   return (
     <div className="flex flex-col min-w-0">
@@ -42,7 +53,7 @@ export function KanbanColumn({ status, projects, savingIds, isLoading = false, o
             {t(labelKey)}
           </span>
           <span className="shrink-0 bg-slate-200 text-slate-600 text-xs rounded-full px-[7px] py-px leading-tight">
-            {projects.length}
+            {totalCount}
           </span>
         </div>
         <button
@@ -70,7 +81,7 @@ export function KanbanColumn({ status, projects, savingIds, isLoading = false, o
             <ProjectCardSkeleton />
             <ProjectCardSkeleton />
           </div>
-        ) : projects.length === 0 ? (
+        ) : totalCount === 0 ? (
           <div
             className="flex items-center justify-center text-xs text-slate-400 bg-slate-50 rounded-lg"
             style={{ minHeight: 72, padding: 16 }}
@@ -79,6 +90,14 @@ export function KanbanColumn({ status, projects, savingIds, isLoading = false, o
           </div>
         ) : (
           <div className="flex flex-col" style={{ gap: 10 }}>
+            {/* Opname-kaartjes boven projectkaartjes — vragen om actie */}
+            {quotations.map((q) => (
+              <OpnameCard
+                key={q.name}
+                quotation={q}
+                onDoordrukken={onOpnameClick ?? (() => {})}
+              />
+            ))}
             {projects.map((project) => (
               <DraggableProjectCard
                 key={project.id}
@@ -93,4 +112,3 @@ export function KanbanColumn({ status, projects, savingIds, isLoading = false, o
     </div>
   );
 }
-
