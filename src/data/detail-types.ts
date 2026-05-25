@@ -68,3 +68,30 @@ export interface CreatePhasesResult {
   skipped: string[];
   failed: string[];
 }
+
+export interface QuotationItem {
+  /** ERPNext child-row docname (bijv. "KBF-QTN-ITEM-0001"), nodig voor update */
+  rowName: string;
+  itemCode: string;
+  itemName: string;
+  /** Beschrijving — HTML gestript voor weergave */
+  description: string;
+  qty: number;
+  uom: string;
+  /** Prijs per eenheid — initieel 0, door kantoor in te vullen */
+  rate: number;
+  /** Berekend: qty * rate */
+  amount: number;
+}
+
+export interface ProjectQuotation {
+  /** ERPNext Quotation-docname (bijv. "QTN-0001") */
+  name: string;
+  customerName: string;
+  transactionDate: Date;
+  /** Datum van de opname (kbf_meetdatum) */
+  meetdatum: Date | null;
+  /** Naam van de inmeter/verkoper (kbf_inmeter) */
+  inmeter: string | null;
+  items: QuotationItem[];
+}
