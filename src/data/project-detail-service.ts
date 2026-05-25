@@ -6,6 +6,8 @@ import type {
   ActivityItem,
   ProjectFinancials,
   CreatePhasesResult,
+  QuotationItem,
+  ProjectQuotation,
 } from "./detail-types";
 
 export interface ProjectDetailService {
@@ -16,6 +18,18 @@ export interface ProjectDetailService {
   getProjectActivity(projectId: string, limit?: number): Promise<ActivityItem[]>;
   getProjectFinancials(projectId: string): Promise<ProjectFinancials>;
   createDefaultPhaseTasks(projectId: string, werksoort: string): Promise<CreatePhasesResult>;
+  /** Haal alle keukenblad-offertes op voor de opgegeven klant. */
+  getProjectQuotations(customerName: string): Promise<ProjectQuotation[]>;
+  /**
+   * Sla een nieuwe rate op voor één offerteregel in ERPNext.
+   * allItems = volledige huidige regellijst (nodig voor child-table PUT).
+   */
+  updateQuotationItemRate(
+    quotationName: string,
+    rowName: string,
+    newRate: number,
+    allItems: QuotationItem[],
+  ): Promise<void>;
 }
 
 export type {
@@ -25,6 +39,8 @@ export type {
   ActivityItem,
   ProjectFinancials,
   CreatePhasesResult,
+  QuotationItem,
+  ProjectQuotation,
 };
 
 // Lazy imports om circulaire afhankelijkheid te vermijden
@@ -45,4 +61,8 @@ export const projectDetailService: ProjectDetailService = {
   getProjectActivity: async (id, limit) => (await getService()).getProjectActivity(id, limit),
   getProjectFinancials: async (id) => (await getService()).getProjectFinancials(id),
   createDefaultPhaseTasks: async (id, werksoort) => (await getService()).createDefaultPhaseTasks(id, werksoort),
+  getProjectQuotations: async (customerName) =>
+    (await getService()).getProjectQuotations(customerName),
+  updateQuotationItemRate: async (quotationName, rowName, newRate, allItems) =>
+    (await getService()).updateQuotationItemRate(quotationName, rowName, newRate, allItems),
 };
