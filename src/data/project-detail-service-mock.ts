@@ -5,6 +5,8 @@ import type {
   ActivityItem,
   ProjectFinancials,
   CreatePhasesResult,
+  QuotationItem,
+  ProjectQuotation,
 } from "./detail-types";
 import type { BouwmeesterStatus } from "./types";
 import type { ProjectDetailService } from "./project-detail-service";
@@ -78,6 +80,63 @@ function fallbackDetail(projectId: string): ProjectDetail {
     team: [],
   };
 }
+
+const MOCK_QUOTATIONS: Record<string, ProjectQuotation[]> = {
+  "Gemeente Sliedrecht": [
+    {
+      name: "QTN-DEMO-001",
+      customerName: "Gemeente Sliedrecht",
+      transactionDate: new Date("2026-05-10"),
+      meetdatum: new Date("2026-05-08"),
+      inmeter: "J. de Vries",
+      items: [
+        {
+          rowName: "row-001",
+          itemCode: "COMPOSIET-BLAD-20MM",
+          itemName: "Composiet 20mm — Silestone Blanco Zeus",
+          description: "Materiaal: Wit / Mat / Composiet / 20mm\nAfmetingen: 2400×600mm\nRandafwerking: Voor: DV20",
+          qty: 1.44,
+          uom: "Square Meter",
+          rate: 0,
+          amount: 0,
+        },
+        {
+          rowName: "row-002",
+          itemCode: "TOESLAG-SPARING-ONDERBOUW",
+          itemName: "Sparing onderbouw spoelbak",
+          description: "Onderbouw / Blanco Steel 780×500mm",
+          qty: 1,
+          uom: "Nos",
+          rate: 0,
+          amount: 0,
+        },
+        {
+          rowName: "row-003",
+          itemCode: "TOESLAG-BOORGAT-KRAAN",
+          itemName: "Boorgat kraan",
+          description: "Kraan (1 boorgat)",
+          qty: 1,
+          uom: "Nos",
+          rate: 0,
+          amount: 0,
+        },
+        {
+          rowName: "row-004",
+          itemCode: "TOESLAG-RAND-DV20",
+          itemName: "Randafwerking DV20",
+          description: "Randafwerking DV20 — 2.400m",
+          qty: 2.4,
+          uom: "Meter",
+          rate: 0,
+          amount: 0,
+        },
+      ],
+    },
+  ],
+};
+
+// In-memory opslag van gewijzigde prijzen per sessie (mock only)
+const mockRates: Record<string, number> = {};
 
 export const mockDetailService: ProjectDetailService = {
   async getProjectDetail(projectId: string): Promise<ProjectDetail> {
@@ -199,5 +258,26 @@ export const mockDetailService: ProjectDetailService = {
       wachtOpToelichting: null,
     }));
     return { created: [...template.phases], skipped: [], failed: [] };
+  },
+
+  async getProjectQuotations(customerName: string): Promise<ProjectQuotation[]> {
+    await new Promise((r) => setTimeout(r, MOCK_DELAY_MS));
+    const quotes = MOCK_QUOTATIONS[customerName] ?? [];
+    return quotes.map((q) => ({
+      ...q,
+      items: q.items.map((item) => {
+        const rate = mockRates[`${q.name}:${item.rowName}`] ?? item.rate;
+        return { ...item, rate, amount: rate * item.qty };
+      }),
+    }));
+  },
+
+  async updateQuotationItemRate(
+    quotationName: string,
+    rowName: string,
+    newRate: number,
+  ): Promise<void> {
+    await new Promise((r) => setTimeout(r, 300));
+    mockRates[`${quotationName}:${rowName}`] = newRate;
   },
 };
