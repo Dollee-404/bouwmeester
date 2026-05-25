@@ -216,6 +216,27 @@
     "error_holiday_list": "Geen standaard vakantielijst ingesteld voor je bedrijf. Voer het installatiescript uit (scripts/install-holiday-list.ts) of stel dit handmatig in via ERPNext: Bedrijf → Standaard vakantielijst.",
     "error_generic": "Aanmaken mislukt. Probeer het opnieuw."
   },
+  "opname_card": {
+    "badge": "Opname",
+    "meetdatum": "Opname op",
+    "inmeter": "door",
+    "items_one": "{{count}} regel",
+    "items_other": "{{count}} regels",
+    "doordrukken": "Doordrukken"
+  },
+  "doordrukken": {
+    "title": "Opname doordrukken",
+    "subtitle": "Maak een project aan op basis van deze keukenblad-opname.",
+    "summary_label": "Opname-samenvatting",
+    "project_name_label": "Projectnaam",
+    "project_name_required": "— verplicht veld",
+    "werksoort_label": "Werksoort",
+    "customer_label": "Klant",
+    "date_label": "Startdatum",
+    "submit": "Aanmaken als project",
+    "creating": "Aanmaken...",
+    "error_generic": "Aanmaken mislukt. Probeer het opnieuw."
+  },
   "planning": {
     "situatie": {
       "werkdag_one": "werkdag",
