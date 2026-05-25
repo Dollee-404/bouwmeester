@@ -95,3 +95,18 @@ export interface ProjectQuotation {
   inmeter: string | null;
   items: QuotationItem[];
 }
+
+/** Minimale data voor een opname-kaartje — Quotation zonder kbf_project */
+export interface UnlinkedQuotation {
+  /** ERPNext Quotation-docname, bijv. "QTN-0001" */
+  name: string;
+  /** party_name — ERPNext Customer-docname */
+  customerName: string;
+  transactionDate: Date;
+  /** Datum van de keukenblad-opname (kbf_meetdatum) */
+  meetdatum: Date | null;
+  /** Naam van de inmeter/verkoper (kbf_inmeter) */
+  inmeter: string | null;
+  /** Totaal aantal regelitems voor weergave op de kaart */
+  itemCount: number;
+}
