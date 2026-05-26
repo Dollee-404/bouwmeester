@@ -56,6 +56,30 @@ Bouwmeester voegt 6 velden toe aan het Project-doctype in ERPNext:
 | `custom_address` | Small Text | Legacy. Projectadres wordt nu gelezen uit `Customer.customer_primary_address`. Dit veld wordt nog als fallback gebruikt in het detailpaneel totdat alle klanten een Customer Address hebben in ERPNext. |
 | `custom_weersafhankelijk` | Check | Markeert weersafhankelijke projecten |
 
+## Werksoort-configuratie
+
+Bouwmeester kent acht werksoorten: Nieuwbouw, Renovatie, Verbouw, Sloop, Sanering, Keukenbladen, Onderhoud en Anders. De configuratie per werksoort staat in `src/data/werksoort-config.ts` en bevat:
+
+- **`primaryColor`** — badge- en accentkleur (hex deep + light)
+- **`palet`** — kleurarray voor Gantt-fasebalken
+- **`statusFlow`** — werksoort-specifieke pijplijn als `StatusFlowStep[]`. Elke stap verwijst naar een echte `BouwmeesterStatus`-waarde en heeft een optioneel afwijkend weergavelabel. `undefined` = standaard 6-staps-flow (Lead → Calculatie → Gegund → In uitvoering → Oplevering → Afgerond).
+- **`kpiSet`** — optionele labeloverrides voor de vier KPI-blokken (Voortgang, Budget, Uren, Planning). `undefined` = standaard i18n-labels.
+
+**Voorbeeld:** Sloop heeft een 5-staps-flow (geen Oplevering) en hernoemt "In uitvoering" naar "Uitvoering" op de statusbalk. De KPI "Voortgang" toont voor Sloop het label "Afvoer %".
+
+### custom_werksoort — deprecation
+
+Het veld `custom_werksoort` (eigen Select-veld op Project) is deprecated per RONDE 5C. Bouwmeester leest de werksoort nu uit het standaard ERPNext-veld `project_type` (via `Project Type`-doctype). `custom_werksoort` blijft als read-only fallback aanwezig totdat alle installaties zijn gemigreerd. Schrijf nooit naar `custom_werksoort` in nieuwe code.
+
+### Project Type toevoegen in ERPNext
+
+1. Open in ERPNext: **Project → Project Type → Nieuw**
+2. Vul de naam in exact zoals hij in Bouwmeester moet verschijnen (bijv. "Restauratie")
+3. Sla op
+4. Voeg indien gewenst een `Project Template` toe voor automatische fase-aanmaak
+
+Bouwmeester herkent de nieuwe werksoort als `WerksoortId` alleen als je de naam ook toevoegt aan `WERKSOORT_IDS` en `WERKSOORT_CONFIGS` in `src/data/werksoort-config.ts`. Zonder die toevoeging valt Bouwmeester terug op de neutrale `DEFAULT_CONFIG` (grijs badge, standaard StatusFlow).
+
 ## Known limitations
 
 1. **Project aanmaken via Bouwmeester is nog niet beschikbaar.** Maak projecten aan via ERPNext. Gepland voor een volgende versie.
@@ -63,6 +87,7 @@ Bouwmeester voegt 6 velden toe aan het Project-doctype in ERPNext:
 3. **`Project User` child-doctype niet betrouwbaar via REST API.** Frappe-permissies en URL-encodingproblemen (spatie in doctype-naam) maken directe queries op de `Project User`-kindtabel via de Y-App bridge onbetrouwbaar. Bouwmeester valt daardoor terug op het legacy `custom_project_manager`-veld voor projectleider-data in de projectenlijst. Een toekomstige ronde moet ofwel de Frappe-permissies voor child-doctypes oplossen, ofwel een server-side endpoint bouwen dat Project Users betrouwbaar levert — pas dan kan `custom_project_manager` worden leeggemaakt.
 4. **`custom_address` fallback actief in detailpaneel.** Zolang klanten nog geen `customer_primary_address` hebben in ERPNext, valt het detailpaneel terug op `custom_address`. De fallback wordt verwijderd in 3F-vervolg, na vulling van de Customer Addresses.
 5. **Instance-switch is niet uitgebreid getest.** Bouwmeester is gebouwd voor multi-instance Y-App setups, maar onze testomgeving had slechts één ERPNext-instance. Wissel je in Y-App tussen instances, dan laadt Bouwmeester de data van de actieve instance opnieuw. Meld afwijkend gedrag via de issue tracker.
+6. **Sanering StatusFlow is vereenvoudigd tot 6 stappen.** De ideale flow (Aanvraag → Onderzoek → Calculatie → Gegund → Sanering → Vrijgave → Afgerond, 7 stappen) vereist twee nieuwe ERPNext-statuswaarden. De huidige implementatie hernoemt bestaande statussen: "Calculatie" verschijnt als "Onderzoek", "In uitvoering" als "Sanering", "Oplevering" als "Vrijgave". Een volledige 7-staps-flow is gepland voor een latere ronde na ERPNext-schema-uitbreiding.
 
 ## Voor ontwikkelaars
 
