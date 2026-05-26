@@ -15,6 +15,7 @@ import { ActivityItem } from "./ActivityItem";
 import { Sidebar } from "./Sidebar";
 import { PlanningTab } from "./planning/PlanningTab";
 import { CalculatieTab } from "./calculatie/CalculatieTab";
+import { DocumentenTab } from "./documenten/DocumentenTab";
 
 const ANIMATION_MS = 250;
 
@@ -264,6 +265,8 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
                     <p className="text-sm text-slate-400 py-4 text-center">{t("activity.empty")}</p>
                   )}
                 </div>
+              ) : activeTab === "documenten" ? (
+                <DocumentenTab projectId={detail!.id} />
               ) : (
                 <div className="py-12 text-center text-sm text-slate-400">
                   {t("tab.not_available")}
