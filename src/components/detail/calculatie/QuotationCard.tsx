@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next";
+import { FileDown } from "lucide-react";
 import type { ProjectQuotation } from "../../../data/detail-types";
+import { ERPNEXT_URL } from "../../../bridge";
 import { QuotationItemsTable } from "./QuotationItemsTable";
 
 interface QuotationCardProps {
@@ -46,6 +48,17 @@ export function QuotationCard({ quotation, onSaveRate }: QuotationCardProps) {
             </span>
             <span className="text-sm text-slate-700">{quotation.inmeter}</span>
           </div>
+        )}
+        {quotation.tekenPdf && (
+          <a
+            href={`${ERPNEXT_URL}${quotation.tekenPdf}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 text-xs text-y-teal hover:text-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-y-teal rounded"
+          >
+            <FileDown size={13} aria-hidden />
+            {t("calculatie.tekening")}
+          </a>
         )}
         <span className="ml-auto text-xs font-mono text-slate-400">
           {quotation.name}

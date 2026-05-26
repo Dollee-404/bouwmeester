@@ -93,6 +93,8 @@ export interface ProjectQuotation {
   meetdatum: Date | null;
   /** Naam van de inmeter/verkoper (kbf_inmeter) */
   inmeter: string | null;
+  /** Bestandspad van de werkplaatstekening PDF (kbf_tekening_pdf), bijv. "/files/tekening.pdf" */
+  tekenPdf: string | null;
   items: QuotationItem[];
 }
 

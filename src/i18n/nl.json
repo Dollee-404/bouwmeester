@@ -157,7 +157,8 @@
       "prijs": "Prijs/eenheid",
       "totaal": "Totaal"
     },
-    "save_error": "Opslaan mislukt. Probeer opnieuw."
+    "save_error": "Opslaan mislukt. Probeer opnieuw.",
+    "tekening": "Werkplaatstekening"
   },
   "kpi": {
     "voortgang": "Voortgang",
