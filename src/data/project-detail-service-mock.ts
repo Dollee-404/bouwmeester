@@ -37,6 +37,26 @@ const MOCK_NEGATIVE_BALANCE  = _p.has("mockNegativeBalance");
 const mockCreatedTasks: Record<string, ProjectTask[]> = {};
 
 const MOCK_DETAILS: Record<string, ProjectDetail> = {
+  "PROJ-0011": {
+    id: "PROJ-0011",
+    projectName: "Keukenbladen Renovatie Keuken Hartman",
+    customerName: "Familie Hartman",
+    customerAddress: "Merwedestraat 38, 3312 CS Dordrecht",
+    status: "Oplevering",
+    werksoort: "Keukenbladen",
+    startDate: new Date("2026-04-14"),
+    endDate: new Date("2026-05-30"),
+    percentComplete: 92,
+    budgetSales: 3_250,
+    budgetHours: 12,
+    billedAmount: 3_250,
+    estimatedCosting: 2_600,
+    isWeatherDependent: false,
+    isArchived: false,
+    team: [
+      { user: "j.devries@example.nl", fullName: "J. de Vries", email: "j.devries@example.nl", role: "projectleider" },
+    ],
+  },
   "PROJ-0023": {
     id: "PROJ-0023",
     projectName: "Keukenbladen Nieuw Woonhuis Van der Linden",
@@ -197,6 +217,16 @@ const MOCK_QUOTATIONS: Record<string, ProjectQuotation[]> = {
 };
 
 const MOCK_INVOICES: Record<string, SalesInvoice[]> = {
+  "PROJ-0011": [
+    {
+      name: "SINV-2026-00028",
+      postingDate: new Date("2026-05-14"),
+      dueDate: new Date("2026-06-13"),
+      grandTotal: 3_250,
+      outstandingAmount: 0,
+      status: "Paid",
+    },
+  ],
   "PROJ-0009": [
     {
       name: "SINV-2026-00012",
@@ -271,6 +301,14 @@ export const mockDetailService: ProjectDetailService = {
     await new Promise((r) => setTimeout(r, 100));
     if (mockCreatedTasks[projectId]) return mockCreatedTasks[projectId];
     if (MOCK_EMPTY_PHASES) return [];
+    if (projectId === "PROJ-0011") return enrichTasksWithWachtOp([
+      { id: "T11-01", subject: "Calculatie & offerte",  parentTask: null, isMilestone: false, isGroup: false, status: "Completed", progress: 100, expectedStartDate: new Date("2026-04-14"), expectedEndDate: new Date("2026-04-16"), actualStartDate: new Date("2026-04-14"), actualEndDate: new Date("2026-04-15"), budgetHours: 1.5, description: "Opmeten keuken + offerte opgesteld en akkoord.", dependsOn: [],         assignedTo: ["j.devries@example.nl"], wachtOp: null, wachtOpToelichting: null },
+      { id: "T11-02", subject: "Tekening goedkeuren",   parentTask: null, isMilestone: false, isGroup: false, status: "Completed", progress: 100, expectedStartDate: new Date("2026-04-17"), expectedEndDate: new Date("2026-04-24"), actualStartDate: new Date("2026-04-17"), actualEndDate: new Date("2026-04-22"), budgetHours: 0.5, description: "Werkplaatstekening verstuurd, klant akkoord per mail.", dependsOn: ["T11-01"], assignedTo: ["j.devries@example.nl"], wachtOp: null, wachtOpToelichting: null },
+      { id: "T11-03", subject: "Productie bij Vasto",   parentTask: null, isMilestone: false, isGroup: false, status: "Completed", progress: 100, expectedStartDate: new Date("2026-04-28"), expectedEndDate: new Date("2026-05-09"), actualStartDate: new Date("2026-04-28"), actualEndDate: new Date("2026-05-09"), budgetHours: null, description: "Graniet 30mm gefreesd en gepolijst door Vasto.",    dependsOn: ["T11-02"], assignedTo: [],                       wachtOp: null, wachtOpToelichting: null },
+      { id: "T11-04", subject: "Levering",              parentTask: null, isMilestone: false, isGroup: false, status: "Completed", progress: 100, expectedStartDate: new Date("2026-05-12"), expectedEndDate: new Date("2026-05-12"), actualStartDate: new Date("2026-05-12"), actualEndDate: new Date("2026-05-12"), budgetHours: 1.5, description: "Transport en lossing op locatie — geen beschadigingen.", dependsOn: ["T11-03"], assignedTo: ["j.devries@example.nl"], wachtOp: null, wachtOpToelichting: null },
+      { id: "T11-05", subject: "Montage",               parentTask: null, isMilestone: false, isGroup: false, status: "Completed", progress: 100, expectedStartDate: new Date("2026-05-13"), expectedEndDate: new Date("2026-05-13"), actualStartDate: new Date("2026-05-13"), actualEndDate: new Date("2026-05-13"), budgetHours: 7,   description: "Blad geplaatst, spoelbak aangesloten, siliconen afgewerkt.",  dependsOn: ["T11-04"], assignedTo: ["j.devries@example.nl"], wachtOp: null, wachtOpToelichting: null },
+      { id: "T11-06", subject: "Oplevering",            parentTask: null, isMilestone: true,  isGroup: false, status: "Open",      progress: 0,   expectedStartDate: new Date("2026-05-30"), expectedEndDate: new Date("2026-05-30"), actualStartDate: null,                  actualEndDate: null,                  budgetHours: 0.5, description: "Eindcontrole, foto's voor dossier, handtekening opleveringsformulier.", dependsOn: ["T11-05"], assignedTo: ["j.devries@example.nl"], wachtOp: null, wachtOpToelichting: null },
+    ]);
     if (projectId === "PROJ-0023") return enrichTasksWithWachtOp([
       { id: "T23-01", subject: "Calculatie & offerte",    parentTask: null, isMilestone: false, isGroup: false, status: "Completed", progress: 100, expectedStartDate: new Date("2026-04-07"), expectedEndDate: new Date("2026-04-11"), actualStartDate: new Date("2026-04-07"), actualEndDate: new Date("2026-04-10"), budgetHours: 2,   description: "Opmeten keuken, offerte opstellen en accorderen.", dependsOn: [],         assignedTo: ["j.devries@example.nl"], wachtOp: null, wachtOpToelichting: null },
       { id: "T23-02", subject: "Tekening goedkeuren",     parentTask: null, isMilestone: false, isGroup: false, status: "Completed", progress: 100, expectedStartDate: new Date("2026-04-14"), expectedEndDate: new Date("2026-04-25"), actualStartDate: new Date("2026-04-14"), actualEndDate: new Date("2026-04-23"), budgetHours: 1,   description: "Werkplaatstekening ter goedkeuring naar klant. Klant akkoord op 23 april.", dependsOn: ["T23-01"], assignedTo: ["j.devries@example.nl"], wachtOp: null, wachtOpToelichting: null },
@@ -321,6 +359,9 @@ export const mockDetailService: ProjectDetailService = {
 
   async getProjectTimesheets(projectId: string): Promise<TimesheetMap> {
     await new Promise((r) => setTimeout(r, 100));
+    if (projectId === "PROJ-0011") {
+      return { "T11-01": 1.5, "T11-02": 0.5, "T11-04": 1.5, "T11-05": 7 };
+    }
     if (projectId === "PROJ-0023") {
       return { "T23-01": 2, "T23-02": 1, "T23-04": 2, "T23-05": 7 };
     }
@@ -336,6 +377,15 @@ export const mockDetailService: ProjectDetailService = {
 
   async getProjectActivity(projectId: string, limit = 20): Promise<ActivityItem[]> {
     await new Promise((r) => setTimeout(r, 100));
+    if (projectId === "PROJ-0011") {
+      return [
+        { id: "a11-001", type: "log",     description: "Factuur SINV-2026-00028 betaald ontvangen",                                                              owner: "Administrator",        createdAt: new Date("2026-05-21T10:00:00") },
+        { id: "a11-002", type: "comment", description: "Montage vlekkeloos verlopen. Klant zeer tevreden met het graniet — oplevering volgende week inplannen.",  owner: "j.devries@example.nl", createdAt: new Date("2026-05-13T16:00:00") },
+        { id: "a11-003", type: "log",     description: "Status gewijzigd naar Oplevering",                                                                       owner: "j.devries@example.nl", createdAt: new Date("2026-05-13T09:00:00") },
+        { id: "a11-004", type: "log",     description: "Werkplaatstekening geaccordeerd door klant",                                                             owner: "j.devries@example.nl", createdAt: new Date("2026-04-22T11:30:00") },
+        { id: "a11-005", type: "log",     description: "Project aangemaakt",                                                                                     owner: "Administrator",        createdAt: new Date("2026-04-14T08:00:00") },
+      ].slice(0, limit);
+    }
     if (projectId === "PROJ-0023") {
       const items0023: ActivityItem[] = [
         { id: "a23-001", type: "comment", description: "Achterwand tegels door klant geplaatst op 27 mei. Afdichting siliconen ingepland voor deze week.", owner: "j.devries@example.nl", createdAt: new Date("2026-05-27T08:45:00") },
