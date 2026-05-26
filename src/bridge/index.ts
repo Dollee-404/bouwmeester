@@ -1,3 +1,18 @@
+// === Dev-direct mode ===
+// When VITE_DEV_ERPNEXT_URL is set, fetch calls go directly to /api/* which
+// Vite proxies to ERPNext (with auth header injected server-side).
+
+const DEV_ERPNEXT_URL = import.meta.env.VITE_DEV_ERPNEXT_URL as string | undefined;
+const IS_DEV_DIRECT = !!DEV_ERPNEXT_URL;
+
+// === URL params (used in iframe/Y-App mode) ===
+const params = new URLSearchParams(window.location.search);
+export const HOST_ORIGIN = params.get("host") || "*";
+export const INSTANCE_ID = IS_DEV_DIRECT ? "dev" : (params.get("instance") || "");
+export const ERPNEXT_URL = IS_DEV_DIRECT ? DEV_ERPNEXT_URL : (params.get("erpUrl") || "");
+export const LANG = params.get("lang") || "nl";
+
+// === postMessage RPC (Y-App iframe mode) ===
 type RpcReply =
   | { id: number; type: "yapp-ext.rpc.reply"; ok: true; result: unknown }
   | { id: number; type: "yapp-ext.rpc.reply"; ok: false; error: string };
@@ -9,12 +24,6 @@ type Pending = {
 
 const pending = new Map<number, Pending>();
 let nextId = 1;
-
-const params = new URLSearchParams(window.location.search);
-export const HOST_ORIGIN = params.get("host") || "*";
-export const INSTANCE_ID = params.get("instance") || "";
-export const ERPNEXT_URL = params.get("erpUrl") || "";
-export const LANG = params.get("lang") || "nl";
 
 window.addEventListener("message", (event: MessageEvent) => {
   if (HOST_ORIGIN !== "*" && event.origin !== HOST_ORIGIN) return;
@@ -30,7 +39,7 @@ window.addEventListener("message", (event: MessageEvent) => {
   }
 });
 
-function rpc<T>(method: string, args: unknown[] = []): Promise<T> {
+function postMessageRpc<T>(method: string, args: unknown[]): Promise<T> {
   const id = nextId++;
   return new Promise<T>((resolve, reject) => {
     pending.set(id, {
@@ -47,6 +56,79 @@ function rpc<T>(method: string, args: unknown[] = []): Promise<T> {
   });
 }
 
+// === Direct fetch (dev mode, proxied through Vite) ===
+async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(path, init);
+  if (!res.ok) {
+    const body = await res.text().catch(() => res.statusText);
+    let msg = `ERPNext ${res.status}`;
+    try {
+      const parsed = JSON.parse(body) as { exc_type?: string; exception?: string };
+      msg = parsed.exc_type || parsed.exception || msg;
+    } catch { /* use status msg */ }
+    throw new Error(msg);
+  }
+  return res.json() as Promise<T>;
+}
+
+async function devRpc<T>(method: string, args: unknown[]): Promise<T> {
+  if (method === "fetchList") {
+    const [doctype, p] = args as [string, ListParams | undefined];
+    const qs = new URLSearchParams();
+    if (p?.fields) qs.set("fields", JSON.stringify(p.fields));
+    if (p?.filters) qs.set("filters", JSON.stringify(p.filters));
+    if (p?.limit_page_length != null) qs.set("limit_page_length", String(p.limit_page_length));
+    if (p?.limit_start != null) qs.set("limit_start", String(p.limit_start));
+    if (p?.order_by) qs.set("order_by", p.order_by);
+    const result = await apiFetch<{ data: T }>(`/api/resource/${encodeURIComponent(doctype)}?${qs}`);
+    return result.data;
+  }
+
+  if (method === "fetchDocument") {
+    const [doctype, name] = args as [string, string];
+    const result = await apiFetch<{ data: T }>(
+      `/api/resource/${encodeURIComponent(doctype)}/${encodeURIComponent(name)}`
+    );
+    return result.data;
+  }
+
+  if (method === "updateDocument") {
+    const [doctype, name, data] = args as [string, string, Record<string, unknown>];
+    const result = await apiFetch<{ data: T }>(
+      `/api/resource/${encodeURIComponent(doctype)}/${encodeURIComponent(name)}`,
+      { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) }
+    );
+    return result.data;
+  }
+
+  if (method === "callMethod") {
+    const [methodName, methodArgs] = args as [string, Record<string, unknown>];
+    const result = await apiFetch<{ message: T }>(
+      `/api/method/${methodName}`,
+      { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(methodArgs) }
+    );
+    return result.message;
+  }
+
+  if (method === "fetchPrivateFile") {
+    const [filePath] = args as [string];
+    const result = await apiFetch<{ message: T }>(`/api/method/frappe.utils.file_manager.get_file_details`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ file_url: filePath }),
+    });
+    return result.message;
+  }
+
+  throw new Error(`devBridge: unknown method ${method}`);
+}
+
+function rpc<T>(method: string, args: unknown[] = []): Promise<T> {
+  if (IS_DEV_DIRECT) return devRpc<T>(method, args);
+  return postMessageRpc<T>(method, args);
+}
+
+// === Public API (unchanged interface) ===
 export interface ListParams {
   fields?: string[];
   filters?: unknown[][];
