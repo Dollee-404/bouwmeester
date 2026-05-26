@@ -151,7 +151,7 @@ export function NewProjectWizard({ onClose, onCreated }: NewProjectWizardProps) 
                 </span>
               )}
             </legend>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {WERKSOORT_IDS.map((id) => {
                 const checked = werksoort === id;
                 return (
