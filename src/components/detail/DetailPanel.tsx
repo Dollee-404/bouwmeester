@@ -7,6 +7,7 @@ import { useMediaQuery } from "../../hooks/use-breakpoint";
 import { Button } from "../ui/button";
 import { PanelHeader } from "./PanelHeader";
 import { KPIBlock } from "./KPIBlock";
+import { getWerksoortConfig } from "../../data/werksoort-config";
 import { calcVoortgangKPI, calcBudgetKPI, calcUrenKPI, calcPlanningKPI } from "./kpi-helpers";
 import { TabBar, type TabKey } from "./TabBar";
 import { PhasesSection } from "./PhasesSection";
@@ -197,6 +198,14 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
     ? <PanelHeader detail={detail} onClose={handleClose} isFullPage={mode === "fullpage"} />
     : simpleHeader;
 
+  const ws = detail ? getWerksoortConfig(detail.werksoort) : null;
+  const kpiLabels = {
+    voortgang: ws?.kpiSet?.voortgang ?? t("kpi.voortgang"),
+    budget:    ws?.kpiSet?.budget    ?? t("kpi.budget"),
+    uren:      ws?.kpiSet?.uren      ?? t("kpi.uren"),
+    planning:  ws?.kpiSet?.planning  ?? t("kpi.planning"),
+  };
+
   const body = (
     <div
       className="flex-1 overflow-y-auto"
@@ -211,10 +220,10 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
           {/* KPI-strook */}
           <div className="px-6 pt-6 pb-4">
             <div className={`grid gap-3 ${mode === "drawer" ? "grid-cols-4" : "grid-cols-2"}`}>
-              <KPIBlock {...calcVoortgangKPI(detail!, t("kpi.voortgang"))} />
-              <KPIBlock {...calcBudgetKPI(detail!, t("kpi.budget"))} />
-              <KPIBlock {...calcUrenKPI(detail!, timesheets ?? {}, t("kpi.uren"))} />
-              <KPIBlock {...calcPlanningKPI(detail!, t("kpi.planning"))} />
+              <KPIBlock {...calcVoortgangKPI(detail!, kpiLabels.voortgang)} />
+              <KPIBlock {...calcBudgetKPI(detail!, kpiLabels.budget)} />
+              <KPIBlock {...calcUrenKPI(detail!, timesheets ?? {}, kpiLabels.uren)} />
+              <KPIBlock {...calcPlanningKPI(detail!, kpiLabels.planning)} />
             </div>
           </div>
           {/* Tab-bar — rand-tot-rand */}
