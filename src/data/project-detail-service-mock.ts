@@ -7,6 +7,7 @@ import type {
   CreatePhasesResult,
   ProjectQuotation,
   ProjectFile,
+  SalesInvoice,
 } from "./detail-types";
 import type { BouwmeesterStatus } from "./types";
 import type { ProjectDetailService } from "./project-detail-service";
@@ -191,6 +192,27 @@ const MOCK_QUOTATIONS: Record<string, ProjectQuotation[]> = {
           amount: 0,
         },
       ],
+    },
+  ],
+};
+
+const MOCK_INVOICES: Record<string, SalesInvoice[]> = {
+  "PROJ-0009": [
+    {
+      name: "SINV-2026-00012",
+      postingDate: new Date("2026-02-28"),
+      dueDate: new Date("2026-03-28"),
+      grandTotal: 287_500,
+      outstandingAmount: 0,
+      status: "Paid",
+    },
+    {
+      name: "SINV-2026-00031",
+      postingDate: new Date("2026-04-30"),
+      dueDate: new Date("2026-05-30"),
+      grandTotal: 149_500,
+      outstandingAmount: 149_500,
+      status: "Overdue",
     },
   ],
 };
@@ -418,6 +440,11 @@ export const mockDetailService: ProjectDetailService = {
         return { ...item, rate, amount: rate * item.qty };
       }),
     }));
+  },
+
+  async getProjectInvoices(projectId: string): Promise<SalesInvoice[]> {
+    await new Promise((r) => setTimeout(r, MOCK_DELAY_MS));
+    return MOCK_INVOICES[projectId] ?? [];
   },
 
   async getProjectFiles(projectId: string): Promise<ProjectFile[]> {

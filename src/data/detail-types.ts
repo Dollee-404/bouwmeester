@@ -125,3 +125,16 @@ export interface ProjectFile {
   createdAt: Date;
   isPrivate: boolean;
 }
+
+export type InvoiceStatus = "Paid" | "Overdue" | "Unpaid" | "Partly Paid" | "Return";
+
+export interface SalesInvoice {
+  /** ERPNext Sales Invoice docname (bijv. "SINV-0001") */
+  name: string;
+  postingDate: Date;
+  dueDate: Date | null;
+  grandTotal: number;
+  /** Nog niet betaald bedrag — 0 bij volledig betaalde factuur */
+  outstandingAmount: number;
+  status: InvoiceStatus;
+}

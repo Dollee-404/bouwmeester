@@ -13,6 +13,8 @@ import type {
   QuotationItem,
   ProjectQuotation,
   ProjectFile,
+  SalesInvoice,
+  InvoiceStatus,
 } from "./detail-types";
 import type { ProjectDetailService } from "./project-detail-service";
 
@@ -81,6 +83,15 @@ interface RawSalesOrder {
 
 interface RawSalesInvoice {
   grand_total: number;
+}
+
+interface RawSalesInvoiceFull {
+  name: string;
+  posting_date: string;
+  due_date: string | null;
+  grand_total: number;
+  outstanding_amount: number;
+  status: string;
 }
 
 interface RawComment {
@@ -488,6 +499,33 @@ export const erpnextDetailService: ProjectDetailService = {
         rate: row.rate,
         amount: row.amount,
       })),
+    }));
+  },
+
+  async getProjectInvoices(projectId: string): Promise<SalesInvoice[]> {
+    const VALID: Set<InvoiceStatus> = new Set([
+      "Paid", "Overdue", "Unpaid", "Partly Paid", "Return",
+    ]);
+
+    const invoices = await fetchList<RawSalesInvoiceFull>("Sales Invoice", {
+      filters: [
+        ["project", "=", projectId],
+        ["docstatus", "=", 1],
+      ],
+      fields: ["name", "posting_date", "due_date", "grand_total", "outstanding_amount", "status"],
+      order_by: "posting_date desc",
+      limit_page_length: 100,
+    });
+
+    return invoices.map((inv): SalesInvoice => ({
+      name: inv.name,
+      postingDate: new Date(inv.posting_date),
+      dueDate: inv.due_date ? new Date(inv.due_date) : null,
+      grandTotal: inv.grand_total,
+      outstandingAmount: inv.outstanding_amount,
+      status: VALID.has(inv.status as InvoiceStatus)
+        ? (inv.status as InvoiceStatus)
+        : "Unpaid",
     }));
   },
 
