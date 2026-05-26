@@ -268,5 +268,22 @@
     "error": "Failed to load files.",
     "download": "Download",
     "private": "Private"
+  },
+  "financieel": {
+    "title_facturen": "Invoices",
+    "loading": "Loading invoices…",
+    "error": "Failed to load invoices.",
+    "empty_title": "No invoices found",
+    "empty_body": "No invoices have been created for this project in ERPNext yet.",
+    "status_paid": "Paid",
+    "status_overdue": "Overdue",
+    "status_unpaid": "Unpaid",
+    "status_partly_paid": "Partial",
+    "status_return": "Credit note",
+    "col_factuur": "Invoice",
+    "col_datum": "Date",
+    "col_vervaldatum": "Due date",
+    "col_bedrag": "Amount",
+    "col_openstaand": "Outstanding"
   }
 }

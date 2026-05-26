@@ -307,5 +307,22 @@
     "error": "Bestanden konden niet worden geladen.",
     "download": "Downloaden",
     "private": "Privé"
+  },
+  "financieel": {
+    "title_facturen": "Facturen",
+    "loading": "Facturen laden…",
+    "error": "Facturen konden niet worden geladen.",
+    "empty_title": "Geen facturen gevonden",
+    "empty_body": "Er zijn nog geen facturen aangemaakt voor dit project in ERPNext.",
+    "status_paid": "Betaald",
+    "status_overdue": "Vervallen",
+    "status_unpaid": "Openstaand",
+    "status_partly_paid": "Gedeeltelijk",
+    "status_return": "Creditnota",
+    "col_factuur": "Factuur",
+    "col_datum": "Datum",
+    "col_vervaldatum": "Vervaldatum",
+    "col_bedrag": "Bedrag",
+    "col_openstaand": "Openstaand"
   }
 }
