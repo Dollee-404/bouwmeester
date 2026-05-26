@@ -12,6 +12,7 @@ import type {
   CreatePhasesResult,
   QuotationItem,
   ProjectQuotation,
+  ProjectFile,
 } from "./detail-types";
 import type { ProjectDetailService } from "./project-detail-service";
 
@@ -109,6 +110,15 @@ interface RawQuotation {
   kbf_inmeter: string | null;
   kbf_tekening_pdf: string | null;
   items: RawQuotationItem[];
+}
+
+interface RawFile {
+  name: string;
+  file_name: string;
+  file_url: string;
+  file_size: number | null;
+  creation: string;
+  is_private: 0 | 1;
 }
 
 /** Strip HTML-tags uit Text Editor-beschrijvingen voor plain-text weergave. */
@@ -478,6 +488,27 @@ export const erpnextDetailService: ProjectDetailService = {
         rate: row.rate,
         amount: row.amount,
       })),
+    }));
+  },
+
+  async getProjectFiles(projectId: string): Promise<ProjectFile[]> {
+    const files = await fetchList<RawFile>("File", {
+      filters: [
+        ["attached_to_doctype", "=", "Project"],
+        ["attached_to_name", "=", projectId],
+      ],
+      fields: ["name", "file_name", "file_url", "file_size", "creation", "is_private"],
+      order_by: "creation desc",
+      limit_page_length: 100,
+    });
+
+    return files.map((f): ProjectFile => ({
+      name: f.name,
+      fileName: f.file_name,
+      fileUrl: f.file_url,
+      fileSize: f.file_size,
+      createdAt: new Date(f.creation),
+      isPrivate: f.is_private === 1,
     }));
   },
 

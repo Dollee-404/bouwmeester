@@ -8,6 +8,7 @@ import type {
   CreatePhasesResult,
   QuotationItem,
   ProjectQuotation,
+  ProjectFile,
 } from "./detail-types";
 
 export interface ProjectDetailService {
@@ -20,6 +21,8 @@ export interface ProjectDetailService {
   createDefaultPhaseTasks(projectId: string, werksoort: string): Promise<CreatePhasesResult>;
   /** Haal alle keukenblad-offertes op voor het opgegeven project (via kbf_project). */
   getProjectQuotations(projectId: string): Promise<ProjectQuotation[]>;
+  /** Haal alle bestandsbijlagen op die aan dit project gekoppeld zijn in ERPNext. */
+  getProjectFiles(projectId: string): Promise<ProjectFile[]>;
   /**
    * Sla een nieuwe rate op voor één offerteregel in ERPNext.
    * allItems = volledige huidige regellijst (nodig voor child-table PUT).
@@ -41,6 +44,7 @@ export type {
   CreatePhasesResult,
   QuotationItem,
   ProjectQuotation,
+  ProjectFile,
 };
 
 // Lazy imports om circulaire afhankelijkheid te vermijden
@@ -63,6 +67,8 @@ export const projectDetailService: ProjectDetailService = {
   createDefaultPhaseTasks: async (id, werksoort) => (await getService()).createDefaultPhaseTasks(id, werksoort),
   getProjectQuotations: async (projectId) =>
     (await getService()).getProjectQuotations(projectId),
+  getProjectFiles: async (projectId) =>
+    (await getService()).getProjectFiles(projectId),
   updateQuotationItemRate: async (quotationName, rowName, newRate, allItems) =>
     (await getService()).updateQuotationItemRate(quotationName, rowName, newRate, allItems),
 };

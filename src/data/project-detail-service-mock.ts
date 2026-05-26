@@ -6,6 +6,7 @@ import type {
   ProjectFinancials,
   CreatePhasesResult,
   ProjectQuotation,
+  ProjectFile,
 } from "./detail-types";
 import type { BouwmeesterStatus } from "./types";
 import type { ProjectDetailService } from "./project-detail-service";
@@ -35,6 +36,48 @@ const MOCK_NEGATIVE_BALANCE  = _p.has("mockNegativeBalance");
 const mockCreatedTasks: Record<string, ProjectTask[]> = {};
 
 const MOCK_DETAILS: Record<string, ProjectDetail> = {
+  "PROJ-0023": {
+    id: "PROJ-0023",
+    projectName: "Keukenbladen Nieuw Woonhuis Van der Linden",
+    customerName: "Familie Van der Linden",
+    customerAddress: "Acacialaan 14, 3297 BK Puttershoek",
+    status: "Oplevering",
+    werksoort: "Keukenbladen",
+    startDate: new Date("2026-04-07"),
+    endDate: new Date("2026-06-03"),
+    percentComplete: 88,
+    budgetSales: 4_850,
+    budgetHours: 18,
+    billedAmount: 4_365,
+    estimatedCosting: 3_900,
+    isWeatherDependent: false,
+    isArchived: false,
+    team: [
+      { user: "j.devries@example.nl", fullName: "J. de Vries", email: "j.devries@example.nl", role: "projectleider" },
+    ],
+  },
+  "PROJ-0022": {
+    id: "PROJ-0022",
+    projectName: "Verbouw Appartementsgebouw Stationsplein Dordrecht",
+    customerName: "Dordrecht Wonen",
+    customerAddress: "Stationsplein 12–24, 3311 JV Dordrecht",
+    status: "Oplevering",
+    werksoort: "Verbouw",
+    startDate: new Date("2025-06-01"),
+    endDate: new Date("2026-06-20"),
+    percentComplete: 91,
+    budgetSales: 2_150_000,
+    budgetHours: 4_100,
+    billedAmount: 1_955_000,
+    estimatedCosting: 1_940_000,
+    isWeatherDependent: false,
+    isArchived: false,
+    team: [
+      { user: "m.janssen@example.nl", fullName: "M. Janssen", email: "m.janssen@example.nl", role: "projectleider" },
+      { user: "r.dekker@example.nl", fullName: "R. Dekker", email: "r.dekker@example.nl", role: "uitvoerder" },
+      { user: "a.vos@example.nl", fullName: "A. Vos", email: "a.vos@example.nl", role: "werkvoorbereider" },
+    ],
+  },
   "PROJ-0009": {
     id: "PROJ-0009",
     projectName: "Renovatie Gemeentehuis Sliedrecht",
@@ -81,6 +124,23 @@ function fallbackDetail(projectId: string): ProjectDetail {
 }
 
 const MOCK_QUOTATIONS: Record<string, ProjectQuotation[]> = {
+  "PROJ-0023": [
+    {
+      name: "QTN-KB-2026-00041",
+      customerName: "Familie Van der Linden",
+      transactionDate: new Date("2026-04-08"),
+      meetdatum: new Date("2026-04-07"),
+      inmeter: "J. de Vries",
+      tekenPdf: null,
+      items: [
+        { rowName: "kb-001", itemCode: "COMPOSIET-BLAD-30MM", itemName: "Composiet 30mm — Silestone Eternal Calacatta Gold", description: "Materiaal: Wit/Goud / Gepolijst / Composiet / 30mm\nAfmetingen: 3200×650mm + 1400×650mm (L-vorm)\nRandafwerking: Voor: DV40", qty: 2.99, uom: "Square Meter", rate: 895, amount: 2_676.05 },
+        { rowName: "kb-002", itemCode: "TOESLAG-SPARING-ONDERBOUW", itemName: "Sparing onderbouw spoelbak", description: "Onderbouw / Blanco Steel 780×500mm", qty: 1, uom: "Nos", rate: 95, amount: 95 },
+        { rowName: "kb-003", itemCode: "TOESLAG-BOORGAT-KRAAN", itemName: "Boorgat kraan", description: "Kraan (1 boorgat)", qty: 1, uom: "Nos", rate: 45, amount: 45 },
+        { rowName: "kb-004", itemCode: "TOESLAG-RAND-DV40", itemName: "Randafwerking DV40", description: "Randafwerking DV40 — 4.600m", qty: 4.6, uom: "Meter", rate: 38, amount: 174.80 },
+        { rowName: "kb-005", itemCode: "MONTAGE-KEUKENBLAD", itemName: "Montage keukenblad", description: "Inclusief transport, plaatsing en aansluiting spoelbak", qty: 1, uom: "Nos", rate: 485, amount: 485 },
+      ],
+    },
+  ],
   "PROJ-0009": [
     {
       name: "QTN-DEMO-001",
@@ -138,6 +198,35 @@ const MOCK_QUOTATIONS: Record<string, ProjectQuotation[]> = {
 // In-memory opslag van gewijzigde prijzen per sessie (mock only)
 const mockRates: Record<string, number> = {};
 
+const MOCK_FILES: Record<string, ProjectFile[]> = {
+  "PROJ-0009": [
+    {
+      name: "FILE-0001",
+      fileName: "bestek-renovatie-gemeentehuis.pdf",
+      fileUrl: "/files/bestek-renovatie-gemeentehuis.pdf",
+      fileSize: 2_451_200,
+      createdAt: new Date("2026-02-15T09:00:00"),
+      isPrivate: false,
+    },
+    {
+      name: "FILE-0002",
+      fileName: "plattegrond-begane-grond.dwg",
+      fileUrl: "/files/plattegrond-begane-grond.dwg",
+      fileSize: 912_384,
+      createdAt: new Date("2026-02-15T09:05:00"),
+      isPrivate: false,
+    },
+    {
+      name: "FILE-0003",
+      fileName: "veiligheids-en-gezondheidsplan.docx",
+      fileUrl: "/files/veiligheids-en-gezondheidsplan.docx",
+      fileSize: 148_992,
+      createdAt: new Date("2026-03-01T14:30:00"),
+      isPrivate: true,
+    },
+  ],
+};
+
 export const mockDetailService: ProjectDetailService = {
   async getProjectDetail(projectId: string): Promise<ProjectDetail> {
     await new Promise((r) => setTimeout(r, MOCK_DELAY_MS));
@@ -159,7 +248,37 @@ export const mockDetailService: ProjectDetailService = {
   async getProjectTasks(projectId: string): Promise<ProjectTask[]> {
     await new Promise((r) => setTimeout(r, 100));
     if (mockCreatedTasks[projectId]) return mockCreatedTasks[projectId];
-    if (MOCK_EMPTY_PHASES || projectId !== "PROJ-0009") return [];
+    if (MOCK_EMPTY_PHASES) return [];
+    if (projectId === "PROJ-0023") return enrichTasksWithWachtOp([
+      { id: "T23-01", subject: "Calculatie & offerte",    parentTask: null, isMilestone: false, isGroup: false, status: "Completed", progress: 100, expectedStartDate: new Date("2026-04-07"), expectedEndDate: new Date("2026-04-11"), actualStartDate: new Date("2026-04-07"), actualEndDate: new Date("2026-04-10"), budgetHours: 2,   description: "Opmeten keuken, offerte opstellen en accorderen.", dependsOn: [],         assignedTo: ["j.devries@example.nl"], wachtOp: null, wachtOpToelichting: null },
+      { id: "T23-02", subject: "Tekening goedkeuren",     parentTask: null, isMilestone: false, isGroup: false, status: "Completed", progress: 100, expectedStartDate: new Date("2026-04-14"), expectedEndDate: new Date("2026-04-25"), actualStartDate: new Date("2026-04-14"), actualEndDate: new Date("2026-04-23"), budgetHours: 1,   description: "Werkplaatstekening ter goedkeuring naar klant. Klant akkoord op 23 april.", dependsOn: ["T23-01"], assignedTo: ["j.devries@example.nl"], wachtOp: null, wachtOpToelichting: null },
+      { id: "T23-03", subject: "Productie bij Vasto",     parentTask: null, isMilestone: false, isGroup: false, status: "Completed", progress: 100, expectedStartDate: new Date("2026-04-28"), expectedEndDate: new Date("2026-05-16"), actualStartDate: new Date("2026-04-28"), actualEndDate: new Date("2026-05-16"), budgetHours: null, description: "Composiet keukenblad 30mm gefreesd en randafgewerkt door Vasto.",  dependsOn: ["T23-02"], assignedTo: [],                       wachtOp: null, wachtOpToelichting: null },
+      { id: "T23-04", subject: "Levering",                parentTask: null, isMilestone: false, isGroup: false, status: "Completed", progress: 100, expectedStartDate: new Date("2026-05-19"), expectedEndDate: new Date("2026-05-19"), actualStartDate: new Date("2026-05-19"), actualEndDate: new Date("2026-05-19"), budgetHours: 2,   description: "Transport en lossing op locatie.",                                    dependsOn: ["T23-03"], assignedTo: ["j.devries@example.nl"], wachtOp: null, wachtOpToelichting: null },
+      { id: "T23-05", subject: "Montage",                 parentTask: null, isMilestone: false, isGroup: false, status: "Open",      progress: 70,  expectedStartDate: new Date("2026-05-20"), expectedEndDate: new Date("2026-05-28"), actualStartDate: new Date("2026-05-20"), actualEndDate: null,                  budgetHours: 10,  description: "Plaatsing bladen, aansluiting spoelbak en kraangat afwerken.",       dependsOn: ["T23-04"], assignedTo: ["j.devries@example.nl"], wachtOp: "Materiaal", wachtOpToelichting: "Achterwand tegels worden apart door klant aangebracht — hierna afdichting siliconen afmaken." },
+      { id: "T23-06", subject: "Oplevering",              parentTask: null, isMilestone: true,  isGroup: false, status: "Open",      progress: 0,   expectedStartDate: new Date("2026-06-03"), expectedEndDate: new Date("2026-06-03"), actualStartDate: null,                  actualEndDate: null,                  budgetHours: 1,   description: "Eindcontrole, foto's voor dossier, handtekening opleveringsformulier.", dependsOn: ["T23-05"], assignedTo: ["j.devries@example.nl"], wachtOp: null, wachtOpToelichting: null },
+    ]);
+    if (projectId === "PROJ-0022") return enrichTasksWithWachtOp([
+      { id: "T22-01",  subject: "Sloop",                      parentTask: null,      isMilestone: false, isGroup: true,  status: "Completed", progress: 100, expectedStartDate: new Date("2025-06-01"), expectedEndDate: new Date("2025-07-15"), actualStartDate: new Date("2025-06-02"), actualEndDate: new Date("2025-07-14"), budgetHours: 320,  description: "Inboedel verwijderen en sloopwerkzaamheden bestaande indeling.", dependsOn: [],            assignedTo: ["r.dekker@example.nl"], wachtOp: null, wachtOpToelichting: null },
+      { id: "T22-01A", subject: "Inboedel verwijderen",        parentTask: "T22-01",  isMilestone: false, isGroup: false, status: "Completed", progress: 100, expectedStartDate: new Date("2025-06-02"), expectedEndDate: new Date("2025-06-14"), actualStartDate: new Date("2025-06-02"), actualEndDate: new Date("2025-06-13"), budgetHours: 60,   description: null, dependsOn: [],         assignedTo: ["r.dekker@example.nl"], wachtOp: null, wachtOpToelichting: null },
+      { id: "T22-01B", subject: "Sloopwerkzaamheden",          parentTask: "T22-01",  isMilestone: false, isGroup: false, status: "Completed", progress: 100, expectedStartDate: new Date("2025-06-16"), expectedEndDate: new Date("2025-07-14"), actualStartDate: new Date("2025-06-16"), actualEndDate: new Date("2025-07-14"), budgetHours: 260,  description: null, dependsOn: ["T22-01A"], assignedTo: ["r.dekker@example.nl"], wachtOp: null, wachtOpToelichting: null },
+      { id: "T22-02",  subject: "Ruwbouw",                     parentTask: null,      isMilestone: false, isGroup: true,  status: "Completed", progress: 100, expectedStartDate: new Date("2025-07-16"), expectedEndDate: new Date("2025-10-31"), actualStartDate: new Date("2025-07-16"), actualEndDate: new Date("2025-10-29"), budgetHours: 980,  description: "Nieuwe draagconstructie, vloerplaten verdiepingen en betonwerk.", dependsOn: ["T22-01"],   assignedTo: ["r.dekker@example.nl"], wachtOp: null, wachtOpToelichting: null },
+      { id: "T22-02A", subject: "Nieuwe draagconstructie",     parentTask: "T22-02",  isMilestone: false, isGroup: false, status: "Completed", progress: 100, expectedStartDate: new Date("2025-07-16"), expectedEndDate: new Date("2025-09-05"), actualStartDate: new Date("2025-07-16"), actualEndDate: new Date("2025-09-04"), budgetHours: 480,  description: null, dependsOn: [],         assignedTo: ["r.dekker@example.nl"], wachtOp: null, wachtOpToelichting: null },
+      { id: "T22-02B", subject: "Vloerplaten verdiepingen",    parentTask: "T22-02",  isMilestone: false, isGroup: false, status: "Completed", progress: 100, expectedStartDate: new Date("2025-09-08"), expectedEndDate: new Date("2025-10-29"), actualStartDate: new Date("2025-09-08"), actualEndDate: new Date("2025-10-29"), budgetHours: 500,  description: null, dependsOn: ["T22-02A"], assignedTo: ["r.dekker@example.nl"], wachtOp: null, wachtOpToelichting: null },
+      { id: "T22-03",  subject: "Gevel & kozijnen",            parentTask: null,      isMilestone: false, isGroup: true,  status: "Completed", progress: 100, expectedStartDate: new Date("2025-09-01"), expectedEndDate: new Date("2025-12-20"), actualStartDate: new Date("2025-09-08"), actualEndDate: new Date("2025-12-19"), budgetHours: 640,  description: "Gevelisolatie, nieuwe kozijnen en gevelbekleding.", dependsOn: ["T22-02"],   assignedTo: ["r.dekker@example.nl"], wachtOp: null, wachtOpToelichting: null },
+      { id: "T22-04",  subject: "Installaties",                parentTask: null,      isMilestone: false, isGroup: true,  status: "Completed", progress: 100, expectedStartDate: new Date("2025-10-01"), expectedEndDate: new Date("2026-02-28"), actualStartDate: new Date("2025-10-06"), actualEndDate: new Date("2026-02-27"), budgetHours: 760,  description: "Elektra, CV & warmtepomp, sanitair ruwbouw door onderaannemer.", dependsOn: ["T22-02"],   assignedTo: [],                      wachtOp: null, wachtOpToelichting: null },
+      { id: "T22-04A", subject: "Elektra ruwbouw",             parentTask: "T22-04",  isMilestone: false, isGroup: false, status: "Completed", progress: 100, expectedStartDate: new Date("2025-10-06"), expectedEndDate: new Date("2025-11-30"), actualStartDate: new Date("2025-10-06"), actualEndDate: new Date("2025-11-28"), budgetHours: 220,  description: null, dependsOn: [],         assignedTo: [],                      wachtOp: null, wachtOpToelichting: null },
+      { id: "T22-04B", subject: "CV & warmtepomp",             parentTask: "T22-04",  isMilestone: false, isGroup: false, status: "Completed", progress: 100, expectedStartDate: new Date("2025-11-03"), expectedEndDate: new Date("2026-01-16"), actualStartDate: new Date("2025-11-03"), actualEndDate: new Date("2026-01-15"), budgetHours: 300,  description: null, dependsOn: [],         assignedTo: [],                      wachtOp: null, wachtOpToelichting: null },
+      { id: "T22-04C", subject: "Sanitair ruwbouw",            parentTask: "T22-04",  isMilestone: false, isGroup: false, status: "Completed", progress: 100, expectedStartDate: new Date("2025-12-01"), expectedEndDate: new Date("2026-02-27"), actualStartDate: new Date("2025-12-01"), actualEndDate: new Date("2026-02-27"), budgetHours: 240,  description: null, dependsOn: [],         assignedTo: [],                      wachtOp: null, wachtOpToelichting: null },
+      { id: "T22-05",  subject: "Afbouw",                      parentTask: null,      isMilestone: false, isGroup: true,  status: "Open",      progress: 80,  expectedStartDate: new Date("2026-01-15"), expectedEndDate: new Date("2026-05-31"), actualStartDate: new Date("2026-01-20"), actualEndDate: null,                  budgetHours: 1_100, description: "Stucwerk, vloerwerk en sanitair afwerking.", dependsOn: ["T22-04"],   assignedTo: ["r.dekker@example.nl"], wachtOp: null, wachtOpToelichting: null },
+      { id: "T22-05A", subject: "Stucwerk",                    parentTask: "T22-05",  isMilestone: false, isGroup: false, status: "Completed", progress: 100, expectedStartDate: new Date("2026-01-20"), expectedEndDate: new Date("2026-03-14"), actualStartDate: new Date("2026-01-20"), actualEndDate: new Date("2026-03-12"), budgetHours: 380,  description: null, dependsOn: [],         assignedTo: ["r.dekker@example.nl"], wachtOp: null, wachtOpToelichting: null },
+      { id: "T22-05B", subject: "Vloerwerk woonlagen",         parentTask: "T22-05",  isMilestone: false, isGroup: false, status: "Open",      progress: 60,  expectedStartDate: new Date("2026-03-17"), expectedEndDate: new Date("2026-05-15"), actualStartDate: new Date("2026-03-17"), actualEndDate: null,                  budgetHours: 420,  description: null, dependsOn: ["T22-05A"], assignedTo: ["r.dekker@example.nl"], wachtOp: "Materiaal", wachtOpToelichting: "Aanvullende vloertegels (kleur afgestemd per woning) verwacht week 23." },
+      { id: "T22-05C", subject: "Sanitair afwerking",          parentTask: "T22-05",  isMilestone: false, isGroup: false, status: "Open",      progress: 0,   expectedStartDate: new Date("2026-05-18"), expectedEndDate: new Date("2026-05-31"), actualStartDate: null,                  actualEndDate: null,                  budgetHours: 300,  description: null, dependsOn: ["T22-05B"], assignedTo: [],                      wachtOp: null, wachtOpToelichting: null },
+      { id: "T22-06",  subject: "Oplevering",                  parentTask: null,      isMilestone: false, isGroup: true,  status: "Open",      progress: 0,   expectedStartDate: new Date("2026-06-06"), expectedEndDate: new Date("2026-06-20"), actualStartDate: null,                  actualEndDate: null,                  budgetHours: 120,  description: "Eindschoonmaak, opleveringsinspectie en overdracht aan opdrachtgever.", dependsOn: ["T22-05"], assignedTo: ["m.janssen@example.nl"], wachtOp: null, wachtOpToelichting: null },
+      { id: "T22-06A", subject: "Bouwlift inplannen",          parentTask: "T22-06",  isMilestone: false, isGroup: false, status: "Open",      progress: 0,   expectedStartDate: new Date("2026-06-06"), expectedEndDate: new Date("2026-06-06"), actualStartDate: null,                  actualEndDate: null,                  budgetHours: null, description: null, dependsOn: [],         assignedTo: ["m.janssen@example.nl"], wachtOp: "Anders", wachtOpToelichting: "Bouwlift reserveren via verhuurder — datum nog niet bevestigd. Minimaal 2 weken vooraf aanvragen." },
+      { id: "T22-06B", subject: "Eindschoonmaak",              parentTask: "T22-06",  isMilestone: false, isGroup: false, status: "Open",      progress: 0,   expectedStartDate: new Date("2026-06-09"), expectedEndDate: new Date("2026-06-13"), actualStartDate: null,                  actualEndDate: null,                  budgetHours: 80,   description: null, dependsOn: ["T22-06A"], assignedTo: [],                      wachtOp: null, wachtOpToelichting: null },
+      { id: "T22-06C", subject: "Opleveringsinspectie & punchlist", parentTask: "T22-06", isMilestone: true, isGroup: false, status: "Open", progress: 0, expectedStartDate: new Date("2026-06-20"), expectedEndDate: new Date("2026-06-20"), actualStartDate: null,                  actualEndDate: null,                  budgetHours: null, description: "Formele overdracht aan Dordrecht Wonen.", dependsOn: ["T22-05", "T22-06B"], assignedTo: ["m.janssen@example.nl"], wachtOp: null, wachtOpToelichting: null },
+    ]);
+    if (projectId !== "PROJ-0009") return [];
     return enrichTasksWithWachtOp([
       { id: "TASK-001", subject: "Sloop",              parentTask: null,      isMilestone: false, isGroup: true,  status: "Completed", progress: 100, expectedStartDate: new Date("2026-02-01"), expectedEndDate: new Date("2026-03-01"), actualStartDate: new Date("2026-02-03"), actualEndDate: new Date("2026-03-05"), budgetHours: 200,  description: "Sloopwerkzaamheden inclusief asbest-inventarisatie.",   dependsOn: [],            assignedTo: ["r.dekker@example.nl"],  wachtOp: null, wachtOpToelichting: null },
       { id: "TASK-002", subject: "Ruwbouw",            parentTask: null,      isMilestone: false, isGroup: true,  status: "Open",      progress: 65,  expectedStartDate: new Date("2026-03-02"), expectedEndDate: new Date("2026-05-01"), actualStartDate: new Date("2026-03-06"), actualEndDate: null,                  budgetHours: 900,  description: "Betonvloer, metselwerk en dakafdekking.",               dependsOn: ["TASK-001"],  assignedTo: ["r.dekker@example.nl"],  wachtOp: null, wachtOpToelichting: null },
@@ -180,12 +299,41 @@ export const mockDetailService: ProjectDetailService = {
 
   async getProjectTimesheets(projectId: string): Promise<TimesheetMap> {
     await new Promise((r) => setTimeout(r, 100));
+    if (projectId === "PROJ-0023") {
+      return { "T23-01": 2, "T23-02": 1, "T23-04": 2, "T23-05": 7 };
+    }
+    if (projectId === "PROJ-0022") {
+      return {
+        "T22-01": 332, "T22-02": 1004, "T22-03": 651, "T22-04": 778,
+        "T22-05A": 392, "T22-05B": 210,
+      };
+    }
     if (projectId !== "PROJ-0009") return {};
     return { "TASK-001": 240, "TASK-002": 580, "TASK-003": 80 };
   },
 
   async getProjectActivity(projectId: string, limit = 20): Promise<ActivityItem[]> {
     await new Promise((r) => setTimeout(r, 100));
+    if (projectId === "PROJ-0023") {
+      const items0023: ActivityItem[] = [
+        { id: "a23-001", type: "comment", description: "Achterwand tegels door klant geplaatst op 27 mei. Afdichting siliconen ingepland voor deze week.", owner: "j.devries@example.nl", createdAt: new Date("2026-05-27T08:45:00") },
+        { id: "a23-002", type: "log",     description: "Status gewijzigd naar Oplevering",                                                                   owner: "j.devries@example.nl", createdAt: new Date("2026-05-20T09:00:00") },
+        { id: "a23-003", type: "comment", description: "Levering vlot verlopen. Blad past perfect — geen bijsnijden nodig.",                                  owner: "j.devries@example.nl", createdAt: new Date("2026-05-19T14:30:00") },
+        { id: "a23-004", type: "log",     description: "Werkplaatstekening geaccordeerd door klant",                                                          owner: "j.devries@example.nl", createdAt: new Date("2026-04-23T11:00:00") },
+        { id: "a23-005", type: "log",     description: "Project aangemaakt",                                                                                  owner: "Administrator",        createdAt: new Date("2026-04-07T08:00:00") },
+      ];
+      return items0023.slice(0, limit);
+    }
+    if (projectId === "PROJ-0022") {
+      const items0022: ActivityItem[] = [
+        { id: "a22-001", type: "comment",  description: "Bouwlift nog niet gereserveerd — verhuurder komt niet voor week 23 terug. M. Janssen volgt op.", owner: "m.janssen@example.nl", createdAt: new Date("2026-05-20T10:30:00") },
+        { id: "a22-002", type: "log",      description: "Status gewijzigd naar Oplevering",                                                              owner: "m.janssen@example.nl", createdAt: new Date("2026-05-12T08:00:00") },
+        { id: "a22-003", type: "comment",  description: "Vloertegels woonlagen 3–6 vertraagd door leverancier. Nieuwe leveringsdatum: week 23.",          owner: "r.dekker@example.nl",  createdAt: new Date("2026-05-05T14:15:00") },
+        { id: "a22-004", type: "log",      description: "Meerwerkopdracht goedgekeurd: extra isolatie dak €24.500",                                       owner: "a.vos@example.nl",     createdAt: new Date("2026-04-18T11:00:00") },
+        { id: "a22-005", type: "log",      description: "Project aangemaakt",                                                                             owner: "Administrator",        createdAt: new Date("2025-06-01T08:00:00") },
+      ];
+      return items0022.slice(0, limit);
+    }
     const items: ActivityItem[] = projectId === "PROJ-0009" ? [
       {
         id: "cmt-001",
@@ -270,6 +418,11 @@ export const mockDetailService: ProjectDetailService = {
         return { ...item, rate, amount: rate * item.qty };
       }),
     }));
+  },
+
+  async getProjectFiles(projectId: string): Promise<ProjectFile[]> {
+    await new Promise((r) => setTimeout(r, MOCK_DELAY_MS));
+    return MOCK_FILES[projectId] ?? [];
   },
 
   async updateQuotationItemRate(

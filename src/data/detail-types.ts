@@ -112,3 +112,16 @@ export interface UnlinkedQuotation {
   /** Totaal aantal regelitems voor weergave op de kaart */
   itemCount: number;
 }
+
+export interface ProjectFile {
+  /** ERPNext File docname (bijv. "FILE-0001") */
+  name: string;
+  /** Originele bestandsnaam (bijv. "tekening-v2.pdf") */
+  fileName: string;
+  /** Relatief URL-pad in ERPNext (bijv. "/files/tekening-v2.pdf") */
+  fileUrl: string;
+  /** Bestandsgrootte in bytes — null als ERPNext het niet registreert */
+  fileSize: number | null;
+  createdAt: Date;
+  isPrivate: boolean;
+}
