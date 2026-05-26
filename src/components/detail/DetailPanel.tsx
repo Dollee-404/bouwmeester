@@ -15,6 +15,7 @@ import { ActivityItem } from "./ActivityItem";
 import { Sidebar } from "./Sidebar";
 import { PlanningTab } from "./planning/PlanningTab";
 import { CalculatieTab } from "./calculatie/CalculatieTab";
+import { FinancieelTab } from "./financieel/FinancieelTab";
 import { DocumentenTab } from "./documenten/DocumentenTab";
 
 const ANIMATION_MS = 250;
@@ -241,6 +242,8 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
                 />
               ) : activeTab === "calculatie" ? (
                 <CalculatieTab projectId={detail!.id} />
+              ) : activeTab === "financieel" ? (
+                <FinancieelTab projectId={detail!.id} financials={financials} />
               ) : activeTab === "overzicht" ? (
                 <div>
                   {/* Fases */}
