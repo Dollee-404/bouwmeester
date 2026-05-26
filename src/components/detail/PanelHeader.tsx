@@ -82,7 +82,7 @@ export function PanelHeader({ detail, onClose, isFullPage }: PanelHeaderProps) {
 
       {/* Rij 3: StatusFlow */}
       <div className="px-6 pb-3">
-        <StatusFlow currentStatus={detail.status} />
+        <StatusFlow currentStatus={detail.status} werksoort={detail.werksoort} />
       </div>
 
       {/* Rij 4: placeholder-actieknoppen */}
