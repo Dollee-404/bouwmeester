@@ -75,6 +75,16 @@ export const REQUIRED_CUSTOM_FIELDS: CustomFieldSpec[] = [
     insert_after: "customer",
   },
   {
+    // Koppelt een keukenblad-offerte aan het Bouwmeester-project dat via
+    // DoordrukkenWizard is aangemaakt. Gezet door quotationsService.linkQuotationToProject().
+    dt: "Quotation",
+    fieldname: "kbf_project",
+    label: "Bouwmeester Project",
+    fieldtype: "Link",
+    options: "Project",
+    insert_after: "customer_address",
+  },
+  {
     dt: "Task",
     fieldname: "custom_wacht_op",
     label: "Wacht op",
