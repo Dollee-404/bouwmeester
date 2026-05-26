@@ -230,7 +230,7 @@ export function DetailPanel({ projectId, onClose }: DetailPanelProps) {
                   timesheets={timesheets ?? {}}
                 />
               ) : activeTab === "calculatie" ? (
-                <CalculatieTab customerName={detail!.customerName} />
+                <CalculatieTab projectId={detail!.id} />
               ) : activeTab === "overzicht" ? (
                 <div>
                   {/* Fases */}

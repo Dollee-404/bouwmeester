@@ -5,11 +5,11 @@ import type { ProjectQuotation, QuotationItem } from "../../../data/detail-types
 import { QuotationCard } from "./QuotationCard";
 
 interface CalculatieTabProps {
-  /** ERPNext Customer-docname, gelijk aan Project.customer */
-  customerName: string;
+  /** ERPNext Project-docname — wordt gebruikt als kbf_project filter op Quotation */
+  projectId: string;
 }
 
-export function CalculatieTab({ customerName }: CalculatieTabProps) {
+export function CalculatieTab({ projectId }: CalculatieTabProps) {
   const { t } = useTranslation();
   const [quotations, setQuotations] = useState<ProjectQuotation[] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -21,7 +21,7 @@ export function CalculatieTab({ customerName }: CalculatieTabProps) {
     setError(false);
 
     projectDetailService
-      .getProjectQuotations(customerName)
+      .getProjectQuotations(projectId)
       .then((data) => {
         if (!cancelled) setQuotations(data);
       })
@@ -36,7 +36,7 @@ export function CalculatieTab({ customerName }: CalculatieTabProps) {
       });
 
     return () => { cancelled = true; };
-  }, [customerName]);
+  }, [projectId]);
 
   const handleSaveRate = useCallback(
     async (quotationName: string, rowName: string, newRate: number) => {
