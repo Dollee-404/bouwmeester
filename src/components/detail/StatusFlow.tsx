@@ -2,27 +2,35 @@ import { Fragment } from "react";
 import { Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { BouwmeesterStatus } from "../../data/types";
+import type { Werksoort } from "../../data/types";
 import { STATUS_ORDER, STATUS_LABEL_KEYS } from "../kanban/status-config";
+import { getWerksoortConfig } from "../../data/werksoort-config";
 
 interface StatusFlowProps {
   currentStatus: BouwmeesterStatus;
+  werksoort?: Werksoort | null;
 }
 
-export function StatusFlow({ currentStatus }: StatusFlowProps) {
+export function StatusFlow({ currentStatus, werksoort }: StatusFlowProps) {
   const { t } = useTranslation();
-  // Verloren/Geannuleerd zijn niet in STATUS_ORDER → currentIdx = -1 → alle fases grijs
-  const currentIdx = STATUS_ORDER.indexOf(currentStatus);
+
+  const config = getWerksoortConfig(werksoort);
+  const flow = config.statusFlow
+    ? config.statusFlow
+    : STATUS_ORDER.map((status) => ({ status }));
+
+  // Verloren/Geannuleerd zijn niet in de flow → currentIdx = -1 → alle stappen grijs
+  const currentIdx = flow.findIndex((step) => step.status === currentStatus);
 
   return (
     <div className="flex items-start" aria-label="Projectstatus">
-      {STATUS_ORDER.map((status, idx) => {
+      {flow.map((step, idx) => {
         const isDone = idx < currentIdx;
         const isCurrent = idx === currentIdx;
-        const label = t(STATUS_LABEL_KEYS[status]);
+        const label = step.label ?? t(STATUS_LABEL_KEYS[step.status]);
 
         return (
-          <Fragment key={status}>
-            {/* Connector vóór deze stap (niet vóór de eerste) */}
+          <Fragment key={`${step.status}-${idx}`}>
             {idx > 0 && (
               <div
                 className={`flex-1 h-0.5 mt-3 ${idx <= currentIdx ? "bg-y-teal" : "bg-slate-200"}`}
@@ -30,7 +38,6 @@ export function StatusFlow({ currentStatus }: StatusFlowProps) {
               />
             )}
 
-            {/* Stap: cirkel + label */}
             <div className="flex flex-col items-center shrink-0">
               <div
                 className={[
