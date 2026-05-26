@@ -24,6 +24,17 @@ export const DEFAULT_PHASE_TEMPLATES: PhaseTemplate[] = [
     werksoort: "Onderhoud",
     phases: ["Inspectie", "Voorbereiding", "Uitvoering", "Oplevering"],
   },
+  {
+    werksoort: "Keukenbladen",
+    phases: [
+      "Calculatie & offerte",
+      "Tekening goedkeuren",
+      "Productie bij Vasto",
+      "Levering",
+      "Montage",
+      "Oplevering",
+    ],
+  },
 ];
 
 export function getPhaseTemplate(werksoort: string): PhaseTemplate | null {
