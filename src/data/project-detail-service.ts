@@ -18,8 +18,8 @@ export interface ProjectDetailService {
   getProjectActivity(projectId: string, limit?: number): Promise<ActivityItem[]>;
   getProjectFinancials(projectId: string): Promise<ProjectFinancials>;
   createDefaultPhaseTasks(projectId: string, werksoort: string): Promise<CreatePhasesResult>;
-  /** Haal alle keukenblad-offertes op voor de opgegeven klant. */
-  getProjectQuotations(customerName: string): Promise<ProjectQuotation[]>;
+  /** Haal alle keukenblad-offertes op voor het opgegeven project (via kbf_project). */
+  getProjectQuotations(projectId: string): Promise<ProjectQuotation[]>;
   /**
    * Sla een nieuwe rate op voor één offerteregel in ERPNext.
    * allItems = volledige huidige regellijst (nodig voor child-table PUT).
@@ -61,8 +61,8 @@ export const projectDetailService: ProjectDetailService = {
   getProjectActivity: async (id, limit) => (await getService()).getProjectActivity(id, limit),
   getProjectFinancials: async (id) => (await getService()).getProjectFinancials(id),
   createDefaultPhaseTasks: async (id, werksoort) => (await getService()).createDefaultPhaseTasks(id, werksoort),
-  getProjectQuotations: async (customerName) =>
-    (await getService()).getProjectQuotations(customerName),
+  getProjectQuotations: async (projectId) =>
+    (await getService()).getProjectQuotations(projectId),
   updateQuotationItemRate: async (quotationName, rowName, newRate, allItems) =>
     (await getService()).updateQuotationItemRate(quotationName, rowName, newRate, allItems),
 };

@@ -5,7 +5,6 @@ import type {
   ActivityItem,
   ProjectFinancials,
   CreatePhasesResult,
-  QuotationItem,
   ProjectQuotation,
 } from "./detail-types";
 import type { BouwmeesterStatus } from "./types";
@@ -82,13 +81,14 @@ function fallbackDetail(projectId: string): ProjectDetail {
 }
 
 const MOCK_QUOTATIONS: Record<string, ProjectQuotation[]> = {
-  "Gemeente Sliedrecht": [
+  "PROJ-0009": [
     {
       name: "QTN-DEMO-001",
       customerName: "Gemeente Sliedrecht",
       transactionDate: new Date("2026-05-10"),
       meetdatum: new Date("2026-05-08"),
       inmeter: "J. de Vries",
+      tekenPdf: null,
       items: [
         {
           rowName: "row-001",
@@ -260,9 +260,9 @@ export const mockDetailService: ProjectDetailService = {
     return { created: [...template.phases], skipped: [], failed: [] };
   },
 
-  async getProjectQuotations(customerName: string): Promise<ProjectQuotation[]> {
+  async getProjectQuotations(projectId: string): Promise<ProjectQuotation[]> {
     await new Promise((r) => setTimeout(r, MOCK_DELAY_MS));
-    const quotes = MOCK_QUOTATIONS[customerName] ?? [];
+    const quotes = MOCK_QUOTATIONS[projectId] ?? [];
     return quotes.map((q) => ({
       ...q,
       items: q.items.map((item) => {

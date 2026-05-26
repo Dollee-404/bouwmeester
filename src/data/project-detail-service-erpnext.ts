@@ -107,6 +107,7 @@ interface RawQuotation {
   transaction_date: string;
   kbf_meetdatum: string | null;
   kbf_inmeter: string | null;
+  kbf_tekening_pdf: string | null;
   items: RawQuotationItem[];
 }
 
@@ -443,11 +444,11 @@ export const erpnextDetailService: ProjectDetailService = {
     return { created, skipped, failed };
   },
 
-  async getProjectQuotations(customerName: string): Promise<ProjectQuotation[]> {
+  async getProjectQuotations(projectId: string): Promise<ProjectQuotation[]> {
     const list = await fetchList<{ name: string }>("Quotation", {
       filters: [
-        ["party_name", "=", customerName],
-        ["kbf_opname", "=", 1],
+        ["kbf_project", "=", projectId],
+        ["docstatus", "!=", 2],
       ],
       fields: ["name"],
       order_by: "transaction_date desc",
@@ -466,6 +467,7 @@ export const erpnextDetailService: ProjectDetailService = {
       transactionDate: new Date(doc.transaction_date),
       meetdatum: doc.kbf_meetdatum ? new Date(doc.kbf_meetdatum) : null,
       inmeter: doc.kbf_inmeter ?? null,
+      tekenPdf: doc.kbf_tekening_pdf ?? null,
       items: (doc.items ?? []).map((row): QuotationItem => ({
         rowName: row.name,
         itemCode: row.item_code,
