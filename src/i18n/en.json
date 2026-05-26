@@ -259,5 +259,14 @@
       "status_achterstallig": "Overdue",
       "badge_mijlpaal": "Milestone"
     }
+  },
+  "documenten": {
+    "title": "Project files",
+    "empty_title": "No files found",
+    "empty_body": "Add files to this project via ERPNext.",
+    "loading": "Loading files…",
+    "error": "Failed to load files.",
+    "download": "Download",
+    "private": "Private"
   }
 }

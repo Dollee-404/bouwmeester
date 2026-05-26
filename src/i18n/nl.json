@@ -298,5 +298,14 @@
       "status_achterstallig": "Achterstallig",
       "badge_mijlpaal": "Mijlpaal"
     }
+  },
+  "documenten": {
+    "title": "Projectbestanden",
+    "empty_title": "Geen bestanden gevonden",
+    "empty_body": "Voeg bestanden toe aan dit project via ERPNext.",
+    "loading": "Bestanden laden…",
+    "error": "Bestanden konden niet worden geladen.",
+    "download": "Downloaden",
+    "private": "Privé"
   }
 }
